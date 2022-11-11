@@ -1,0 +1,9 @@
+@charset "UTF-8";
+
+textarea {
+	/* style="background-image:url('css/index.JPG')" */
+	width:90%;
+	height: 20em;
+	resize: vertical;
+	background-repeat: repeat-y;
+}
