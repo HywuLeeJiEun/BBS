@@ -2,6 +2,7 @@ package bbs;
 
 public class Bbs {
 	private int bbsID;
+	private String bbsManager;
 	private String bbsTitle;
 	private String userID;
 	private String userName;
@@ -23,6 +24,12 @@ public class Bbs {
 	}
 	public void setBbsID(int bbsID) {
 		this.bbsID = bbsID;
+	}
+	public String getBbsManager() {
+		return bbsManager;
+	}
+	public void setBbsManager(String bbsManager) {
+		this.bbsManager = bbsManager;
 	}
 	public String getBbsTitle() {
 		return bbsTitle;

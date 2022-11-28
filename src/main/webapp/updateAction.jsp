@@ -1,3 +1,4 @@
+<%@page import="java.sql.Timestamp"%>
 <%@page import="java.io.PrintWriter"%>
 <%@page import="bbs.BbsDAO"%>
 <%@page import="bbs.Bbs"%>
@@ -9,7 +10,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>BBB-update</title>
+<title>Baynex-update</title>
 </head>
 <body>
 	<%		
@@ -58,7 +59,9 @@
 			}else{
 				// 정상적으로 입력이 되었다면 글 수정 로직을 수행한다
 				BbsDAO bbsDAO = new BbsDAO();
-				int result = bbsDAO.update(bbsID, request.getParameter("bbsTitle"), request.getParameter("bbsContent"), request.getParameter("bbsStart"), request.getParameter("bbsTarget"), request.getParameter("bbsEnd"), request.getParameter("bbsNContent"), request.getParameter("bbsNStart"), request.getParameter("bbsNTarget"));
+				java.sql.Timestamp date = bbsDAO.getDateNow();
+				
+				int result = bbsDAO.update(bbsID, request.getParameter("bbsManager"), request.getParameter("bbsTitle"), request.getParameter("bbsContent"), request.getParameter("bbsStart"), request.getParameter("bbsTarget"), request.getParameter("bbsEnd"), request.getParameter("bbsNContent"), request.getParameter("bbsNStart"), request.getParameter("bbsNTarget"), date);
 				// 데이터베이스 오류인 경우
 				if(result == -1){
 					PrintWriter script = response.getWriter();

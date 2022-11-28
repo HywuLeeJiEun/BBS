@@ -1,3 +1,4 @@
+<%@page import="user.UserDAO"%>
 <%@page import="java.util.Locale"%>
 <%@page import="java.util.Calendar"%>
 <%@page import="java.time.LocalDate"%>
@@ -9,7 +10,7 @@
 <%@ page import="bbs.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
 
 
 <!DOCTYPE html>
@@ -17,20 +18,18 @@
 <head>
 <meta charset="UTF-8">
 <!-- 화면 최적화 -->
-<meta name="viewport" content="width-device-width", initial-scale="1">
+<!-- <meta name="viewport" content="width-device-width", initial-scale="1"> -->
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
+<link rel="stylesheet" href="css/index.css">
 
-<title>BBS</title>
-<style type="css/text/css">
-	a, a:hover{
-		color: #000000;
-		text-decoration: none;
-	}
-</style>
+<title>Baynex 주간보고</title>
 </head>
+
 <body>
 	<%
+		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -49,10 +48,22 @@
 			script.println("location.href='login.jsp'");
 			script.println("</script>");
 		}
+		
+		//rank에 따른 뷰 전환
+
+		if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("location.href='bbsRk.jsp'");
+			script.println("</script>");
+		}
+		
+		String name = userDAO.getName(id);
 	%>
 	
-	<nav class="navbar navbar-default"> <!-- 네비게이션 -->
-		<div class="navbar-header"> 	<!-- 네비게이션 상단 부분 -->
+	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	<nav class="navbar navbar-default"> 
+		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
 			<button type="button" class="navbar-toggle collapsed"
 				data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
@@ -62,27 +73,17 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<!-- 상단 바에 제목이 나타나고 클릭하면 main 페이지로 이동한다 -->
-			<% 
-			BbsDAO bbsDAO = new BbsDAO();
-			int confirm = bbsDAO.getBbsRecord((String)session.getAttribute("id"));
-			
-			if(confirm == 1 ) {%>
-			<a class="navbar-brand" href="bbsUpdate.jsp">BBS 주간보고</a>
-			<% } else { %>
-			<a class="navbar-brand" href="main.jsp">BBS 주간보고</a>
-			<% } %>
+			<a class="navbar-brand" href="bbsUpdate.jsp">Baynex 주간보고</a>
 		</div>
+		
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 			<ul class="nav navbar-nav">
-			<% if(confirm == 1 ) { %>
 				<li><a href="bbsUpdate.jsp">주간보고</a></li>
-			<% } else { %>
-				<li><a class="navbar-brand" href="main.jsp">주간보고</a></li>
-			<% } %>
 				<li class="active"><a href="bbs.jsp">제출목록</a></li>
 			</ul>
+			
+			
 			
 			<%
 				// 로그인 하지 않았을 때 보여지는 화면
@@ -96,17 +97,39 @@
 						aria-expanded="false">접속하기<span class="caret"></span></a>
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
-						<li><a href="login.jsp">로그인</a></li>
+						<li class="active"><a href="login.jsp">로그인</a></li>
 					</ul>
 				</li>
 			</ul>
+			
+			
 			<%
 				// 로그인이 되어 있는 상태에서 보여주는 화면
 				}else{
 			%>
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle"
+						data-toggle="dropdown" role="button" aria-haspopup="true"
+						aria-expanded="false">관리<span class="caret"></span></a>
+					<!-- 드랍다운 아이템 영역 -->	
+					<ul class="dropdown-menu">
+					<%
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					%>
+						<li><a href="workChange.jsp">담당업무 변경</a></li>
+					
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
+					<%
+					} else {
+					%>
+						<li><a href="logoutAction.jsp">로그아웃</a></li>
+					<%
+					}
+					%>
+					</ul>
+				</li>
 			</ul>
 			<%
 				}
@@ -126,7 +149,6 @@
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
 								<option value="bbsDeadline">제출일</option>
 								<option value="bbsTitle">제목</option>
-								<option value="userName">작성자</option>
 						</select></td>
 						<td><input type="text" class="form-control"
 							placeholder="검색어 입력" name="searchText" maxlength="100"></td>
@@ -155,18 +177,11 @@
 				</thead>
 				<tbody>
 					<%
-						//BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
-						ArrayList<Bbs> list = bbsDAO.getList(pageNumber);
+						BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
+						String userName = "userName";
+						ArrayList<Bbs> list = bbsDAO.getRkSearch(pageNumber, userName, name);
+						
 						for(int i = 0; i < list.size(); i++){
-							
-/* 							// Deadline을 가져온다. 
-							String DDline = list.get(i).getBbsDeadline();
-							//String DDline = "2022-10-24";
-							
-							DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-							LocalDate date = LocalDate.parse(DDline, formatter);
-							//date = date.plusWeeks(1); //일주일을 더하는 것. */
-							
 					%>
 
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
@@ -207,6 +222,9 @@
 	</div>
 	<!-- 게시판 메인 페이지 영역 끝 -->
 	
+	<!-- 부트스트랩 참조 영역 -->
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="css/js/bootstrap.js"></script>
 	<script>
 		function ChangeValue() {
 			var value_str = document.getElementById('searchField');
@@ -214,8 +232,5 @@
 		}
 	</script>
 	
-	<!-- 부트스트랩 참조 영역 -->
-	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script src="ccs/js/bootstrap.js"></script>
 </body>
 </html>

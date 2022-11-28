@@ -13,7 +13,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>BBS</title>
+<title>baynex-login</title>
 </head>
 <body>
 	<%
@@ -28,7 +28,7 @@
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('현재 로그인 중입니다.')");
-			script.println("location.href='main.jsp'");
+			script.println("location.href='bbs.jsp'");
 			script.println("</script>");
 		}
 	
@@ -47,7 +47,8 @@
 		if(result == 1){
 			// 로그인에 성공하면 세션을 부여한다. 
 			session.setAttribute("id", user.getId());
-			/* session.setAttribute("Name", user.getName()); */
+			session.setMaxInactiveInterval(60 * 60); 
+			
 			
 			// bbs 이력 확인
 			int confirm = bbsDAO.getBbsRecord((String)session.getAttribute("id"));
@@ -55,13 +56,13 @@
 			if(confirm == 1) {
 				PrintWriter script = response.getWriter();
 				script.println("<script>");
-				script.println("alert('로그인 성공 (기존 회원)')");
+				/* script.println("alert('로그인 성공 (기존 회원)')"); */
 				script.println("location.href='bbsUpdate.jsp'");
 				script.println("</script>");
 			} else {
 				PrintWriter script = response.getWriter();
 				script.println("<script>");
-				script.println("alert('로그인 성공 (신규 회원)')");
+				/* script.println("alert('로그인 성공 (신규 회원)')"); */
 				script.println("location.href='main.jsp'");
 				script.println("</script>");
 			}

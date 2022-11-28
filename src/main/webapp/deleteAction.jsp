@@ -8,7 +8,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>BBS-delete</title>
+<title>Baynex-delete</title>
 </head>
 <body>
 	<%

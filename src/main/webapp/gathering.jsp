@@ -10,11 +10,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<!-- 화면 최적화 -->
-<meta name="viewport" content="width-device-width", initial-scale="1">
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
-<title>BBS</title>
+<title>Baynex 주간보고</title>
 </head>
 <body>
 		<%
@@ -53,7 +51,7 @@
 				<span class="icon-bar"></span>
 			</button>
 			<!-- 상단 바에 제목이 나타나고 클릭하면 보고 작성 페이지로 이동한다 -->
-			<a class="navbar-brand" href="bbsUpdate.jsp">BBS 주간보고</a>
+			<a class="navbar-brand" href="bbsUpdate.jsp">Baynex 주간보고</a>
 		</div>
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -180,7 +178,7 @@
 					</tr>
 					
 					<tr>
-						<th colspan="5" style="background-color: #D4D2FF;" align="center">차주 업무 실적</th>
+						<th colspan="5" style="background-color: #D4D2FF;" align="center">차주 업무 계획</th>
 					</tr>
 					<tr style="background-color: #FFC57B;">
 						<th width="6%">|  담당자</th>
@@ -246,12 +244,12 @@
 	<script src="css/js/bootstrap.js"></script>
 	<script>
 		// 자동 높이 확장 (textarea)
-		$("textarea").on('input keyup input focusin focusout blur change', function() {
+		$("textarea").on('input keyup input focusin focusout blur change mousemove', function() {
 			var offset = this.offsetHeight - this.clientHeight;
 			var resizeTextarea = function(el) {
 				$(el).css('height','auto').css('height',el.scrollHeight + offset);
 			};
-			$(this).on('keyup input focusin focusout blur change', function() {resizeTextarea(this); });
+			$(this).on('keyup input focusin focusout blur change mousemove', function() {resizeTextarea(this); });
 		});
 	</script>
 </body>

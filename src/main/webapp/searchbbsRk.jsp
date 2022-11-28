@@ -19,7 +19,6 @@
 
 <body>
 	<%
-		UserDAO user = new UserDAO();
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -32,7 +31,7 @@
 			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
 		}
 		
-		String name = user.getName(id);
+		UserDAO user = new UserDAO();
 		String rk = user.getRank((String)session.getAttribute("id"));
 	%>
 	<nav class="navbar navbar-default"> <!-- 네비게이션 -->
@@ -147,17 +146,19 @@
 	%>
 	<div class="container">
 		<div class="row">
-			<form method="post" name="search" id="search" action="searchbbs.jsp">
+			<form method="post" name="search" id="search" action="searchbbsRk.jsp">
 				<table class="pull-right">
 					<tr>
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
 								<option value="bbsDeadline" <%= category.equals("bbsDeadline")?"selected":""%>>제출일</option>
 								<option value="bbsTitle" <%= category.equals("bbsTitle")?"selected":""%>>제목</option>
+								<option value="userName" <%= category.equals("userName")?"selected":""%>>작성자</option>
+
 						</select></td>
 						<td>
 							<input type="text" class="form-control"
 							placeholder="" name="searchText" maxlength="100" value="<%= request.getParameter("searchText") %>"></td>
-						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="searchbbs.jsp">검색</button></td>
+						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="searchbbsRk.jsp">검색</button></td>
 						<!-- <td><button type="submit" class="btn btn-warning pull-right" formaction="gathering.jsp" onclick="return submit2(this.form)">취합</button></td> -->
 					</tr>
 
@@ -182,7 +183,7 @@
 				</thead>
 				<tbody>
 					<%
-						ArrayList<Bbs> list =  bbsDAO.getSearch(pageNumber, name, category,
+						ArrayList<Bbs> list =  bbsDAO.getRkSearch(pageNumber ,category,
 								request.getParameter("searchText"));
 						
 	 					if (list.size() == 0) {

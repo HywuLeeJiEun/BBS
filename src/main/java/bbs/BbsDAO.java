@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 public class BbsDAO {
@@ -42,6 +43,21 @@ public class BbsDAO {
 		}
 		return ""; //데이터베이스 오류
 	}
+	
+	//작성일자(시간) 메소드
+		public java.sql.Timestamp getDateNow() {
+			String sql = "select now()";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				if(rs.next()) {
+					return rs.getTimestamp(1);
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null; //데이터베이스 오류
+		}
 	
 	
 	//작성자이름 메소드
@@ -115,24 +131,25 @@ public class BbsDAO {
 	}
 	
 	//글쓰기 메소드
-	public int write(String id, String bbsTitle, String name, String bbsContent, String bbsStart, String bbsTarget, String bbsEnd, String bbsNContent, String bbsNStart, String bbsNTarget, String bbsDeadline) {
-		String sql = "insert into bbs values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+	public int write(String id, String bbsManager,String bbsTitle, String name, String bbsContent, String bbsStart, String bbsTarget, String bbsEnd, String bbsNContent, String bbsNStart, String bbsNTarget, String bbsDeadline) {
+		String sql = "insert into bbs values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, getNext());
-			pstmt.setString(2, bbsTitle);
-			pstmt.setString(3, id);
-			pstmt.setString(4, name);
-			pstmt.setString(5, getDate());
-			pstmt.setString(6, bbsContent);
-			pstmt.setString(7, bbsStart);
-			pstmt.setString(8, bbsTarget);
-			pstmt.setString(9, bbsEnd);
-			pstmt.setString(10, bbsNContent);
-			pstmt.setString(11, bbsNStart);
-			pstmt.setString(12, bbsNTarget);
-			pstmt.setInt(13, 1); //글의 유효번호
-			pstmt.setString(14, bbsDeadline);
+			pstmt.setString(2, bbsManager);
+			pstmt.setString(3, bbsTitle);
+			pstmt.setString(4, id);
+			pstmt.setString(5, name);
+			pstmt.setString(6, getDate());
+			pstmt.setString(7, bbsContent);
+			pstmt.setString(8, bbsStart);
+			pstmt.setString(9, bbsTarget);
+			pstmt.setString(10, bbsEnd);
+			pstmt.setString(11, bbsNContent);
+			pstmt.setString(12, bbsNStart);
+			pstmt.setString(13, bbsNTarget);
+			pstmt.setInt(14, 1); //글의 유효번호
+			pstmt.setString(15, bbsDeadline);
 			return pstmt.executeUpdate();
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -143,7 +160,6 @@ public class BbsDAO {
 	
 	//게시글 리스트 메소드
 		public ArrayList<Bbs> getList(int pageNumber){
-			//String sql = "select * from bbs where bbsID < ? and bbsAvailable = 1 order by bbsID desc limit 10";
 			String sql = "select * from bbs order by bbsID desc limit ?,10";
 			ArrayList<Bbs> list = new ArrayList<Bbs>();
 			try {
@@ -154,19 +170,20 @@ public class BbsDAO {
 				while(rs.next()) {
 					Bbs bbs = new Bbs();
 					bbs.setBbsID(rs.getInt(1));
-					bbs.setBbsTitle(rs.getString(2));
-					bbs.setUserID(rs.getString(3));
-					bbs.setUserName(rs.getString(4));
-					bbs.setBbsDate(rs.getString(5));
-					bbs.setBbsContent(rs.getString(6));
-					bbs.setBbsStart(rs.getString(7));
-					bbs.setBbsTarget(rs.getString(8));
-					bbs.setBbsEnd(rs.getString(9));
-					bbs.setBbsNContent(rs.getString(10));
-					bbs.setBbsNStart(rs.getString(11));
-					bbs.setBbsNTarget(rs.getString(12));
-					bbs.setBbsAvailable(rs.getInt(13));
-					bbs.setBbsDeadline(rs.getString(14));
+					bbs.setBbsManager(rs.getString(2));
+					bbs.setBbsTitle(rs.getString(3));
+					bbs.setUserID(rs.getString(4));
+					bbs.setUserName(rs.getString(5));
+					bbs.setBbsDate(rs.getString(6));
+					bbs.setBbsContent(rs.getString(7));
+					bbs.setBbsStart(rs.getString(8));
+					bbs.setBbsTarget(rs.getString(9));
+					bbs.setBbsEnd(rs.getString(10));
+					bbs.setBbsNContent(rs.getString(11));
+					bbs.setBbsNStart(rs.getString(12));
+					bbs.setBbsNTarget(rs.getString(13));
+					bbs.setBbsAvailable(rs.getInt(14));
+					bbs.setBbsDeadline(rs.getString(15));
 					list.add(bbs);
 				}
 			}catch (Exception e) {
@@ -205,19 +222,20 @@ public class BbsDAO {
 				if(rs.next()) {
 					Bbs bbs = new Bbs();
 					bbs.setBbsID(rs.getInt(1));
-					bbs.setBbsTitle(rs.getString(2));
-					bbs.setUserID(rs.getString(3));
-					bbs.setUserName(rs.getString(4));
-					bbs.setBbsDate(rs.getString(5));
-					bbs.setBbsContent(rs.getString(6));
-					bbs.setBbsStart(rs.getString(7));
-					bbs.setBbsTarget(rs.getString(8));
-					bbs.setBbsEnd(rs.getString(9));
-					bbs.setBbsNContent(rs.getString(10));
-					bbs.setBbsNStart(rs.getString(11));
-					bbs.setBbsNTarget(rs.getString(12));
-					bbs.setBbsAvailable(rs.getInt(13));
-					bbs.setBbsDeadline(rs.getString(14));
+					bbs.setBbsManager(rs.getString(2));
+					bbs.setBbsTitle(rs.getString(3));
+					bbs.setUserID(rs.getString(4));
+					bbs.setUserName(rs.getString(5));
+					bbs.setBbsDate(rs.getString(6));
+					bbs.setBbsContent(rs.getString(7));
+					bbs.setBbsStart(rs.getString(8));
+					bbs.setBbsTarget(rs.getString(9));
+					bbs.setBbsEnd(rs.getString(10));
+					bbs.setBbsNContent(rs.getString(11));
+					bbs.setBbsNStart(rs.getString(12));
+					bbs.setBbsNTarget(rs.getString(13));
+					bbs.setBbsAvailable(rs.getInt(14));
+					bbs.setBbsDeadline(rs.getString(15));
 					return bbs;
 				}
 			}catch (Exception e) {
@@ -227,19 +245,21 @@ public class BbsDAO {
 		}
 		
 		//게시글 수정 메소드
-		public int update(int bbsID, String bbsTitle, String bbsContent, String bbsStart, String bbsTarget, String bbsEnd, String bbsNContent, String bbsNStart, String bbsNTarget) {
-			String sql = "update bbs set bbsTitle = ?, bbsContent = ?, bbsStart = ?, bbsTarget = ?, bbsEnd = ?, bbsNContent = ?, bbsNStart = ?, bbsNTarget = ? where bbsID =?";
+		public int update(int bbsID, String bbsManager, String bbsTitle, String bbsContent, String bbsStart, String bbsTarget, String bbsEnd, String bbsNContent, String bbsNStart, String bbsNTarget, java.sql.Timestamp date) {
+			String sql = "update bbs set bbsManager=?,  bbsTitle = ?, bbsContent = ?, bbsStart = ?, bbsTarget = ?, bbsDate= ? ,bbsEnd = ?, bbsNContent = ?, bbsNStart = ?, bbsNTarget = ? where bbsID =?";
 			try {
 				PreparedStatement pstmt = conn.prepareStatement(sql);
-				pstmt.setString(1, bbsTitle);
-				pstmt.setString(2, bbsContent);
-				pstmt.setString(3, bbsStart);
-				pstmt.setString(4, bbsTarget);
-				pstmt.setString(5, bbsEnd);
-				pstmt.setString(6, bbsNContent);
-				pstmt.setString(7, bbsNStart);
-				pstmt.setString(8, bbsNTarget);
-				pstmt.setInt(9, bbsID);
+				pstmt.setString(1, bbsManager);
+				pstmt.setString(2, bbsTitle);
+				pstmt.setString(3, bbsContent);
+				pstmt.setString(4, bbsStart);
+				pstmt.setString(5, bbsTarget);
+				pstmt.setTimestamp(6, date);
+				pstmt.setString(7, bbsEnd);
+				pstmt.setString(8, bbsNContent);
+				pstmt.setString(9, bbsNStart);
+				pstmt.setString(10, bbsNTarget);
+				pstmt.setInt(11, bbsID);
 				return pstmt.executeUpdate();
 			}catch (Exception e) {
 				e.printStackTrace();
@@ -267,9 +287,10 @@ public class BbsDAO {
 		
 		
 		// 검색 메소드 
-		public ArrayList<Bbs> getSearch(int pageNumber, String searchField, String searchText){//특정한 리스트를 받아서 반환
+		public ArrayList<Bbs> getSearch(int pageNumber, String name, String searchField, String searchText){//특정한 리스트를 받아서 반환
 		      ArrayList<Bbs> list = new ArrayList<Bbs>();
-		      String SQL ="select * from bbs WHERE "+searchField.trim();
+		      String SQL ="select * from (select * from bbs where userName like '%"+name.trim()+"%') a"
+		      		+ " WHERE "+searchField.trim();
 		      try {
 		            if(searchText != null && !searchText.equals("") ){
 		                SQL +=" LIKE '%"+searchText.trim()+"%' order by bbsID desc limit ?,10";
@@ -278,21 +299,22 @@ public class BbsDAO {
 		            pstmt.setInt(1, (pageNumber-1) * 10);
 					rs=pstmt.executeQuery();//select
 		         while(rs.next()) {
-		            Bbs bbs = new Bbs();
+		        	 Bbs bbs = new Bbs();
 					bbs.setBbsID(rs.getInt(1));
-					bbs.setBbsTitle(rs.getString(2));
-					bbs.setUserID(rs.getString(3));
-					bbs.setUserName(rs.getString(4));
-					bbs.setBbsDate(rs.getString(5));
-					bbs.setBbsContent(rs.getString(6));
-					bbs.setBbsStart(rs.getString(7));
-					bbs.setBbsTarget(rs.getString(8));
-					bbs.setBbsEnd(rs.getString(9));
-					bbs.setBbsNContent(rs.getString(10));
-					bbs.setBbsNStart(rs.getString(11));
-					bbs.setBbsNTarget(rs.getString(12));
-					bbs.setBbsAvailable(rs.getInt(13));
-					bbs.setBbsDeadline(rs.getString(14));
+					bbs.setBbsManager(rs.getString(2));
+					bbs.setBbsTitle(rs.getString(3));
+					bbs.setUserID(rs.getString(4));
+					bbs.setUserName(rs.getString(5));
+					bbs.setBbsDate(rs.getString(6));
+					bbs.setBbsContent(rs.getString(7));
+					bbs.setBbsStart(rs.getString(8));
+					bbs.setBbsTarget(rs.getString(9));
+					bbs.setBbsEnd(rs.getString(10));
+					bbs.setBbsNContent(rs.getString(11));
+					bbs.setBbsNStart(rs.getString(12));
+					bbs.setBbsNTarget(rs.getString(13));
+					bbs.setBbsAvailable(rs.getInt(14));
+					bbs.setBbsDeadline(rs.getString(15));
 		            list.add(bbs);
 		         }         
 		      } catch(Exception e) {
@@ -300,6 +322,42 @@ public class BbsDAO {
 		      }
 		      return list;
 		   }
+		
+		// 검색 메소드 
+				public ArrayList<Bbs> getRkSearch(int pageNumber, String searchField, String searchText){//특정한 리스트를 받아서 반환
+				      ArrayList<Bbs> list = new ArrayList<Bbs>();
+				      String SQL ="select * from bbs WHERE "+searchField.trim();
+				      try {
+				            if(searchText != null && !searchText.equals("") ){
+				                SQL +=" LIKE '%"+searchText.trim()+"%' order by bbsID desc limit ?,10";
+				            }
+				            PreparedStatement pstmt=conn.prepareStatement(SQL);
+				            pstmt.setInt(1, (pageNumber-1) * 10);
+							rs=pstmt.executeQuery();//select
+				         while(rs.next()) {
+				            Bbs bbs = new Bbs();
+							bbs.setBbsID(rs.getInt(1));
+							bbs.setBbsManager(rs.getString(2));
+							bbs.setBbsTitle(rs.getString(3));
+							bbs.setUserID(rs.getString(4));
+							bbs.setUserName(rs.getString(5));
+							bbs.setBbsDate(rs.getString(6));
+							bbs.setBbsContent(rs.getString(7));
+							bbs.setBbsStart(rs.getString(8));
+							bbs.setBbsTarget(rs.getString(9));
+							bbs.setBbsEnd(rs.getString(10));
+							bbs.setBbsNContent(rs.getString(11));
+							bbs.setBbsNStart(rs.getString(12));
+							bbs.setBbsNTarget(rs.getString(13));
+							bbs.setBbsAvailable(rs.getInt(14));
+							bbs.setBbsDeadline(rs.getString(15));
+				            list.add(bbs);
+				         }         
+				      } catch(Exception e) {
+				         e.printStackTrace();
+				      }
+				      return list;
+				   }
 		
 		
 		// 취합 메소드 
@@ -313,21 +371,22 @@ public class BbsDAO {
 				            PreparedStatement pstmt=conn.prepareStatement(SQL);
 							rs=pstmt.executeQuery();//select
 				         while(rs.next()) {
-				            Bbs bbs = new Bbs();
+				        	 Bbs bbs = new Bbs();
 							bbs.setBbsID(rs.getInt(1));
-							bbs.setBbsTitle(rs.getString(2));
-							bbs.setUserID(rs.getString(3));
-							bbs.setUserName(rs.getString(4));
-							bbs.setBbsDate(rs.getString(5));
-							bbs.setBbsContent(rs.getString(6));
-							bbs.setBbsStart(rs.getString(7));
-							bbs.setBbsTarget(rs.getString(8));
-							bbs.setBbsEnd(rs.getString(9));
-							bbs.setBbsNContent(rs.getString(10));
-							bbs.setBbsNStart(rs.getString(11));
-							bbs.setBbsNTarget(rs.getString(12));
-							bbs.setBbsAvailable(rs.getInt(13));
-							bbs.setBbsDeadline(rs.getString(14));
+							bbs.setBbsManager(rs.getString(2));
+							bbs.setBbsTitle(rs.getString(3));
+							bbs.setUserID(rs.getString(4));
+							bbs.setUserName(rs.getString(5));
+							bbs.setBbsDate(rs.getString(6));
+							bbs.setBbsContent(rs.getString(7));
+							bbs.setBbsStart(rs.getString(8));
+							bbs.setBbsTarget(rs.getString(9));
+							bbs.setBbsEnd(rs.getString(10));
+							bbs.setBbsNContent(rs.getString(11));
+							bbs.setBbsNStart(rs.getString(12));
+							bbs.setBbsNTarget(rs.getString(13));
+							bbs.setBbsAvailable(rs.getInt(14));
+							bbs.setBbsDeadline(rs.getString(15));
 				            list.add(bbs);
 				         }         
 				      } catch(Exception e) {
@@ -417,19 +476,20 @@ public class BbsDAO {
 				if(rs.next()) {
 					Bbs bbs = new Bbs();
 					bbs.setBbsID(rs.getInt(1));
-					bbs.setBbsTitle(rs.getString(2));
-					bbs.setUserID(rs.getString(3));
-					bbs.setUserName(rs.getString(4));
-					bbs.setBbsDate(rs.getString(5));
-					bbs.setBbsContent(rs.getString(6));
-					bbs.setBbsStart(rs.getString(7));
-					bbs.setBbsTarget(rs.getString(8));
-					bbs.setBbsEnd(rs.getString(9));
-					bbs.setBbsNContent(rs.getString(10));
-					bbs.setBbsNStart(rs.getString(11));
-					bbs.setBbsNTarget(rs.getString(12));
-					bbs.setBbsAvailable(rs.getInt(13));
+					bbs.setBbsManager(rs.getString(2));
+					bbs.setBbsTitle(rs.getString(3));
+					bbs.setUserID(rs.getString(4));
+					bbs.setUserName(rs.getString(5));
+					bbs.setBbsDate(rs.getString(6));
+					bbs.setBbsContent(rs.getString(7));
+					bbs.setBbsStart(rs.getString(8));
+					bbs.setBbsTarget(rs.getString(9));
+					bbs.setBbsEnd(rs.getString(10));
+					bbs.setBbsNContent(rs.getString(11));
+					bbs.setBbsNStart(rs.getString(12));
+					bbs.setBbsNTarget(rs.getString(13));
 					bbs.setBbsAvailable(rs.getInt(14));
+					bbs.setBbsDeadline(rs.getString(15));
 					return bbs;
 				}
 			}catch (Exception e) {

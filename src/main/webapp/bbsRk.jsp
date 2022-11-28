@@ -1,5 +1,8 @@
 <%@page import="user.UserDAO"%>
-<%@page import="org.mariadb.jdbc.internal.failover.tools.SearchFilter"%>
+<%@page import="java.util.Locale"%>
+<%@page import="java.util.Calendar"%>
+<%@page import="java.time.LocalDate"%>
+<%@page import="java.time.format.DateTimeFormatter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
@@ -7,21 +10,31 @@
 <%@ page import="bbs.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
+<!-- 화면 최적화 -->
+<meta name="viewport" content="width-device-width">
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
-<link rel="stylesheet" href="css/index.css">
-<title>Baynex 주간보고</title>
-</head>
 
+<title>Baynex 주간보고</title>
+<style type="css/text/css">
+	a, a:hover{
+		color: #000000;
+		text-decoration: none;
+	}
+</style>
+</head>
 <body>
 	<%
-		UserDAO user = new UserDAO();
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
+	
 		if(session.getAttribute("id") != null){
 			id = (String)session.getAttribute("id");
 		}
@@ -31,12 +44,19 @@
 		if(request.getParameter("pageNumber") != null){
 			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
 		}
+		if(id == null){
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('로그인이 필요한 서비스입니다.')");
+			script.println("location.href='login.jsp'");
+			script.println("</script>");
+		}
 		
-		String name = user.getName(id);
-		String rk = user.getRank((String)session.getAttribute("id"));
 	%>
-	<nav class="navbar navbar-default"> <!-- 네비게이션 -->
-		<div class="navbar-header"> 	<!-- 네비게이션 상단 부분 -->
+	
+	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	<nav class="navbar navbar-default"> 
+		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
 			<button type="button" class="navbar-toggle collapsed"
 				data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
@@ -46,27 +66,17 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<!-- 상단 바에 제목이 나타나고 클릭하면 main 페이지로 이동한다 -->
-			<% 
-			BbsDAO bbsDAO = new BbsDAO();
-			int confirm = bbsDAO.getBbsRecord((String)session.getAttribute("id"));
-			
-			if(confirm == 1 ) {%>
 			<a class="navbar-brand" href="bbsUpdate.jsp">Baynex 주간보고</a>
-			<% } else { %>
-			<a class="navbar-brand" href="main.jsp">Baynex 주간보고</a>
-			<% } %>
 		</div>
+		
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 			<ul class="nav navbar-nav">
-			<% if(confirm == 1 ) { %>
 				<li><a href="bbsUpdate.jsp">주간보고</a></li>
-			<% } else { %>
-				<li><a class="navbar-brand" href="main.jsp">주간보고</a></li>
-			<% } %>
 				<li class="active"><a href="bbs.jsp">제출목록</a></li>
 			</ul>
+			
+			
 			
 			<%
 				// 로그인 하지 않았을 때 보여지는 화면
@@ -80,10 +90,12 @@
 						aria-expanded="false">접속하기<span class="caret"></span></a>
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
-						<li><a href="login.jsp">로그인</a></li>
+						<li class="active"><a href="login.jsp">로그인</a></li>
 					</ul>
 				</li>
 			</ul>
+			
+			
 			<%
 				// 로그인이 되어 있는 상태에서 보여주는 화면
 				}else{
@@ -96,19 +108,8 @@
 						aria-expanded="false">관리<span class="caret"></span></a>
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
-					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-					%>
-						<li><a href="workChange.jsp">담당업무 변경</a></li>
-					
+					<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
-					<%
-					} else {
-					%>
-						<li><a href="logoutAction.jsp">로그아웃</a></li>
-					<%
-					}
-					%>
 					</ul>
 				</li>
 			</ul>
@@ -117,48 +118,23 @@
 			%>
 		</div>
 	</nav>
-	<!-- 네비게이션 영역 끝 -->
 	
 		
-	<!-- ***********검색바 추가 ************* -->
-	<%
-		String category = request.getParameter("searchField");
-		String str = request.getParameter("searchText");
-		if(category == null) {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('검색 내용이 비어있습니다.')");
-			script.println("location.href='bbs.jsp'");
-			script.println("</script>");
-		}
 		
-		if(category.equals("bbsDeadline")) {
-			int len = str.length();
-			
-			// 2글자 이상이며 -을 포함하지 않는다면, 
-			if(len > 2 && str.contains("-") == false) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('날짜 형식은 - 을 갖추어야 합니다.')");
-				script.println("location.href='bbs.jsp'");
-				script.println("</script>");
-			}
-		}
-	%>
+	<!-- ***********검색바 추가 ************* -->
 	<div class="container">
 		<div class="row">
-			<form method="post" name="search" id="search" action="searchbbs.jsp">
+			<form method="post" name="search" action="searchbbsRk.jsp">
 				<table class="pull-right">
 					<tr>
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
-								<option value="bbsDeadline" <%= category.equals("bbsDeadline")?"selected":""%>>제출일</option>
-								<option value="bbsTitle" <%= category.equals("bbsTitle")?"selected":""%>>제목</option>
+								<option value="bbsDeadline">제출일</option>
+								<option value="bbsTitle">제목</option>
+								<option value="userName">작성자</option>
 						</select></td>
-						<td>
-							<input type="text" class="form-control"
-							placeholder="" name="searchText" maxlength="100" value="<%= request.getParameter("searchText") %>"></td>
-						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="searchbbs.jsp">검색</button></td>
-						<!-- <td><button type="submit" class="btn btn-warning pull-right" formaction="gathering.jsp" onclick="return submit2(this.form)">취합</button></td> -->
+						<td><input type="text" class="form-control"
+							placeholder="검색어 입력" name="searchText" maxlength="100"></td>
+						<td><button type="submit" style="margin:5px" class="btn btn-success">검색</button></td>
 					</tr>
 
 				</table>
@@ -168,12 +144,13 @@
 	<br>
 	
 	
-	<!-- # <검색된게시판 메인 페이지 영역 시작 -->
+	<!-- 게시판 메인 페이지 영역 시작 -->
 	<div class="container">
 		<div class="row">
 			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
+						<!-- <th style="background-color: #eeeeee; text-align: center;">번호</th> -->
 						<th style="background-color: #eeeeee; text-align: center;">제출일</th>
 						<th style="background-color: #eeeeee; text-align: center;">제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
@@ -182,27 +159,30 @@
 				</thead>
 				<tbody>
 					<%
-						ArrayList<Bbs> list =  bbsDAO.getSearch(pageNumber, name, category,
-								request.getParameter("searchText"));
-						
-	 					if (list.size() == 0) {
-							PrintWriter script = response.getWriter();
-							script.println("<script>");
-							script.println("alert('검색결과가 없습니다.')");
-							script.println("location.href='bbs.jsp'");
-							script.println("</script>");
-						} 
-
+						BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
+						ArrayList<Bbs> list = bbsDAO.getList(pageNumber);
 						for(int i = 0; i < list.size(); i++){
+							
+/* 							// Deadline을 가져온다. 
+							String DDline = list.get(i).getBbsDeadline();
+							//String DDline = "2022-10-24";
+							
+							DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+							LocalDate date = LocalDate.parse(DDline, formatter);
+							//date = date.plusWeeks(1); //일주일을 더하는 것. */
+							
 					%>
-					<tr>
-						<td><%= list.get(i).getBbsDeadline() %></td>
+
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
-						<td><a href="update.jsp?bbsID=<%=list.get(i).getBbsID()%>"><%=list.get(i).getBbsTitle().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;")
-						.replaceAll(">", "&gt;").replaceAll("\n", "<br>")%></a></td>
+					<tr>
+						<td> <%= list.get(i).getBbsDeadline() %> </td>
+
+						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
+						<td><a href="update.jsp?bbsID=<%= list.get(i).getBbsID() %>">
+							<%= list.get(i).getBbsTitle() %></a></td>
 						<td><%= list.get(i).getUserName() %></td>
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
-							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>			
+							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
 					</tr>
 					<%
 						}
@@ -214,33 +194,35 @@
 			<%
 				if(pageNumber != 1){
 			%>
-				<a href="searchbbs.jsp?pageNumber=<%=pageNumber - 1 %>&searchField=<%= category %>&searchText=<%= str %>"
+				<a href="bbsRk.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
 				}if(bbsDAO.nextPage(pageNumber + 1)){
 			%>
-				<a href="searchbbs.jsp?pageNumber=<%=pageNumber + 1 %>&searchField=<%= category %>&searchText=<%= str %>"
+				<a href="bbsRk.jsp?pageNumber=<%=pageNumber + 1 %>"
 					class="btn btn-success btn-arraw-left">다음</a>
 			<%
 				}
 			%>
 			
-			
-			<a href="bbs.jsp" class="btn btn-primary pull-right">목록</a> 
+			<!-- 글쓰기 버튼 생성 -->
+			<a href="bbsUpdate.jsp" class="btn btn-info pull-right">새 보고 작성</a>
 		</div>
 	</div>
 	<!-- 게시판 메인 페이지 영역 끝 -->
 	
-	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>
-	<!-- <script>
-		function submit2(frm) {
-			frm.action='gathering.jsp';
-			frm.submit();
-			return true;
+	<script>
+		function ChangeValue() {
+			var value_str = document.getElementById('searchField');
+			
 		}
-	</script> -->
+	</script>
+	
+	<!-- 부트스트랩 참조 영역 -->
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="ccs/js/bootstrap.js"></script>
 </body>
 </html>
