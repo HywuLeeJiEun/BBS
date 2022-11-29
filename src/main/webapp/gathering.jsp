@@ -1,3 +1,5 @@
+<%@page import="java.util.List"%>
+<%@page import="user.UserDAO"%>
 <%@page import="org.mariadb.jdbc.internal.failover.tools.SearchFilter"%>
 <%@page import="java.util.ArrayList"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -162,7 +164,7 @@
 					</tr>
 					<tr align="center">	
 							<!-- (구분/담당자는 처음 작성하는 사람을 위하여 유지) 추후 userName과 연결 -->
-						 <td><textarea class="textarea" style="height:180px; width:100%; border:none" placeholder="구분/담당자" maxlength="50" readonly><%= list.get(i).getUserName() %></textarea></td>
+						  <td><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:180px; width:100%; border:none;" placeholder="구분/담당자" maxlength="50"><%= list.get(i).getBbsManager() %></textarea></td>
 						 <td><textarea class="textarea" style="height:180px;width:100%; border:none" placeholder="업무내용" name="bbsContent" readonly ><%= list.get(i).getBbsContent() %></textarea></td>
 						 <td><textarea class="textarea" style="height:180px; width:100%; border:none" placeholder="접수일" name="bbsStart" readonly ><%= list.get(i).getBbsStart() %></textarea></td>
 						 <td><textarea class="textarea" style="height:180px; width:100%; border:none" placeholder="완료목표일" name="bbsTarget" readonly ><%= list.get(i).getBbsTarget() %></textarea></td>	
@@ -187,7 +189,7 @@
 						<th width="1%">| &nbsp; 완료목표일</th>
 					</tr>
 					<tr align="center">	
-						 <td><textarea class="textarea" style="height:180px; width:100%; border:none" placeholder="구분/담당자" maxlength="50" readonly><%= list.get(i).getUserName() %></textarea></td>
+						  <td><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:180px; width:100%; border:none;" placeholder="구분/담당자" maxlength="50"><%= list.get(i).getBbsManager()  %></textarea></td>
 						 <td><textarea class="textarea" style="height:180px;width:100%; border:none" placeholder="업무내용" name="bbsContent" readonly ><%= list.get(i).getBbsNContent() %></textarea></td>
 						 <td><textarea class="textarea" style="height:180px; width:100%; border:none" placeholder="접수일" name="bbsStart" readonly ><%= list.get(i).getBbsNStart() %></textarea></td>
 						 <td><textarea class="textarea" style="height:180px; width:100%; border:none" placeholder="완료목표일" name="bbsTarget" readonly ><%= list.get(i).getBbsNTarget() %></textarea></td>									
@@ -224,6 +226,8 @@
 			
 			<a href="bbs.jsp" class="btn btn-primary pull-right">목록</a>
 			<button class="btn btn-info pull-left" onclick="window.scrollTo({top:0 ,behavior:'smooth'});">상단으로</button>
+			<a class="btn btn-info pull-right" href="ppt.jsp?deadLine=<%= list.get(0).getBbsDeadline() %>">PPTX</a>
+
 			
 <%-- 			<!-- 해당 글의 작성자가 본인이라면 수정과 삭제가 가능하도록 코드 추가 -->
 			<%

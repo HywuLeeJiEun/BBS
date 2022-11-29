@@ -159,7 +159,13 @@
 							<input type="text" class="form-control"
 							placeholder="" name="searchText" maxlength="100" value="<%= request.getParameter("searchText") %>"></td>
 						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="searchbbsRk.jsp">검색</button></td>
-						<!-- <td><button type="submit" class="btn btn-warning pull-right" formaction="gathering.jsp" onclick="return submit2(this.form)">취합</button></td> -->
+						<%
+						if (request.getParameter("searchField").equals("bbsDeadline")) { 
+						%>
+						<td><button type="submit" class="btn btn-warning pull-right" formaction="gathering.jsp" onclick="return submit2(this.form)">취합</button></td>
+						<%
+						}
+						%>
 					</tr>
 
 				</table>

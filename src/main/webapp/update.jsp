@@ -279,14 +279,14 @@
 									<tr>
 									 <td colspan="5" >
 										<%
-											//if(id != null && id.equals(bbs.getUserID()) && dldate.after(today)){
+											if(id != null && id.equals(bbs.getUserID()) && dldate.after(today)){
 										%>
 											<a onclick="return confirm('해당 게시글을 삭제하시겠습니까?')"
 											href="deleteAction.jsp?bbsID=<%= bbsID %>" class="btn btn-danger pull-left">삭제</a>
 											
 											<input type="submit" id="update" style="margin-bottom:5px" class="btn btn-success pull-right" value="수정"> 
 										<%
-											//}
+											}
 										%>
 									</td>	
 								</tr>
