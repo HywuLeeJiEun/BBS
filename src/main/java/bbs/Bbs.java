@@ -16,6 +16,8 @@ public class Bbs {
 	private String bbsNTarget;
 	private int bbsAvailable;
 	private String bbsDeadline;
+	private String bbsUpdate;
+	private String sign;
 	
 	
 	
@@ -109,6 +111,19 @@ public class Bbs {
 	public void setBbsDeadline(String bbsDeadline) {
 		this.bbsDeadline = bbsDeadline;
 	}
+	public String getBbsUpdate() {
+		return bbsUpdate;
+	}
+	public void setBbsUpdate(String bbsUpdate) {
+		this.bbsUpdate = bbsUpdate;
+	}
+	public String getSign() {
+		return sign;
+	}
+	public void setSign(String sign) {
+		this.sign = sign;
+	}
+	
 	
 
 	

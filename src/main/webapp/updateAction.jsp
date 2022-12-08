@@ -1,3 +1,6 @@
+<%@page import="java.util.List"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="user.UserDAO"%>
 <%@page import="java.sql.Timestamp"%>
 <%@page import="java.io.PrintWriter"%>
 <%@page import="bbs.BbsDAO"%>
@@ -39,10 +42,38 @@
 			script.println("location.href='bbs.jsp'");
 			script.println("</script>");
 		}
+		
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+				String workSet;
+				
+				UserDAO userDAO = new UserDAO();
+				String rk = userDAO.getRank((String)session.getAttribute("id"));
+				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+				List<String> works = new ArrayList<String>();
+				
+				if(code == null) {
+					workSet = "";
+				} else {
+					for(int i=0; i < code.size(); i++) {
+						
+						String number = code.get(i);
+						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+						String manager = userDAO.getManager(number);
+						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+					}
+					
+					workSet = String.join("/",works);
+
+
+				}
+		
+				
 		//해당 'bbsID'에 대한 게시글을 가져온 다음 세션을 통하여 작성자 본인이 맞는지 체크한다
 		Bbs bbs = new BbsDAO().getBbs(bbsID);
-		if(!id.equals(bbs.getUserID())){
-			PrintWriter script = response.getWriter();
+		String name = new BbsDAO().name(id);
+		
+		if(!id.equals(bbs.getUserID()) && !rk.equals("부장") && !rk.equals("차장") && !rk.equals("관리자")) {
+			PrintWriter script = response.getWriter(); 
 			script.println("<script>");
 			script.println("alert('수정 권한이 없습니다. 사용자를 확인해주십시오.')");
 			script.println("location.href='bbs.jsp'");
@@ -61,7 +92,7 @@
 				BbsDAO bbsDAO = new BbsDAO();
 				java.sql.Timestamp date = bbsDAO.getDateNow();
 				
-				int result = bbsDAO.update(bbsID, request.getParameter("bbsManager"), request.getParameter("bbsTitle"), request.getParameter("bbsContent"), request.getParameter("bbsStart"), request.getParameter("bbsTarget"), request.getParameter("bbsEnd"), request.getParameter("bbsNContent"), request.getParameter("bbsNStart"), request.getParameter("bbsNTarget"), date);
+				int result = bbsDAO.update(bbsID, request.getParameter("bbsManager"), request.getParameter("bbsTitle"), request.getParameter("bbsContent"), request.getParameter("bbsStart"), request.getParameter("bbsTarget"), request.getParameter("bbsEnd"), request.getParameter("bbsNContent"), request.getParameter("bbsNStart"), request.getParameter("bbsNTarget"), date, name);
 				// 데이터베이스 오류인 경우
 				if(result == -1){
 					PrintWriter script = response.getWriter();
@@ -71,6 +102,8 @@
 					script.println("</script>");
 				// 글 수정이 정상적으로 실행되면 알림창을 띄우고 게시판 메인으로 이동한다
 				}else {
+					// Update 제한을 풀어둠!! (수정이 완료되면)
+					bbsDAO.getActiveout(bbsID);
 					PrintWriter script = response.getWriter();
 					script.println("<script>");
 					script.println("alert('보고가 정상적으로 수정되었습니다.')");

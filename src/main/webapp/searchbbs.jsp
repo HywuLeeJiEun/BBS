@@ -177,7 +177,8 @@
 						<th style="background-color: #eeeeee; text-align: center;">제출일</th>
 						<th style="background-color: #eeeeee; text-align: center;">제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성일</th>
+						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
+						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -202,7 +203,8 @@
 						.replaceAll(">", "&gt;").replaceAll("\n", "<br>")%></a></td>
 						<td><%= list.get(i).getUserName() %></td>
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
-							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>			
+							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>	
+						<td><%= list.get(i).getBbsUpdate() %></td>		
 					</tr>
 					<%
 						}

@@ -1,3 +1,5 @@
+<%@page import="java.util.Date"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="user.UserDAO"%>
 <%@page import="java.util.Locale"%>
 <%@page import="java.util.Calendar"%>
@@ -23,7 +25,7 @@
 <link rel="stylesheet" href="css/css/bootstrap.css">
 <link rel="stylesheet" href="css/index.css">
 
-<title>Baynex 주간보고</title>
+<title>RMS</title>
 </head>
 
 <body>
@@ -59,6 +61,23 @@
 		}
 		
 		String name = userDAO.getName(id);
+		
+		/* // 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		
+		String dl = BbsDAO.getDLS(bbsID);
+		if(dl.isEmpty()) { //삭제 되어 비어있다면,
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('게시글이 제거되거나 수정되었을 수 있습니다. 확인하여 주십시오.')");
+			script.println("history.back()");
+			script.println("</script>");
+		}
+		Date time = new Date();
+		String timenow = dateFormat.format(time);
+
+		Date dldate = dateFormat.parse(dl);
+		Date today = dateFormat.parse(timenow); */
 	%>
 	
 	 <!-- ************ 상단 네비게이션바 영역 ************* -->
@@ -73,42 +92,30 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="bbsUpdate.jsp">Baynex 주간보고</a>
+			<a class="navbar-brand" href="bbs.jsp">Report Management System</a>
 		</div>
 		
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<ul class="nav navbar-nav">
-				<li><a href="bbsUpdate.jsp">주간보고</a></li>
-				<li class="active"><a href="bbs.jsp">제출목록</a></li>
-			</ul>
+				<ul class="nav navbar-nav navbar-left">
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle"
+							data-toggle="dropdown" role="button" aria-haspopup="true"
+							aria-expanded="false">주간보고<span class="caret"></span></a>
+						<!-- 드랍다운 아이템 영역 -->	
+						<ul class="dropdown-menu">
+							<li class="active"><a href="bbs.jsp">조회</a></li>
+							<li><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="update.jsp">수정/삭제</a></li>
+							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
+						</ul>
+					</li>
+				</ul>
 			
 			
-			
-			<%
-				// 로그인 하지 않았을 때 보여지는 화면
-				if(id == null){
-			%>
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-haspopup="true"
-						aria-expanded="false">접속하기<span class="caret"></span></a>
-					<!-- 드랍다운 아이템 영역 -->	
-					<ul class="dropdown-menu">
-						<li class="active"><a href="login.jsp">로그인</a></li>
-					</ul>
-				</li>
-			</ul>
-			
-			
-			<%
-				// 로그인이 되어 있는 상태에서 보여주는 화면
-				}else{
-			%>
-			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
-			<ul class="nav navbar-nav navbar-right">
+				<li><a href="bbs.jsp" style="color:#2E2E2E"><%= name %>(님)</a></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle"
 						data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -118,12 +125,13 @@
 					<%
 					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
 					%>
+						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
-					
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					} else {
 					%>
+						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					}
@@ -131,9 +139,6 @@
 					</ul>
 				</li>
 			</ul>
-			<%
-				}
-			%>
 		</div>
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
@@ -172,7 +177,9 @@
 						<th style="background-color: #eeeeee; text-align: center;">제출일</th>
 						<th style="background-color: #eeeeee; text-align: center;">제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성일</th>
+						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
+						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
+						<th style="background-color: #eeeeee; text-align: center;">승인</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -182,6 +189,16 @@
 						ArrayList<Bbs> list = bbsDAO.getRkSearch(pageNumber, userName, name);
 						
 						for(int i = 0; i < list.size(); i++){
+							
+							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
+							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+							
+							String dl = bbsDAO.getDLS(list.get(i).getBbsID());
+							Date time = new Date();
+							String timenow = dateFormat.format(time);
+
+							Date dldate = dateFormat.parse(dl);
+							Date today = dateFormat.parse(timenow);
 					%>
 
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
@@ -194,6 +211,21 @@
 						<td><%= list.get(i).getUserName() %></td>
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
 							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
+						<td><%= list.get(i).getBbsUpdate() %></td>
+						<!-- 승인/미승인/마감 표시 -->
+						<td>
+						<%
+						String sign = null;
+						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
+							sign = list.get(i).getSign();
+						} else {
+							sign="마감";
+							// 데이터베이스에 마감처리 진행
+							int a = bbsDAO.getSignDeadLine(list.get(i).getBbsID());
+						}
+						%>
+						<%= sign %>
+						</td>
 					</tr>
 					<%
 						}

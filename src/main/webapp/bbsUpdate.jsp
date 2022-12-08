@@ -62,6 +62,31 @@
 		date = date.plusWeeks(1); //일주일을 더하는 것.
 		
 		String rk = user.getRank((String)session.getAttribute("id"));
+		
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+		String workSet;
+		
+		UserDAO userDAO = new UserDAO();
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		List<String> works = new ArrayList<String>();
+		
+		if(code == null) {
+			workSet = "";
+		} else {
+			for(int i=0; i < code.size(); i++) {
+				
+				String number = code.get(i);
+				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+				String manager = userDAO.getManager(number);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			
+			workSet = String.join("/",works);
+
+
+		}
+		
+		String name = userDAO.getName(id);
 	%>
 	
 	
@@ -77,42 +102,30 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="bbsUpdate.jsp">Baynex 주간보고</a>
+			<a class="navbar-brand" href="bbs.jsp">Report Management System</a>
 		</div>
 		
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<ul class="nav navbar-nav">
-				<li class="active"><a href="bbsUpdate.jsp">주간보고</a></li>
-				<li><a href="bbs.jsp">제출목록</a></li>
-			</ul>
+				<ul class="nav navbar-nav navbar-left">
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle"
+							data-toggle="dropdown" role="button" aria-haspopup="true"
+							aria-expanded="false">주간보고<span class="caret"></span></a>
+						<!-- 드랍다운 아이템 영역 -->	
+						<ul class="dropdown-menu">
+							<li><a href="bbs.jsp">조회</a></li>
+							<li class="active"><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="update.jsp">수정/삭제</a></li>
+							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
+						</ul>
+					</li>
+				</ul>
 			
 			
-			
-			<%
-				// 로그인 하지 않았을 때 보여지는 화면
-				if(id == null){
-			%>
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-haspopup="true"
-						aria-expanded="false">접속하기<span class="caret"></span></a>
-					<!-- 드랍다운 아이템 영역 -->	
-					<ul class="dropdown-menu">
-						<li class="active"><a href="login.jsp">로그인</a></li>
-					</ul>
-				</li>
-			</ul>
-			
-			
-			<%
-				// 로그인이 되어 있는 상태에서 보여주는 화면
-				}else{
-			%>
-			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
-			<ul class="nav navbar-nav navbar-right">
+				<li><a href="bbs.jsp" style="color:#2E2E2E"><%= name %>(님)</a></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle"
 						data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -122,12 +135,13 @@
 					<%
 					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
 					%>
+						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
-					
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					} else {
 					%>
+						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					}
@@ -135,32 +149,6 @@
 					</ul>
 				</li>
 			</ul>
-			<%
-				}
-			
-			// ********** 담당자를 가져오기 위한 메소드 *********** 
-			String workSet;
-			
-			UserDAO userDAO = new UserDAO();
-			ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-			List<String> works = new ArrayList<String>();
-			
-			if(code == null) {
-				workSet = "";
-			} else {
-				for(int i=0; i < code.size(); i++) {
-					
-					String number = code.get(i);
-					// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-					String manager = userDAO.getManager(number);
-					works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-				}
-				
-				workSet = String.join("/",works);
-
-
-			}
-			%>
 		</div>
 	</nav>
 	

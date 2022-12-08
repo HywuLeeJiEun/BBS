@@ -1,4 +1,5 @@
 <%@page import="java.time.format.DateTimeFormatter"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.time.LocalDateTime"%>
 <%@page import="java.time.LocalDate"%>
 <%@page import="java.text.SimpleDateFormat"%>
@@ -61,6 +62,13 @@
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			
 			String dl = bbsDAO.getDLS(bbsID);
+			if(dl.isEmpty()) { //삭제 되어 비어있다면,
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('게시글이 제거되거나 수정되었을 수 있습니다. 확인하여 주십시오.')");
+				script.println("history.back()");
+				script.println("</script>");
+			}
 			Date time = new Date();
 			String timenow = dateFormat.format(time);
 
@@ -96,6 +104,9 @@
 				String rk = userDAO.getRank((String)session.getAttribute("id"));
 	%>
 	
+	<c:set var="bbsID" value="<%= bbsID %>" />
+	<input type="hidden" id="bbsId" value="<c:out value='${bbsID}' />">
+	
 	
     <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
@@ -117,6 +128,13 @@
 			<ul class="nav navbar-nav">
 				<li><a href="bbsUpdate.jsp">주간보고</a></li>
 				<li><a href="bbs.jsp">제출목록</a></li>
+				<%
+				if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+				%>
+				<li><a href="gathering_search.jsp">취합하기</a></li>
+				<%
+				}
+				%>
 			</ul>
 			
 			
@@ -191,10 +209,12 @@
 						<thead>
 							<tr>
 								<%
-								if(id != null && id.equals(bbs.getUserID()) && dldate.after(today)){
+								if(id.equals(bbs.getUserID()) || rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+									if(dldate.after(today)){
 								%>
 								<th colspan="5" style=" text-align: center; color:blue ">주간보고를 수정하고 있습니다.</th>
 								<%
+									}
 								}
 								%>
 							</tr>
@@ -279,7 +299,8 @@
 									<tr>
 									 <td colspan="5" >
 										<%
-											if(id != null && id.equals(bbs.getUserID()) && dldate.after(today)){
+										if(id.equals(bbs.getUserID()) || rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+											if(dldate.after(today)){
 										%>
 											<a onclick="return confirm('해당 게시글을 삭제하시겠습니까?')"
 											href="deleteAction.jsp?bbsID=<%= bbsID %>" class="btn btn-danger pull-left">삭제</a>
@@ -287,6 +308,7 @@
 											<input type="submit" id="update" style="margin-bottom:5px" class="btn btn-success pull-right" value="수정"> 
 										<%
 											}
+										}
 										%>
 									</td>	
 								</tr>
@@ -551,19 +573,27 @@
 		});
 	</script>
 	
-<!-- 	<script>
-	//단축키를 통한 저장 (shfit + s)
-	var isShift = false;
-	document.onkeyup = function(e) {
-		if(e.which == 16)isShift = false;
-	}
-	document.onkeydown = function(e) {
-		if(e.which == 16)isShift = true;
-		if(e.which == 83 && isShift == true) {
-			// shift와 s가 동시에 눌린다면,
-			document.getElementById("update").click();
-		}
-	}
-	</script> -->
+	
+	<%-- <script>
+	/* 제작할 필요 없나..?  */
+	window.addEventListener('beforeunload', (event) => {
+	      
+		$(document).on("beforeunload", function(event){
+		  <% 
+	     	// 작동 O -> row 유지가 안됨!
+	      	BbsDAO BBS = new BbsDAO(); 
+	      	BBS.getActiveout(bbsID);
+	      %> 
+		});
+	    
+	      
+	      
+	   // 표준에 따라 기본 동작 방지
+	      event.preventDefault();
+	      // Chrome에서는 returnValue 설정이 필요함
+	      event.returnValue = '';
+	});
+
+	</script> --%>
 	
 </body>

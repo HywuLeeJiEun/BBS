@@ -287,11 +287,11 @@
 						<!-- 제출 버튼 생성 -->
 						<a href="bbsUpdate.jsp" class="btn btn-info">오늘 날짜로 돌아가기</a>
 						<%
-						//if(id != null && id.equals(bbs.getUserID()) && dldate.after(today)){
+						if(id != null && id.equals(bbs.getUserID()) && dldate.after(today)){
 						%>
 						<input type="submit" id="update" style="margin-bottom:50px" class="btn btn-success pull-right" value="수정">
 						<%
-						//}
+						}
 						%>
 					</form>
 				</div>

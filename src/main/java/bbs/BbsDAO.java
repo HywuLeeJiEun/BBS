@@ -5,7 +5,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 public class BbsDAO {
 
@@ -77,6 +82,22 @@ public class BbsDAO {
 		return ""; //데이터베이스 오류
 	}
 	
+	//작성자이름 메소드 (현재 로그인 유저 이름)
+		public String name(String id) {
+			String sql = "select name from user where id=?";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, id); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입
+				rs = pstmt.executeQuery();
+				if(rs.next()) {
+					return rs.getString(1);
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return ""; //데이터베이스 오류
+		}
+	
 	// ********* 금주 업무 실적 관련 **********
 	public String getContent(String id, String bbsTitle) {
 		String sql = "select b.bbsContent from bbs b Inner join user u on b.userID = u.id and  u.id = ? where b.bbsTitle = ?";
@@ -132,7 +153,8 @@ public class BbsDAO {
 	
 	//글쓰기 메소드
 	public int write(String id, String bbsManager,String bbsTitle, String name, String bbsContent, String bbsStart, String bbsTarget, String bbsEnd, String bbsNContent, String bbsNStart, String bbsNTarget, String bbsDeadline) {
-		String sql = "insert into bbs values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String sql = "insert into bbs values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String sign = "미승인";
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, getNext());
@@ -150,6 +172,8 @@ public class BbsDAO {
 			pstmt.setString(13, bbsNTarget);
 			pstmt.setInt(14, 1); //글의 유효번호
 			pstmt.setString(15, bbsDeadline);
+			pstmt.setString(16,  name);
+			pstmt.setString(17, sign);
 			return pstmt.executeUpdate();
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -184,6 +208,8 @@ public class BbsDAO {
 					bbs.setBbsNTarget(rs.getString(13));
 					bbs.setBbsAvailable(rs.getInt(14));
 					bbs.setBbsDeadline(rs.getString(15));
+					bbs.setBbsUpdate(rs.getString(16));
+					bbs.setSign(rs.getString(17));
 					list.add(bbs);
 				}
 			}catch (Exception e) {
@@ -236,6 +262,8 @@ public class BbsDAO {
 					bbs.setBbsNTarget(rs.getString(13));
 					bbs.setBbsAvailable(rs.getInt(14));
 					bbs.setBbsDeadline(rs.getString(15));
+					bbs.setBbsUpdate(rs.getString(16));
+					bbs.setSign(rs.getString(17));
 					return bbs;
 				}
 			}catch (Exception e) {
@@ -245,8 +273,8 @@ public class BbsDAO {
 		}
 		
 		//게시글 수정 메소드
-		public int update(int bbsID, String bbsManager, String bbsTitle, String bbsContent, String bbsStart, String bbsTarget, String bbsEnd, String bbsNContent, String bbsNStart, String bbsNTarget, java.sql.Timestamp date) {
-			String sql = "update bbs set bbsManager=?,  bbsTitle = ?, bbsContent = ?, bbsStart = ?, bbsTarget = ?, bbsDate= ? ,bbsEnd = ?, bbsNContent = ?, bbsNStart = ?, bbsNTarget = ? where bbsID =?";
+		public int update(int bbsID, String bbsManager, String bbsTitle, String bbsContent, String bbsStart, String bbsTarget, String bbsEnd, String bbsNContent, String bbsNStart, String bbsNTarget, java.sql.Timestamp date, String bbsUpdate) {
+			String sql = "update bbs set bbsManager=?,  bbsTitle = ?, bbsContent = ?, bbsStart = ?, bbsTarget = ?, bbsDate= ? ,bbsEnd = ?, bbsNContent = ?, bbsNStart = ?, bbsNTarget = ?, bbsUpdate = ? where bbsID =?";
 			try {
 				PreparedStatement pstmt = conn.prepareStatement(sql);
 				pstmt.setString(1, bbsManager);
@@ -259,7 +287,8 @@ public class BbsDAO {
 				pstmt.setString(8, bbsNContent);
 				pstmt.setString(9, bbsNStart);
 				pstmt.setString(10, bbsNTarget);
-				pstmt.setInt(11, bbsID);
+				pstmt.setString(11, bbsUpdate);
+				pstmt.setInt(12, bbsID);
 				return pstmt.executeUpdate();
 			}catch (Exception e) {
 				e.printStackTrace();
@@ -315,6 +344,8 @@ public class BbsDAO {
 					bbs.setBbsNTarget(rs.getString(13));
 					bbs.setBbsAvailable(rs.getInt(14));
 					bbs.setBbsDeadline(rs.getString(15));
+					bbs.setBbsUpdate(rs.getString(16));
+					bbs.setSign(rs.getString(17));
 		            list.add(bbs);
 		         }         
 		      } catch(Exception e) {
@@ -323,7 +354,7 @@ public class BbsDAO {
 		      return list;
 		   }
 		
-		// 검색 메소드 
+		// 검색 메소드 (일반 사용자용)
 				public ArrayList<Bbs> getRkSearch(int pageNumber, String searchField, String searchText){//특정한 리스트를 받아서 반환
 				      ArrayList<Bbs> list = new ArrayList<Bbs>();
 				      String SQL ="select * from bbs WHERE "+searchField.trim();
@@ -351,6 +382,8 @@ public class BbsDAO {
 							bbs.setBbsNTarget(rs.getString(13));
 							bbs.setBbsAvailable(rs.getInt(14));
 							bbs.setBbsDeadline(rs.getString(15));
+							bbs.setBbsUpdate(rs.getString(16));
+							bbs.setSign(rs.getString(17));
 				            list.add(bbs);
 				         }         
 				      } catch(Exception e) {
@@ -490,6 +523,7 @@ public class BbsDAO {
 					bbs.setBbsNTarget(rs.getString(13));
 					bbs.setBbsAvailable(rs.getInt(14));
 					bbs.setBbsDeadline(rs.getString(15));
+					bbs.setSign(rs.getString(16));
 					return bbs;
 				}
 			}catch (Exception e) {
@@ -545,5 +579,42 @@ public class BbsDAO {
 				}
 				return ""; //데이터베이스 오류
 			}
+			
+			
+			// 검색 메소드 
+			public ArrayList<Bbs> getDeadLineList() {
+			      ArrayList<Bbs> list = new ArrayList<Bbs>();
+			      String sql = "select bbsDeadLine from bbs group by bbsDeadLine DESC";
+			      try {
+			            PreparedStatement pstmt=conn.prepareStatement(sql);
+						rs=pstmt.executeQuery();//select
+			         while(rs.next()) {
+			        	 Bbs bbs = new Bbs();
+						bbs.setBbsDeadline(rs.getString(1));
+			            list.add(bbs);
+			         }         
+			      } catch(Exception e) {
+			         e.printStackTrace();
+			      }
+			      return list;
+			   }
+			
+				
+			
+			// bbs의 Sign을 마감으로 변경함! ((제출 날짜가 지남!))
+			public int getSignDeadLine(int bbsId) {
+				String sql = " update bbs set sign='마감' where bbsId=?";
+				 try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, bbsId); // bbsId 삽입
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				 return -1;
+			}
+			
+			
+						
 }
 

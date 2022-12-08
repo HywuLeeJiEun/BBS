@@ -63,6 +63,7 @@
 
 		}
 		
+		String name = userDAO.getName(id);
 	%>
 
 	
@@ -79,42 +80,30 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="main.jsp">Baynex 주간보고</a>
+			<a class="navbar-brand" href="bbs.jsp">Report Management System</a>
 		</div>
 		
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<ul class="nav navbar-nav">
-				<li class="active"><a href="main.jsp">주간보고</a></li>
-				<li><a href="bbs.jsp">제출목록</a></li>
-			</ul>
+				<ul class="nav navbar-nav navbar-left">
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle"
+							data-toggle="dropdown" role="button" aria-haspopup="true"
+							aria-expanded="false">주간보고<span class="caret"></span></a>
+						<!-- 드랍다운 아이템 영역 -->	
+						<ul class="dropdown-menu">
+							<li><a href="bbs.jsp">조회</a></li>
+							<li class="active"><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="update.jsp">수정/삭제</a></li>
+							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
+						</ul>
+					</li>
+				</ul>
 			
 			
-			
-			<%
-				// 로그인 하지 않았을 때 보여지는 화면
-				if(id == null){
-			%>
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-haspopup="true"
-						aria-expanded="false">접속하기<span class="caret"></span></a>
-					<!-- 드랍다운 아이템 영역 -->	
-					<ul class="dropdown-menu">
-						<li class="active"><a href="login.jsp">로그인</a></li>
-					</ul>
-				</li>
-			</ul>
-			
-			
-			<%
-				// 로그인이 되어 있는 상태에서 보여주는 화면
-				}else{
-			%>
-			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
-			<ul class="nav navbar-nav navbar-right">
+				<li><a href="bbs.jsp" style="color:#2E2E2E"><%= name %>(님)</a></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle"
 						data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -124,24 +113,22 @@
 					<%
 					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
 					%>
+						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
-					
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					} else {
 					%>
+						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					}
+					
+					UserDAO user = new UserDAO();
 					%>
 					</ul>
 				</li>
 			</ul>
-			<%
-				}
-			
-				UserDAO user = new UserDAO();
-			%>
 		</div>
 	</nav>
 	
@@ -225,7 +212,7 @@
 												.replace(/(\..*)\./g, '$1');"></textarea></td>	
 									</tr>
 									<tr>
-										<td colspan="5"><button type="button" style="margin-bottom:5px;margin-top:5px; margin-left:15px" onclick="textAdd()" class="btn btn-primary pull-right"> 추가 </button>
+										<td colspan="5"><button type="button" style="margin-bottom:5px;margin-top:5px; margin-left:15px" onclick="textAdd()" class="btn btn-primary pull-right"> + </button>
 														<button type="button" style="margin-bottom:5px;margin-top:5px" onclick="textRe()" class="btn btn-info pull-right"> 초기화 </button></td>
 									</tr>
 									
@@ -272,8 +259,8 @@
 										 <td><textarea class="textarea" id="ncontent_add" style="height:45px;width:100%;" placeholder="업무내용" name="ncontent_add" ></textarea></td>
 										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="nstart_add" class="form-control" placeholder="접수일" name="nstart_add" ></td>
 										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="ntarget_add" class="form-control" placeholder="완료목표일" name="ntarget_add"></td>	
-										 <td colspan="5"><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" onclick="textNAdd()" class="btn btn-primary pull-right"> 추가 </button>
-										 				 <button type="button" style="margin-bottom:5px;margin-top:5px" onclick="textNRe()" class="btn btn-info pull-right"> 초기화 </button></td>	
+										 <td colspan="5"><button type="button" style=" margin-bottom:5px; margin-top:5px; margin-left:15px" onclick="textNAdd()" class="btn btn-primary pull-right"> + </button>
+										 				 <button type="button" style=" margin-bottom:5px;margin-top:5px" onclick="textNRe()" class="btn btn-info pull-right"> 초기화 </button></td>	
 									</tr>
 						</tbody>
 					</table>

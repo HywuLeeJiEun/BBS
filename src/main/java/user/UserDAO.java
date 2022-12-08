@@ -1,6 +1,5 @@
 package user;
 
-import java.lang.reflect.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import bbs.Bbs;
 
 public class UserDAO { //DAO : data access object
 	
