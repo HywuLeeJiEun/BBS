@@ -1,3 +1,7 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@page import="java.util.Arrays"%>
+<%@page import="java.util.List"%>
+<%@page import="java.util.ArrayList"%>
 <%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@page import="bbs.BbsDAO"%>
@@ -15,6 +19,7 @@
 <jsp:setProperty name="bbs" property="bbsNStart" />
 <jsp:setProperty name="bbs" property="bbsNTarget" />
 <jsp:setProperty name="bbs" property="bbsDeadline" />
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,109 +46,201 @@
 			script.println("alert('로그인이 되어 있지 않습니다. 로그인 후 사용해주시길 바랍니다.')");
 			script.println("location.href='login.jsp'");
 			script.println("</script>");
-		}else{
-			
-			// 입력이 안 된 부분이 있는지 체크한다 (금주 업무 실적과 title)
-			if(bbs.getBbsTitle() == null){
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('(Title) 주간보고 명세서가 입력되지 않았습니다.')");
-				script.println("history.back()");
-				script.println("</script>");
-			}
-			if(bbs.getBbsContent() == null) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('(금주) 업무 내용이 입력되지 않았습니다.')");
-				script.println("history.back()");
-				script.println("</script>");
-			}
-			if(bbs.getBbsStart() == null) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('(금주) 접수일이 입력되지 않았습니다.')");
-				script.println("history.back()");
-				script.println("</script>");
-			}
-			if(bbs.getBbsTarget() == null) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('(금주) 완료일목표일이 입력되지 않았습니다.')");
-				script.println("history.back()");
-				script.println("</script>");
-			}
-			if(bbs.getBbsEnd() == null) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('(금주)진행율/완료일이 입력되지 않았습니다.')");
-				script.println("history.back()");
-				script.println("</script>");
-			}
-			if(bbs.getBbsDeadline() == null) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('주간보고 제출일이 입력되지 않았습니다.')");
-				script.println("history.back()");
-				script.println("</script>");
-			} else { 
-			
-			// 유효성 검사(날짜 타입으로 작성하되, 규격을 지키기 위함 - 즉, 한글이나 영문은 필요 없음!)
-/* 			if(bbs.getBbsStart() >= 0x61 && bbs.getBbsStart() <= 0x7A) {
-				
-			} */
-			
-			
-			if(bbs.getBbsNContent() == null){
-				NContent=(String)(" ");
-			}else{
-				NContent =(String)bbs.getBbsNContent();
-			}
-			if(bbs.getBbsNStart() == null){
-				NStart=(String)(" ");
-			}else{
-				NStart = (String)bbs.getBbsNStart();
-			}
-			if(bbs.getBbsNTarget() == null){
-				NTarget=(String)(" ");
-			}else{
-				NTarget = (String)bbs.getBbsNTarget();
-			} 
-				
-					// 정상적으로 입력이 되었다면 글쓰기 로직을 수행한다
-					BbsDAO bbsDAO = new BbsDAO();
-					UserDAO user = new UserDAO();
-					String name = user.getName(id);
-					
-					String dl = bbsDAO.getDL(bbs.getBbsDeadline(), id);
-					if(dl != "") {
-						PrintWriter script = response.getWriter();
-						script.println("<script>");
-						script.println("alert('해당 날짜로 저장된 주간보고가 있습니다.')");
-						script.println("location.href='bbs.jsp'");
-						script.println("</script>");
-					} else { 
-					
-						int result = bbsDAO.write(id, bbs.getBbsManager(), bbs.getBbsTitle(), name, bbs.getBbsContent(), bbs.getBbsStart(), bbs.getBbsTarget(), bbs.getBbsEnd(), NContent, NStart, NTarget, bbs.getBbsDeadline());
-						// 데이터베이스 오류인 경우
-						if(result == -1){
-							PrintWriter script = response.getWriter();
-							script.println("<script>");
-							script.println("alert('데이터베이스에 오류가 있습니다.')");
-							script.println("history.back()");
-							script.println("</script>");
-						// 글쓰기가 정상적으로 실행되면 알림창을 띄우고 게시판 메인으로 이동한다
-						}else {
-							PrintWriter script = response.getWriter();
-							script.println("<script>");
-							script.println("alert('제출이 완료되었습니다.')");
-							script.println("location.href='bbsUpdate.jsp'");
-							script.println("</script>");
-						}
-					}
-			}
-		
 		}
-	
+		
+		// 저장할 내용을 담을 리스트 생성
+		String getbbscontent = "";
+		String getbbsstart = "";
+		String getbbstarget = "";
+		String getbbsend = "";
+
+		String getbbsncontent = "";
+		String getbbsnstart = "";
+		String getbbsntarget = "";
+
+		List<String> bbscontent = new ArrayList<String>();
+		List<String> bbsstart = new ArrayList<String>();
+		List<String> bbstarget = new ArrayList<String>();
+		List<String> bbsend = new ArrayList<String>();
+
+		List<String> bbsncontent = new ArrayList<String>();
+		List<String> bbsnstart = new ArrayList<String>();
+		List<String> bbsntarget = new ArrayList<String>();
+
+		
+		for(int i=0; i< 30; i++) {
+			//금주 업무 내용 + select box
+			String a = "bbsContent";
+			String jobs = "jobs";
+			// -[담당업무] CONTENT 내용~ 으로 나오도록 함.
+			if(request.getParameter(a+(i+5)) != null) { // 값이 비어있지 않다면,
+				if(!request.getParameter(jobs+(i+5)).contains("시스템") && !request.getParameter(jobs+(i+5)).contains("기타")) { //시스템이나 기타가 아니라면,
+			bbscontent.add("- ["+ request.getParameter(jobs+(i+5)) +"] " + request.getParameter(a+(i+5)));
+				}else {
+					bbscontent.add("- " + request.getParameter(a+(i+5)));
+				}
+			} else {
+			bbscontent.add(request.getParameter(a+(i+5)));
+			bbscontent.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
+			}
+			getbbscontent = String.join("&#10;&#10;",bbscontent); // 각 배열 요소마다 줄바꿈 하여 넣음.
+			getbbscontent = getbbscontent.replace("\r\n","&#10;"); // String 내부의 줄바꿈을 표현
+			
+			//금주 접수일
+			String b = "bbsStart";
+			bbsstart.add(request.getParameter(b+(i+5)));
+			bbsstart.removeAll(Arrays.asList("",null));
+			getbbsstart = String.join(",",bbsstart);
+			getbbsstart = getbbsstart.replace("\r\n","&#10;");
+			
+			//금주 완료 목표일
+			String c = "bbsTarget";
+			bbstarget.add(request.getParameter(c+(i+5)));
+			bbstarget.removeAll(Arrays.asList("",null));
+			getbbstarget = String.join(",",bbstarget);
+			getbbstarget = getbbstarget.replace("\r\n","&#10;"); 
+			
+			//금주 진행율/완료일
+			String d = "bbsEnd";
+			bbsend.add(request.getParameter(d+(i+5)));
+			bbsend.removeAll(Arrays.asList("",null));
+			getbbsend = String.join(",",bbsend);
+			getbbsend = getbbsend.replace("\r\n","&#10;");
+			
+			// << 차주 >> 
+			//차주 업무 내용
+			String e = "bbsNContent";
+			if(request.getParameter(e+(i+2)) != null) {
+				if(!request.getParameter(jobs+(i+2)).contains("시스템") && !request.getParameter(jobs+(i+2)).contains("기타")) {
+			bbsncontent.add("- ["+ request.getParameter(jobs+(i+2)) + "] " + request.getParameter(e+(i+2)));
+				} else {
+					bbsncontent.add("- " + request.getParameter(e+(i+2)));
+				}
+			} else {
+				bbsncontent.add(request.getParameter(e+(i+2)));
+				bbsncontent.removeAll(Arrays.asList("",null));
+			}
+			getbbsncontent = String.join("&#10;&#10;",bbsncontent);
+			getbbsncontent = getbbsncontent.replace("\r\n","&#10;");
+			
+			//차주 접수일
+			String f = "bbsNStart";
+			bbsnstart.add(request.getParameter(f+(i+2)));
+			bbsnstart.removeAll(Arrays.asList("",null));
+			getbbsnstart = String.join(",",bbsnstart);
+			getbbsnstart = getbbsnstart.replace("\r\n","&#10;"); 
+			
+			
+			//차주 완료 목표일
+			String g = "bbsNTarget";
+			bbsntarget.add(request.getParameter(g+(i+2)));
+			bbsntarget.removeAll(Arrays.asList("",null));
+			getbbsntarget = String.join(",",bbsntarget);
+			getbbsntarget = getbbsntarget.replace("\r\n","&#10;"); 
+			
+		}
+		
 	%>
+		<form id="post_item" method="post" action="mainActionComplete.jsp">
+			<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
+				<tbody id="tbody">
+					<tr id="tr">
+						<td><textarea class="textarea" id="manager" name="manager" readonly><%= bbs.getBbsManager() %></textarea></td>
+						<td><textarea class="textarea" id="title" name="title" readonly><%= bbs.getBbsTitle() %></textarea></td>
+						<td><textarea class="textarea" id="bbsDeadline" name="bbsDeadline" readonly><%= bbs.getBbsDeadline() %></textarea></td>
+						<td><textarea class="textarea" id="getbbscontent" name="getbbscontent" readonly><%= getbbscontent %></textarea></td>
+						<td><textarea class="textarea" id="getbbsstart" name="getbbsstart" readonly><%= getbbsstart %></textarea></td>
+						<td><textarea class="textarea" id="getbbstarget" name="getbbstarget" readonly><%= getbbstarget %></textarea></td>
+						<td><textarea class="textarea" id="getbbsend" name="getbbsend" readonly><%= getbbsend %></textarea></td>
+						<td><textarea class="textarea" id="getbbsncontent" name="getbbsncontent" readonly><%= getbbsncontent %></textarea></td>
+						<td><textarea class="textarea" id="getbbsnstart" name="getbbsnstart" readonly><%= getbbsnstart %></textarea></td>
+						<td><textarea class="textarea" id="getbbsntarget" name="getbbsntarget" readonly><%= getbbsntarget %></textarea></td>
+						<!-- <button id="save" onclick="handleButtonOnclick()"> + </button> -->
+					</tr>
+				</tbody>
+			</table>
+			<button type="button" id="save" style="margin-bottom:15px; margin-right:30px" onclick="addRow()" class="btn btn-primary"> + </button>
+		</form>
+
+	
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="css/js/bootstrap.js"></script>
+	
+	<%
+	// <<<<<<<<<<<<< 금주 컨텐츠 >>>>>>>>>>>>>>>>>>>
+	List<String> b = new ArrayList<String>();
+	for(int i=0; i < 30;  i++) {
+		String a = "bbsContent";
+		b.add(request.getParameter(a+(i+5)));
+		b.removeAll(Arrays.asList("",null));
+	}
+	%>
+	<c:set var="content" value="<%= b %>"/>
+	<input type="hidden" id="value" value="<c:out value='${content}' />">
+	
+	<script>
+	var numliststr = "";
+	var numlist = [];
+	var value = [];
+	value = document.getElementById("value").value;
+	value = value.replace("[","");
+	value = value.replace("]","");
+	value = value.split(',');
+	
+	for(var i=0; i < value.length; i++ ) {
+		var content = value[i];		
+		var rows = content.split('\n').length;
+		numlist.push(rows); // content의 줄바꿈 갯수
+	}
+	numliststr = numlist.join(',');
+	</script>
+	
+	
+	<%
+	// <<<<<<<<<<<<<< 차주 컨텐츠 >>>>>>>>>>>>>>.
+	List<String> c = new ArrayList<String>();
+	for(int i=0; i < 30;  i++) {
+		String d = "bbsNContent";
+		c.add(request.getParameter(d+(i+2)));
+		c.removeAll(Arrays.asList("",null));
+	}
+	%>
+	<c:set var="ncontent" value="<%= c %>"/>
+	<input type="hidden" id="nvalue" value="<c:out value='${ncontent}' />">
+	
+	<script>
+	var nnumliststr = "";
+	var nnumlist = [];
+	var nvalue = [];
+	nvalue = document.getElementById("nvalue").value;
+	nvalue = nvalue.replace("[","");
+	nvalue = nvalue.replace("]","");
+	nvalue = nvalue.split(',');
+	
+	for(var i=0; i < nvalue.length; i++ ) {
+		var ncontent = nvalue[i];		
+		var nrows = ncontent.split('\n').length;
+		nnumlist.push(nrows); // content의 줄바꿈 갯수
+	}
+	nnumliststr=nnumlist.join(',');
+	</script>
+
+	<script>
+	$(window).on('load', function() {
+		document.getElementById("save").click();
+		
+		/* $('#post_item').submit(); */
+	});
+	
+	function addRow() {
+		var innerHtml = "";
+		innerHtml += '<td><textarea class="textarea" id="numlist" name="numlist" readonly>'+ numliststr +'</textarea></td>';
+		innerHtml += '<td><textarea class="textarea" id="nnumlist" name="nnumlist" readonly>'+ nnumliststr +'</textarea></td>';
+		
+		$('#bbsTable > tbody > tr:last').append(innerHtml);
+		$('#post_item').submit();
+	} 
+	</script>   
+	
 </body>
 </html>

@@ -1,4 +1,5 @@
-<%@page import="user.User"%>
+<%@page import="java.time.LocalDate"%>
+<%@page import="java.time.format.DateTimeFormatter"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.stream.Collectors"%>
 <%@page import="java.util.List"%>
@@ -20,9 +21,7 @@
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
 <link rel="stylesheet" href="css/index.css">
-<!-- // 폰트어썸 이미지 사용하기 -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<title>RMS</title>
+<title>Baynex 주간보고</title>
 </head>
 
 
@@ -35,19 +34,43 @@
 		if(session.getAttribute("id") != null){
 			id = (String)session.getAttribute("id");
 		}
-		if(id == null){
+		int week = 0; //기본은 0으로 할당
+		// 만약 파라미터로 넘어온 오브젝트 타입 'week'가 존재한다면
+		// 'int'타입으로 캐스팅을 해주고 그 값을 'week'변수에 저장한다
+		if(request.getParameter("week") != null){
+			week = Integer.parseInt(request.getParameter("week"));
+		}
+		
+		BbsDAO bbsDAO = new BbsDAO();
+		
+		// bbs 이력 확인
+		int confirm = bbsDAO.getBbsRecord(id);
+		
+		if(confirm != 1) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('로그인이 필요한 서비스입니다.')");
-			script.println("location.href='login.jsp'");
+			script.println("location.href='main.jsp'");
 			script.println("</script>");
 		}
+
+		// 유효한 글이라면 구체적인 정보를 'bbs'라는 인스턴스에 담는다
+		int bbsid = new BbsDAO().getMaxbbs(id);
+		Bbs bbs = new BbsDAO().getBbs(bbsid);
+		UserDAO user = new UserDAO();
+		
+		String DDline = bbs.getBbsDeadline();
+		//String DDline = "2022-10-24";
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		LocalDate date = LocalDate.parse(DDline, formatter);
+		date = date.plusWeeks(1); //일주일을 더하는 것.
+		
+		String rk = user.getRank((String)session.getAttribute("id"));
 		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
 		
 		UserDAO userDAO = new UserDAO();
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
 		List<String> works = new ArrayList<String>();
 		
@@ -63,19 +86,11 @@
 			}
 			
 			workSet = String.join("/",works);
-			
+
+
 		}
 		
 		String name = userDAO.getName(id);
-		
-		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
-		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
-		
 	%>
 
 	<c:set var="works" value="<%= works %>" />
@@ -105,8 +120,8 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbs.jsp">조회</a></li>
-							<li><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="bbs.jsp">조회</a></li>
+							<li class="active"><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
 							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
 						</ul>
@@ -116,7 +131,7 @@
 			
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
-				<li><a data-toggle="modal" href="#UserUpdateModal" style="color:#2E2E2E"><%= name %>(님)</a></li>
+				<li><a href="bbs.jsp" style="color:#2E2E2E"><%= name %>(님)</a></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle"
 						data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -132,9 +147,7 @@
 					<%
 					} else {
 					%>
-						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a>
-						
-						</li>
+						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					}
@@ -146,131 +159,7 @@
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
 	
-	<!-- 모달 영역! -->
-	   <div class="modal fade" id="UserUpdateModal" role="dialog">
-		   <div class="modal-dialog">
-		    <div class="modal-content">
-		     <div class="modal-header">
-		      <button type="button" class="close" data-dismiss="modal">×</button>
-		      <h3 class="modal-title" align="center">개인정보 수정</h3>
-		     </div>
-		     <!-- 모달에 포함될 내용 -->
-		     <form method="post" action="ModalUpdateAction.jsp" id="modalform">
-		     <div class="modal-body">
-		     		<div class="row">
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label">ID </label>
-		     				<input type="text" maxlength="20" class="form-control" readonly style="width:100%" id="updateid" name="updateid"  value="<%= id %>">
-		     			</div>
-		     			<div class="col-md-3">
-		     				<label class="col-form-label"> &nbsp; </label>
-		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
-						</div>
-						<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			
-		     			
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label"> Password </label>
-		     				<input type="password" maxlength="20" required class="form-control" style="width:100%" id="password" name="password" value="<%= password %>">
-		     			</div>
-		     			<div class="col-md-3">
-		     				<label class="col-form-label"> &nbsp; </label>
-		     				<i class="glyphicon glyphicon-eye-open" id="icon" style="right:20%; top:35px;" ></i>
-						</div>
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			
-		     			
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label">name </label>
-		     				<input type="text" maxlength="20" required class="form-control" style="width:100%" id="name" name="name"  value="<%= name %>">
-		     			</div>
-		     			<div class="col-md-3">
-		     				<label class="col-form-label"> &nbsp; </label>
-		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
-						</div>
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			
-		     			
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label">rank </label>
-		     				<input type="text" required class="form-control" data-toggle="tooltip" data-placement="bottom" title="직급 변경은 관리자 권한이 필요합니다." readonly style="width:100%" id="rank" name="rank"  value="<%= rank %>">
-		     			</div>
-		     			<div class="col-md-3">
-		     				<label class="col-form-label"> &nbsp; </label>
-		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
-						</div>
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			
-		     			
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-4 form-outline">
-		     				<label class="col-form-label">email </label>
-		     				<input type="text" maxlength="30" required class="form-control" style="width:100%" id="email" name="email"  value="<%= email[0] %>"> 
-		     			</div>
-		     			<div class="col-md-3" align="left" style="top:5px; right:20px">
-		     				<label class="col-form-label" > &nbsp; </label>
-		     				<div><i>@ s-oil.com</i></div>
-						</div>
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			
-		     			
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label">duty </label>
-		     				<input type="text" required class="form-control" readonly data-toggle="tooltip" data-placement="bottom" title="업무 변경은 관리자 권한이 필요합니다." style="width:100%" id="duty" name="duty" value="<%= workSet %>">
-		     			</div>
-		     			<div class="col-md-3">
-		     				<label class="col-form-label"> &nbsp; </label>
-		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
-						</div>
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     		</div>	
-		     </div>
-		     <div class="modal-footer">
-			     <div class="col-md-3" style="visibility:hidden">
-     			</div>
-     			<div class="col-md-6">
-			     	<button type="submit" class="btn btn-primary pull-left form-control" id="modalbtn" >수정</button>
-		     	</div>
-		     	 <div class="col-md-3" style="visibility:hidden">
-	   			</div>	
-		    </div>
-		    </form>
-		   </div>
-	  </div>
-	</div>
+	
 	
 	<!-- ********** 게시판 글쓰기 양식 영역 ********* -->
 		<div class="container">
@@ -295,9 +184,9 @@
 						<tbody id="tbody">
 							<tr>
 									<td colspan="2"> 
-									주간보고 명세서 <input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50" value="3.주간업무 실적 및 계획(AMS) - "></td>
+									주간보고 명세서 <input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50" value="<%= bbs.getBbsTitle().replaceAll(" ","&nbsp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("\n","<br>") %>"></td>
 									<td colspan="1"></td>
-									<td colspan="2">  주간보고 제출일 <input type="date" max="9999-12-31" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" ></td>
+									<td colspan="2">  주간보고 제출일 <input type="date" max="9999-12-31" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value="<%= date %>"></td>
 							</tr>
 									<tr>
 										<th colspan="5" style="background-color: #D4D2FF;" align="center">금주 업무 실적</th>
@@ -312,7 +201,7 @@
 									</tr>
 									
 									<tr align="center">
-										<td style="display:none"><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:auto; width:100%; border:none; overflow:auto" placeholder="구분/담당자"   readonly><%= workSet %><%= name %></textarea></td> 
+										<td style="display:none"><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:auto; width:100%; border:none; overflow:auto" placeholder="구분/담당자"   readonly><%= workSet %><%= bbs.getUserName() %></textarea></td> 
 									</tr>
 									<tr>
 										 <td>
@@ -382,8 +271,8 @@
 									 <textarea class="textarea" id="bbsNContent2" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsNContent2"></textarea>
 									 </div>
 								 </td>
-								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart2" ></td>
-								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNTarget2" class="form-control" placeholder="완료목표일" name="bbsNTarget2" oninput="this.value = this.value
+								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart2" ></td>
+								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget2" class="form-control" placeholder="완료목표일" name="bbsNTarget2" oninput="this.value = this.value
 										.replace(/[^0-9./.\s.%.-]/g, '')
 										.replace(/(\..*)\./g, '$1');"></td>		
 							</tr>
@@ -807,10 +696,6 @@
 	
 	
 	<script>
-	
-	</script>
-	
-	<script>
 		function addRow() {
 			var work = "";
 			var strworks ="";
@@ -834,7 +719,7 @@
 			 	//console.log(work[count]);
 			} 
 				var trCnt = $('#bbsTable tr').length;
-				if(trCnt <= 35) {
+				if(trCnt <= 32) {
 				//console.log(trCnt); // 버튼을 처음 눌렀을 때, 6 / 기본 5 -> + 누를 시, 1씩 증가
 	            var innerHtml = "";
 	            innerHtml += '<tr>';
@@ -920,52 +805,36 @@
 	</script>
 	
 	<script>
-		$(document).on("click","button[name=delNRow]", function() {
-			var trHtml = $(this).parent().parent();
-			trHtml.remove();
-		});
-		</script>
-		
-		
-		<!-- modal 내, password 보이기(안보이기) 기능 -->
-		<script>
-		$(document).ready(function(){
-		    $('#icon').on('click',function(){
-		    	console.log("hello");
-		        $('#password').toggleClass('active');
-		        if($('#password').hasClass('active')){
-		            $(this).attr('class',"glyphicon glyphicon-eye-close")
-		            $('#password').attr('type',"text");
-		        }else{
-		            $(this).attr('class',"glyphicon glyphicon-eye-open")
-		            $('#password').attr('type','password');
-		        }
-		    });
-		});
+	$(document).on("click","button[name=delNRow]", function() {
+		var trHtml = $(this).parent().parent();
+		trHtml.remove();
+	});
 	</script>
 	
-	
-	<!-- 모달 툴팁 -->
-	<script>
-		$(document).ready(function(){
-			$('[data-toggle="tooltip"]').tooltip();
-		});
-	</script>
-	
-	
-	<!-- 모달 submit -->
-	<script>
-	$('#modalbtn').click(function(){
-		$('#modalform').text();
-	})
-	</script>
-	
-	<!-- 모달 update를 위한 history 감지 -->
-	<script>
-	window.onpageshow = function(event){
-		if(event.persisted || (window.performance && window.performance.navigation.type == 2)){ //history.back 감지
-			location.reload();
-		}
+<%-- 	<%
+	List<String> b = new ArrayList<String>();
+	for(int i=0; i < 30;  i++) {
+		String a = "bbsContent";
+		b.add(request.getParameter(a+(i+5)));
 	}
-	</script>
+	%>
+	<c:set var="content" value="<%= b %>"/>
+	<input type="hidden" id="value" value="<c:out value='${content}' />">
+	
+	<script>
+	/* for(var i=0; i< 30; i++) {
+		var a = "bbsContent" + (i+5);
+		var value = []; 
+		value =	document.getElementById("bbsConetent5").value; // bbsContent(i)의 값 구하기
+		value.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
+		var rows = []; 
+		rows =	value.split('&#10;').length;
+		console.log(rows); 
+
+	} */
+	var value = document.getElementById("value").value;
+	var rows = value.split('&#10;').length;
+	console.log(rows); 
+	</script> --%>
+	
 </body>

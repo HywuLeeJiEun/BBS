@@ -88,9 +88,9 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbs.jsp">조회</a></li>
+							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
+							<li class="active"><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
 							<li><a href="signOn.jsp">승인(제출)</a></li>
 						</ul>
 					</li>
@@ -119,6 +119,13 @@
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					}
+					
+					
+					
+					
+					BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
+					String userName = "userName";
+					ArrayList<Bbs> list = bbsDAO.getNoneSignSearch(pageNumber, userName, name);
 					%>
 					</ul>
 				</li>
@@ -127,28 +134,48 @@
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
 	
-		
-		
-	<!-- ***********검색바 추가 ************* -->
+	
+	<%
+	if(list.isEmpty()) {
+		PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('미승인된 보고 목록이 없습니다.')");
+		script.println("location.href='bbs.jsp'");
+		//script.println("history.back()");
+		script.println("</script>");
+	%>
 	<div class="container">
-		<div class="row">
-			<form method="post" name="search" action="searchbbs.jsp">
-				<table class="pull-right">
-					<tr>
-						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
-								<option value="bbsDeadline">제출일</option>
-								<option value="bbsTitle">제목</option>
-						</select></td>
-						<td><input type="text" class="form-control"
-							placeholder="검색어 입력" name="searchText" maxlength="100"></td>
-						<td><button type="submit" style="margin:5px" class="btn btn-success">검색</button></td>
-					</tr>
+		<table class="table" style="text-align: center; cellpadding:50px;" >
+			<thead>
+				<tr valign="top" style="height:150px">
+				</tr>
+				<tr valign="bottom" style="height:150px">
+					<th colspan="5" style=" text-align: center; color:black ">미승인된 보고 목록이 없습니다. <br><br><br><br></th>
+				</tr>
 
-				</table>
-			</form>
-		</div>
+			</thead>
+		</table>
+		<button style="margin:5px" class="btn btn-info pull-right" onclick="location.href='bbs.jsp'">검색</button>
+	</div>
+	
+	<% 
+	} else {
+	%>
+		
+	<br>
+	<div class="container">
+		<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
+			<thead>
+				<tr>
+				</tr>
+				<tr>
+					<th colspan="5" style=" text-align: center; color:blue "> 승인되지 않은 보고만 수정/삭제가 가능합니다.</th>
+				</tr>
+			</thead>
+		</table>
 	</div>
 	<br>
+	
 	
 	
 	<!-- 게시판 메인 페이지 영역 시작 -->
@@ -168,10 +195,8 @@
 				</thead>
 				<tbody>
 					<%
-						BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
-						String userName = "userName";
-						ArrayList<Bbs> list = bbsDAO.getRkSearch(pageNumber, userName, name);
 						
+						// 미승인 (마감, 승인 제외)인 bbs만을 가져옴!
 						for(int i = 0; i < list.size(); i++){
 							
 							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
@@ -183,6 +208,7 @@
 
 							Date dldate = dateFormat.parse(dl);
 							Date today = dateFormat.parse(timenow);
+							
 					%>
 
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
@@ -190,9 +216,8 @@
 						<td> <%= list.get(i).getBbsDeadline() %> </td>
 
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
-						<td style="text-align: left">
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="update.jsp?bbsID=<%= list.get(i).getBbsID() %>">
+						<td style="text-align: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<a href="update.jsp?bbsID=<%= list.get(i).getBbsID() %>">
 							<%= list.get(i).getBbsTitle() %></a></td>
 						<td><%= list.get(i).getUserName() %></td>
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
@@ -229,19 +254,19 @@
 				}if(bbsDAO.nextPage(pageNumber + 1)){
 			%>
 				<a href="bbs.jsp?pageNumber=<%=pageNumber + 1 %>"
-					class="btn btn-success btn-arraw-left" id="next">다음</a>
+					id="next" class="btn btn-success btn-arraw-left">다음</a>
 			<%
 				}
 			%>
 			
 			<!-- 글쓰기 버튼 생성 -->
-			<a href="main.jsp" class="btn btn-info pull-right">작성</a>
+			<a href="bbs.jsp" class="btn btn-primary pull-right">전체 목록</a>
 		</div>
 	</div>
-	
-	
-	
 	<!-- 게시판 메인 페이지 영역 끝 -->
+	<%
+	}
+	%>
 	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -251,11 +276,9 @@
 			var value_str = document.getElementById('searchField');
 			
 		}
-		
-	
 	</script>
 	
-    <!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
+	<!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
 	<script>
 	var trCnt = $('#bbsTable tr').length; 
 	
@@ -263,6 +286,5 @@
 		$('#next').hide();
 	}
 	</script>
-	
 </body>
 </html>

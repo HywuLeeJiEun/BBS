@@ -322,7 +322,7 @@ public class BbsDAO {
 		      		+ " WHERE "+searchField.trim();
 		      try {
 		            if(searchText != null && !searchText.equals("") ){
-		                SQL +=" LIKE '%"+searchText.trim()+"%' order by bbsID desc limit ?,10";
+		                SQL +=" LIKE '%"+searchText.trim()+"%' order by BbsDeadline desc limit ?,10";
 		            }
 		            PreparedStatement pstmt=conn.prepareStatement(SQL);
 		            pstmt.setInt(1, (pageNumber-1) * 10);
@@ -360,7 +360,7 @@ public class BbsDAO {
 				      String SQL ="select * from bbs WHERE "+searchField.trim();
 				      try {
 				            if(searchText != null && !searchText.equals("") ){
-				                SQL +=" LIKE '%"+searchText.trim()+"%' order by bbsID desc limit ?,10";
+				                SQL +=" LIKE '%"+searchText.trim()+"%' order by bbsDeadline desc limit ?,10";
 				            }
 				            PreparedStatement pstmt=conn.prepareStatement(SQL);
 				            pstmt.setInt(1, (pageNumber-1) * 10);
@@ -392,6 +392,44 @@ public class BbsDAO {
 				      return list;
 				   }
 		
+				
+				//select * from (select * from bbs where userName like '%이지은%') a where a.sign="미승인" order by a.bbsDeadline ASC limit 0,10; 
+				// 검색 메소드 (일반 사용자용 -> '미승인' 만을 가져옴!)
+				public ArrayList<Bbs> getNoneSignSearch(int pageNumber, String searchField, String searchText){//특정한 리스트를 받아서 반환
+				      ArrayList<Bbs> list = new ArrayList<Bbs>();
+				      String SQL ="select * from (select * from bbs where userName like '%"+searchText.trim()+"%') a"
+				      		+ " WHERE a.sign='미승인' order by a.bbsDeadline ASC limit ?,10";
+				      try {
+				            PreparedStatement pstmt=conn.prepareStatement(SQL);
+				            pstmt.setInt(1, (pageNumber-1) * 10);
+							rs=pstmt.executeQuery();//select
+				         while(rs.next()) {
+				        	 Bbs bbs = new Bbs();
+							bbs.setBbsID(rs.getInt(1));
+							bbs.setBbsManager(rs.getString(2));
+							bbs.setBbsTitle(rs.getString(3));
+							bbs.setUserID(rs.getString(4));
+							bbs.setUserName(rs.getString(5));
+							bbs.setBbsDate(rs.getString(6));
+							bbs.setBbsContent(rs.getString(7));
+							bbs.setBbsStart(rs.getString(8));
+							bbs.setBbsTarget(rs.getString(9));
+							bbs.setBbsEnd(rs.getString(10));
+							bbs.setBbsNContent(rs.getString(11));
+							bbs.setBbsNStart(rs.getString(12));
+							bbs.setBbsNTarget(rs.getString(13));
+							bbs.setBbsAvailable(rs.getInt(14));
+							bbs.setBbsDeadline(rs.getString(15));
+							bbs.setBbsUpdate(rs.getString(16));
+							bbs.setSign(rs.getString(17));
+				            list.add(bbs);
+				         }         
+				      } catch(Exception e) {
+				         e.printStackTrace();
+				      }
+				      return list;
+				   }
+				
 		
 		// 취합 메소드 
 				public ArrayList<Bbs> getGathering(String searchField, String searchText){//특정한 리스트를 받아서 반환
@@ -615,6 +653,19 @@ public class BbsDAO {
 			}
 			
 			
+			// bbs의 Sign을 승인으로 변경함! (승인(제출)버튼 클릭시!)
+			public int SignAction(int bbsID) {
+				String sql = " update bbs set sign='승인' where bbsId=?";
+				 try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, bbsID); // bbsId 삽입
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				 return -1;
+			}
+
 						
 }
 

@@ -47,7 +47,7 @@
 		if(result == 1){
 			// 로그인에 성공하면 세션을 부여한다. 
 			session.setAttribute("id", user.getId());
-			session.setMaxInactiveInterval(60 * 60); 
+			//session.setMaxInactiveInterval(60 * 60); 
 			
 			
 			// bbs 이력 확인

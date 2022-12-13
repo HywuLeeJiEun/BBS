@@ -20,6 +20,7 @@
 <body>
 	<%
 		UserDAO user = new UserDAO();
+		BbsDAO bbsDAO = new BbsDAO();
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -35,8 +36,9 @@
 		String name = user.getName(id);
 		String rk = user.getRank((String)session.getAttribute("id"));
 	%>
-	<nav class="navbar navbar-default"> <!-- 네비게이션 -->
-		<div class="navbar-header"> 	<!-- 네비게이션 상단 부분 -->
+	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	<nav class="navbar navbar-default"> 
+		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
 			<button type="button" class="navbar-toggle collapsed"
 				data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
@@ -46,50 +48,30 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<!-- 상단 바에 제목이 나타나고 클릭하면 main 페이지로 이동한다 -->
-			<% 
-			BbsDAO bbsDAO = new BbsDAO();
-			int confirm = bbsDAO.getBbsRecord((String)session.getAttribute("id"));
-			
-			if(confirm == 1 ) {%>
-			<a class="navbar-brand" href="bbsUpdate.jsp">Baynex 주간보고</a>
-			<% } else { %>
-			<a class="navbar-brand" href="main.jsp">Baynex 주간보고</a>
-			<% } %>
+			<a class="navbar-brand" href="bbs.jsp">Report Management System</a>
 		</div>
+		
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<ul class="nav navbar-nav">
-			<% if(confirm == 1 ) { %>
-				<li><a href="bbsUpdate.jsp">주간보고</a></li>
-			<% } else { %>
-				<li><a class="navbar-brand" href="main.jsp">주간보고</a></li>
-			<% } %>
-				<li class="active"><a href="bbs.jsp">제출목록</a></li>
-			</ul>
+				<ul class="nav navbar-nav navbar-left">
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle"
+							data-toggle="dropdown" role="button" aria-haspopup="true"
+							aria-expanded="false">주간보고<span class="caret"></span></a>
+						<!-- 드랍다운 아이템 영역 -->	
+						<ul class="dropdown-menu">
+							<li class="active"><a href="bbs.jsp">조회</a></li>
+							<li><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
+							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
+						</ul>
+					</li>
+				</ul>
 			
-			<%
-				// 로그인 하지 않았을 때 보여지는 화면
-				if(id == null){
-			%>
+			
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-haspopup="true"
-						aria-expanded="false">접속하기<span class="caret"></span></a>
-					<!-- 드랍다운 아이템 영역 -->	
-					<ul class="dropdown-menu">
-						<li><a href="login.jsp">로그인</a></li>
-					</ul>
-				</li>
-			</ul>
-			<%
-				// 로그인이 되어 있는 상태에서 보여주는 화면
-				}else{
-			%>
-			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
-			<ul class="nav navbar-nav navbar-right">
+				<li><a href="bbs.jsp" style="color:#2E2E2E"><%= name %>(님)</a></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle"
 						data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -99,12 +81,13 @@
 					<%
 					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
 					%>
+						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
-					
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					} else {
 					%>
+						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					}
@@ -112,11 +95,9 @@
 					</ul>
 				</li>
 			</ul>
-			<%
-				}
-			%>
 		</div>
 	</nav>
+	<!-- 네비게이션 영역 끝 -->
 	<!-- 네비게이션 영역 끝 -->
 	
 		
@@ -179,6 +160,7 @@
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
+						<th style="background-color: #eeeeee; text-align: center;">승인</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -205,6 +187,7 @@
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
 							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>	
 						<td><%= list.get(i).getBbsUpdate() %></td>		
+						<td><%= list.get(i).getSign() %></td>
 					</tr>
 					<%
 						}

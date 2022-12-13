@@ -1,76 +1,104 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@page import="java.util.stream.Collectors"%>
+<%@page import="java.util.Date"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.util.List"%>
-<%@page import="org.apache.tomcat.util.buf.StringUtils"%>
-<%@page import="java.util.ArrayList"%>
 <%@page import="user.UserDAO"%>
-<%@page import="bbs.Bbs"%>
-<%@page import="java.io.PrintWriter"%>
+<%@page import="org.mariadb.jdbc.internal.failover.tools.SearchFilter"%>
+<%@page import="java.util.ArrayList"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ page import="java.io.PrintWriter" %>
 <%@ page import="bbs.Bbs" %>
 <%@ page import="bbs.BbsDAO" %>
-<% request.setCharacterEncoding("utf-8"); %>   
-
+<% request.setCharacterEncoding("utf-8"); %>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
-<link rel="stylesheet" href="css/index.css">
-<title>RMS</title>
+<title>Baynex 주간보고</title>
 </head>
+<body id="weekreport">
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 
 
-
-<body>
-	<!--  ********* 세션(session)을 통한 클라이언트 정보 관리 *********  -->
-	<%
+<%
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
 			id = (String)session.getAttribute("id");
 		}
-		if(id == null){
+		
+		// bbsID를 초기화 시키고
+		// 'bbsID'라는 데이터가 넘어온 것이 존재한다면 캐스팅을 하여 변수에 담는다
+		int bbsID = 0;
+		if(request.getParameter("bbsID") != null){
+			bbsID = Integer.parseInt(request.getParameter("bbsID"));
+		}
+		
+		// 만약 넘어온 데이터가 없다면
+		if(bbsID == 0){
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('로그인이 필요한 서비스입니다.')");
-			script.println("location.href='login.jsp'");
-			script.println("</script>");
+			script.println("alert('유효하지 않은 글입니다')");
+			script.println("location.href='bbs.jsp'");
+			script.println("</script");
 		}
+		
+		// 유효한 글이라면 구체적인 정보를 'bbs'라는 인스턴스에 담는다
+		BbsDAO bbsDAO = new BbsDAO();
+		Bbs bbs = new BbsDAO().getBbs(bbsID);
+		UserDAO user = new UserDAO();
+		String name = user.getName(id);
+
+		
+			// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			
+			String dl = bbsDAO.getDLS(bbsID);
+			if(dl.isEmpty()) { //삭제 되어 비어있다면,
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('게시글이 제거되거나 수정되었을 수 있습니다. 확인하여 주십시오.')");
+				script.println("history.back()");
+				script.println("</script>");
+			}
+			Date time = new Date();
+			String timenow = dateFormat.format(time);
+
+			Date dldate = dateFormat.parse(dl);
+			Date today = dateFormat.parse(timenow);
+			
+	
+	
 		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
-		String workSet;
-		
-		UserDAO userDAO = new UserDAO();
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-		List<String> works = new ArrayList<String>();
-		
-		if(code == null) {
-			workSet = "";
-		} else {
-			for(int i=0; i < code.size(); i++) {
+				String workSet;
 				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
-				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-			}
-			
-			workSet = String.join("/",works);
-			
-		}
-		
-		String name = userDAO.getName(id);
-	
-	%>
+				UserDAO userDAO = new UserDAO();
+				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+				List<String> works = new ArrayList<String>();
+				
+				if(code == null) {
+					workSet = "";
+				} else {
+					for(int i=0; i < code.size(); i++) {
+						
+						String number = code.get(i);
+						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+						String manager = userDAO.getManager(number);
+						works.add(manager); //즉, work 리스트에 모두 담겨 저장됨
+					}
+					
+					workSet = String.join("/",works);
 
-	<c:set var="works" value="<%= works %>" />
-	<input type="hidden" id="work" value="<c:out value='${works}'/>">
+
+				}
+				
+				String rk = userDAO.getRank((String)session.getAttribute("id"));
+	%>
 	
-     <!-- ************ 상단 네비게이션바 영역 ************* -->
+	
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -94,10 +122,10 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbs.jsp">조회</a></li>
-							<li><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="bbs.jsp">조회</a></li>
+							<li><a href="main.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
+							<li class="active"><a href="signOn.jsp">승인(제출)</a></li>
 						</ul>
 					</li>
 				</ul>
@@ -135,137 +163,158 @@
 	
 	
 	
-	<!-- ********** 게시판 글쓰기 양식 영역 ********* -->
-		<div class="container">
-			<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
-				<thead>
-					<tr>
-						<th colspan="5" style=" text-align: center; color:blue "></th>
-					</tr>
-				</thead>
-			</table>
-		</div>
-		
-		<div class="container">
-			<div class="row">
-				<form method="post" action="mainAction.jsp">
-					<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
-						<thead>
-							<tr>
-								<th colspan="5" style="background-color: #eeeeee; text-align: center;">주간보고 작성</th>
-							</tr>
-						</thead>
-						<tbody id="tbody">
-							<tr>
-									<td colspan="2"> 
-									주간보고 명세서 <input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50" value="3.주간업무 실적 및 계획(AMS) - "></td>
-									<td colspan="1"></td>
-									<td colspan="2">  주간보고 제출일 <input type="date" max="9999-12-31" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" ></td>
-							</tr>
-									<tr>
-										<th colspan="5" style="background-color: #D4D2FF;" align="center">금주 업무 실적</th>
-									</tr>
-									<tr style="background-color: #FFC57B;">
-										<!-- <th width="6%">|  담당자</th> -->
-										<th width="50%">| &nbsp; 업무내용</th>
-										<th width="10%">| &nbsp; 접수일</th>
-										<th width="10%">| &nbsp; 완료목표일</th>
-										<th width="10%">| &nbsp; 진행율<br>&nbsp;&nbsp;&nbsp;&nbsp;/완료일</th>
-										<th></th>
-									</tr>
-									
-									<tr align="center">
-										<td style="display:none"><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:auto; width:100%; border:none; overflow:auto" placeholder="구분/담당자"   readonly><%= workSet %><%= name %></textarea></td> 
-									</tr>
-									<tr>
-										 <td>
-										 	<div style="float:left">
-											 <select name="jobs5" id="jobs5" style="height:45px;">
-													 <option> [시스템] 선택 </option>
-													 <%
-													 for(int count=0; count < works.size(); count++) {
-													 %>
-													 	<option> <%= works.get(count) %> </option>
-													 <%
-													 }
-													 %>
-													 <option> 기타 </option>
-												 </select>
-											 </div>
-											 <div style="float:left">
-											 <textarea class="textarea" id="bbsContent" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsContent5"></textarea>
-											 </div>
-										 </td>
-										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart5" ></td>
-										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget" class="form-control" placeholder="완료목표일" name="bbsTarget5" oninput="this.value = this.value
-												.replace(/[^0-9./.\s.%.-]/g, '')
-												.replace(/(\..*)\./g, '$1');"></td>		
-										 <td><textarea class="textarea" id="bbsEnd" required style="height:45px; width:100%; border:none;"  placeholder="진행율/완료일" name="bbsEnd5" oninput="this.value = this.value
+<div class="container-fluid">
+<table id="JR_PAGE_ANCHOR_0_1" role="none" class="jrPage" data-jr-height="595" style="empty-cells: show; width: 90%; border-collapse: collapse; background-color: white;">
+<tr role="none" valign="top" style="height:0">
+<td style="width:70px"></td>
+<td style="width:3px"></td>
+<td style="width:1px"></td>
+<td style="width:46px"></td>
+<td style="width:238px"></td>
+<td style="width:1px"></td>
+<td style="width:50px"></td>
+<td style="width:50px"></td>
+<td style="width:19px"></td>
+<td style="width:31px"></td>
+<td style="width:4px"></td>
+<td style="width:47px"></td>
+<td style="width:1px"></td>
+<td style="width:223px"></td>
+<td style="width:50px"></td>
+<td style="width:46px"></td>
+<td style="width:4px"></td>
+<td style="width:1px"></td>
+<td style="width:16px"></td>
+</tr>
+<tr valign="top" style="height:23px">
+<td colspan="24">
+</td>
+</tr>
+<tr valign="top" style="height:30px">
+<td>
+</td>
+<td colspan="14" style="text-indent: 0px; text-align: left;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 24px; line-height: 2; font-weight: bold;"><%= bbs.getBbsTitle() %></span></td>
+<td colspan="10">
+</td>
+</tr>
+<tr valign="top" style="height:5px">
+<td>
+</td>
+<td colspan="15" style="border-top: 1px solid #000000; ">
+</td>
+<td colspan="3">
+</td>
+</tr>
+<tr valign="top" style="height:9px">
+<td colspan="19">
+</td>
+</tr>
+<tr valign="top" style="height:30px">
+<td colspan="3">
+</td>
+<td colspan="7" style="background-color: #C7CDFD; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 20px; line-height: 1.3300781; font-weight: bold;">금주 업무 실적</span></td>
+<td>
+</td>
+<td colspan="7" style="background-color: #C7CDFD; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 20px; line-height: 1.3300781; font-weight: bold;">차주 업무 계획</span></td>
+<td>
+</td>
+</tr>
+<tr valign="top" style="height:3px">
+<td colspan="19">
+</td>
+</tr>
+
+<tr valign="top" style="height:37px">
+<td colspan="2">
+</td>
+<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">구분/<br/>담당자</span></td>
+<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">업무 내용</span></td>
+<td style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">접수일</span></td>
+<td style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">완료<br/>목표일</span></td>
+<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">진행율<br/>완료일</span></td>
+<td>
+</td>
+<td style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">구분/<br/>담당자</span></td>
+<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">업무 내용</span></td>
+<td style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">접수일</span></td>
+<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">완료<br/>목표일</span></td>
+<td colspan="2">
+</td>
+</tr>
+
+<!-- for문을 통해 출력 -->
+
+<tr valign="top" align="center">
+	<td colspan="2">
+	</td>
+   	 <td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" id="bbsManager" name="bbsManager" style="resize:none; height:180px; width:100%; border:none; overflow:auto; vertical-align:top; text-align: center;" placeholder="구분/담당자"  readonly><%= bbs.getBbsManager() %></textarea></td>
+	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
+	<textarea class="textarea" id="bbsContent" required style="resize:none; height:180px;width:100%; border:none;  " placeholder="업무내용" name="bbsContent"><%= bbs.getBbsContent() %></textarea></td>
+	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" id="bbsStart" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsStart"  oninput="this.value = this.value
+												.replace(/[^0-9./.\s.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
+												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsStart() %></textarea></td>
+	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" id="bbsTarget" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="완료목표일" name="bbsTarget" oninput="this.value = this.value
+												.replace(/[^0-9./.\s.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
+												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsTarget() %></textarea></td>
+	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" id="bbsEnd" required style="resize:none; height:180px; width:100%; border:none; text-align: center;"  placeholder="진행율/완료일" name="bbsEnd" oninput="this.value = this.value
 												.replace(/[^0-9./.\s.%.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
-												.replace(/(\..*)\./g, '$1');"></textarea></td>
-												</tr>
-									</tbody>
-								</table>
-									<div id="wrapper" style="width:100%; text-align: center;">
-										<button type="button" style="margin-bottom:15px; margin-right:30px" onclick="addRow()" class="btn btn-primary"> + </button>
-									</div>	 			
+												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsEnd() %></textarea></td>
+	<td>
+	</td>
+	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" style="resize:none; height:180px; width:100%; border:none; overflow:auto; text-align: center;" placeholder="구분/담당자"   readonly><%= bbs.getBbsManager() %></textarea></td>
+	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
+	<textarea class="textarea" required id="bbsNContent" style="resize:none; height:180px;width:100%; border:none; " placeholder="업무내용" name="bbsNContent"><%= bbs.getBbsNContent() %></textarea></td>
+	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" required id="bbsNStart" style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsNStart"  oninput="this.value = this.value
+												.replace(/[^0-9./.\s.-]/g, '')
+												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsNStart() %></textarea></td>
+	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
+	<textarea class="textarea" required id="bbsNTarget" style="resize:none; height:180px; width:100%; border:none; text-align: center; " placeholder="완료목표일" name="bbsNTarget" oninput="this.value = this.value
+												.replace(/[^0-9./.\s.-]/g, '')
+												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsNTarget() %></textarea></td>
+	<td colspan="2">
+	
+	</td>
+</tr>
+<tr  style="height:80px">
+	<td colspan="15" style="right-margin:50px;">
+		<a href="signOn.jsp" style="margin-left:130px;" class="btn btn-primary pull-right">목록</a>
+	</td>
+	<td>
+		<button class="btn btn-success pull-right" id="<%= bbs.getBbsID() %>" onclick="signOn_click(this.id);"> 승인 </button>
+	</td>
+	<td>
+		<%-- <a class="btn btn-success pull-right" href="ppt.jsp?deadLine=<%= list.get(0).getBbsDeadline() %>">PPTX</a> --%>
+	</td>
+</tr>
+<tr valign="top" style="height:30px">
+<td>
+</td>
+</tr>
+</table>
+</div>
 
-
-				<!-- 차주 업무 계획  -->
-				<table class="table" id="bbsNTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
-				<thead>
-				</thead>
-				<tbody id="tbody">
-							<tr>
-								<th colspan="5" style="background-color: #D4D2FF;" align="center">차주 업무 계획</th>
-							</tr>
-							<tr style="background-color: #FFC57B;">
-								<th width="50%">| &nbsp; 업무내용</th>
-								<th width="10%">| &nbsp; 접수일</th>
-								<th width="10%">| &nbsp; 완료목표일</th>
-								<th></th>
-								<th></th>
-							</tr>
-							<tr>
-								 <td>
-								 	<div style="float:left">
-									 <select name="jobs2" id="jobs2" style="height:45px;">
-											 <option> [시스템] 선택 </option>
-											 <%
-											 for(int count=0; count < works.size(); count++) {
-											 %>
-											 	<option> <%= works.get(count) %> </option>
-											 <%
-											 }
-											 %>
-											 <option> 기타 </option>
-										 </select>
-									 </div>
-									 <div style="float:left">
-									 <textarea class="textarea" id="bbsNContent2" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsNContent2"></textarea>
-									 </div>
-								 </td>
-								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart2" ></td>
-								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNTarget2" class="form-control" placeholder="완료목표일" name="bbsNTarget2" oninput="this.value = this.value
-										.replace(/[^0-9./.\s.%.-]/g, '')
-										.replace(/(\..*)\./g, '$1');"></td>		
-							</tr>
-							</tbody>
-						</table>
-							<div id="wrapper" style="width:100%; text-align: center;">
-								<button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" onclick="addNRow()" class="btn btn-primary"> + </button>
-								<!-- 저장 버튼 생성 -->
-								<button type="submit" id="save" style="margin-bottom:50px" class="btn btn-primary pull-right"> 저장 </button>									
-							</div>					
-				</form>
-			</div>
-		</div>
-
-
-	<!-- 부트스트랩 참조 영역 -->
+<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>
-	<script>
+ 	<script>
 		// 자동 높이 확장 (textarea)
 		$("textarea").on('input keyup keydown focusin focusout blur mousemove', function() {
 			var offset = this.offsetHeight - this.clientHeight;
@@ -275,9 +324,9 @@
 			$(this).on('keyup input keydown focusin focusout blur mousemove', Document ,function() {resizeTextarea(this); });
 			
 		});
-	</script>
+	</script> 
 	
-	<!-- <script>
+	<script>
 		//textarea 접수일 ... 유효성 검사
 		$(document.getElementById("bbsStart")).on('input', function() {
 			// ### 접수일 처리
@@ -658,161 +707,16 @@
 		$("textarea").scrollTop(sdown);
 	};
 	</script>
-	<script>
-	function textRe() {
-		document.getElementById("njobs").value="담당 업무 선택";
-		document.getElementById('ncontent_add').value="";
-		document.getElementById('nstart_add').value="";
-		document.getElementById('ntarget_add').value="";
-		document.getElementById('nend_add').value="";
-	}
-	</script> -->
-	
-	
-	<script>
-	
-	</script>
-	
-	<script>
-		function addRow() {
-			var work = "";
-			var strworks ="";
-			
-			work = document.getElementById("work").value;
-			work = work.replace("[","");
-			work = work.replace("]","");
-			work = work.replace(/\n/g,"");
-			work = work.split(',');
-			
-			/* console.log(work); 
-			console.log(work.length);  */
-			
-			// 테이블 개수 구하기
-			
-			
-			for(var count=0; count < work.length; count++) {
-				if(work[count]!="") {
-					strworks += "<option>"+work[count]+ "</option>"
-				}
-			 	//console.log(work[count]);
-			} 
-				var trCnt = $('#bbsTable tr').length;
-				if(trCnt <= 35) {
-				//console.log(trCnt); // 버튼을 처음 눌렀을 때, 6 / 기본 5 -> + 누를 시, 1씩 증가
-	            var innerHtml = "";
-	            innerHtml += '<tr>';
-	            innerHtml += '    <td>';
-            	innerHtml += '<div style="float:left">';
-	            innerHtml += '     <select name="jobs'+Number(trCnt)+'" id="jobs'+Number(trCnt)+'" style="height:45px;">';
-	            innerHtml += '			<option> [시스템] 선택 </option>';
-	            innerHtml += strworks; 
-	            innerHtml += '  <option> 기타 </option>';
-	            innerHtml += ' </select>';
-	            innerHtml += ' </div>';
-	            innerHtml += '  <div style="float:left">';
-	            innerHtml += ' <textarea class="textarea" id="bbsContent'+Number(trCnt)+'" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsContent'+Number(trCnt)+'"></textarea>';
-	            innerHtml += '  </div> </td>';
-	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart'+Number(trCnt)+'" class="form-control" placeholder="접수일" name="bbsStart'+Number(trCnt)+'" ></td>';
-	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+Number(trCnt)+'" class="form-control" placeholder="완료목표일" name="bbsTarget'+Number(trCnt)+'" ></td>';
-	            innerHtml += '  <td><textarea class="textarea" id="bbsEnd'+Number(trCnt)+'" required style="height:45px; width:100%; border:none;"  placeholder="진행율/완료일" name="bbsEnd'+Number(trCnt)+'" ></textarea></td>'; 
-	            innerHtml += '    <td>';
-	            innerHtml += '<button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button>';
-	            innerHtml += '    </td>';
-	            innerHtml += '</tr>'; 
-	            
-	            $('#bbsTable > tbody:last').append(innerHtml);
-				} else {
-					alert("업무 예정은 최대 30개를 넘을 수 없습니다.");
-				}
-		}
-	</script>
-	
-	<script>
-	$(document).on("click","button[name=delRow]", function() {
-		var trHtml = $(this).parent().parent();
-		trHtml.remove();
-	});
-	</script>
-	
-	
-	<script>
-		function addNRow() {
-			var work = "";
-			var strworks ="";
-			
-			work = document.getElementById("work").value;
-			work = work.replace("[","");
-			work = work.replace("]","");
-			work = work.replace(/\n/g,"");
-			work = work.split(',');
-				
-			for(var count=0; count < work.length; count++) {
-				if(work[count]!="") {
-					strworks += "<option>"+work[count]+ "</option>"
-				}
-			} 
-				var trNCnt = $('#bbsNTable tr').length;
-				if(trNCnt <= 32) {
-				//console.log(trNCnt); // 버튼을 처음 눌렀을 때, 3 / 기본 2 -> + 누를 시, 1씩 증가
-	            var innerHtml = "";
-	            innerHtml += '<tr>';
-	            innerHtml += '    <td>';
-            	innerHtml += '<div style="float:left">';
-	            innerHtml += '     <select name="jobs'+Number(trNCnt)+'" id="jobs'+Number(trNCnt)+'" style="height:45px;">';
-	            innerHtml += '			<option> [시스템] 선택 </option>';
-	            innerHtml += strworks; 
-	            innerHtml += '  <option> 기타 </option>';
-	            innerHtml += ' </select>';
-	            innerHtml += ' </div>';
-	            innerHtml += '  <div style="float:left">';
-	            innerHtml += ' <textarea class="textarea" id="bbsNContent'+Number(trNCnt)+'" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsNContent'+Number(trNCnt)+'"></textarea>';
-	            innerHtml += '  </div> </td>';
-	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNStart'+Number(trNCnt)+'" class="form-control" placeholder="접수일" name="bbsNStart'+Number(trNCnt)+'" ></td>';
-	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget'+Number(trNCnt)+'" class="form-control" placeholder="완료목표일" name="bbsNTarget'+Number(trNCnt)+'" ></td>';
-	            innerHtml += '<td></td>'
-	            innerHtml += '<td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:100px" id="delRow" name="delNRow" class="btn btn-danger"> 삭제 </button>';
-	            innerHtml += '    </td>';
-	            innerHtml += '</tr>'; 
-	            
-	            $('#bbsNTable > tbody:last').append(innerHtml);
-				} else {
-					alert("업무 예정은 최대 30개를 넘을 수 없습니다.");
-				}
 
-		}
-	</script>
-	
-	<script>
-	$(document).on("click","button[name=delNRow]", function() {
-		var trHtml = $(this).parent().parent();
-		trHtml.remove();
-	});
-	</script>
-	
-<%-- 	<%
-	List<String> b = new ArrayList<String>();
-	for(int i=0; i < 30;  i++) {
-		String a = "bbsContent";
-		b.add(request.getParameter(a+(i+5)));
-	}
-	%>
-	<c:set var="content" value="<%= b %>"/>
-	<input type="hidden" id="value" value="<c:out value='${content}' />">
-	
-	<script>
-	/* for(var i=0; i< 30; i++) {
-		var a = "bbsContent" + (i+5);
-		var value = []; 
-		value =	document.getElementById("bbsConetent5").value; // bbsContent(i)의 값 구하기
-		value.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
-		var rows = []; 
-		rows =	value.split('&#10;').length;
-		console.log(rows); 
 
-	} */
-	var value = document.getElementById("value").value;
-	var rows = value.split('&#10;').length;
-	console.log(rows); 
-	</script> --%>
+	<script>
+	function signOn_click(clicked_id) {
+		var trCnt = $('#bbsTable tr').length; 
+		//bbsID를 가져와 작업을 진행.
+		location.href="signOnAction.jsp?bbsID="+clicked_id+"&trCnt="+trCnt;
+	}
+	</script>
+	
 	
 </body>
+</html>

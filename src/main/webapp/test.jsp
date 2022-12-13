@@ -48,33 +48,14 @@
 		}
 		int bbsID = 1;
 		
-		// 유효한 글이라면 구체적인 정보를 'bbs'라는 인스턴스에 담는다
-				BbsDAO bbsDAO = new BbsDAO();
-				
-				UserDAO user = new UserDAO();
-				
-				
-				String del = bbsDAO.getActionDeleteCheck(bbsID);
-				//수정자가 있는지 확인함.
-				int active = bbsDAO.getActive(bbsID); // 0이라면 없음, 1이라면 있음! (수정자가)
-				if(active == 0) {
-					bbsDAO.getActiveplus(1, bbsID); //숫자를 1로 변경함.
-				} else if (active == -1){
-					bbsDAO.getActiveRow(bbsID); //row를 추가하며 active를 1로 변경함.
-				}else { // 1이거나, -1 일때,
-					PrintWriter script = response.getWriter();
-					script.println("<script>");
-					script.println("alert('현재 다른 사용자가 수정중입니다.')");
-					script.println("history.back()");
-					script.println("</script");
-				}
+	
 
 	%>
 	
 	
 
-<a><%= active %></a>
-<a>(<%= del %>)</a>
+<%-- <a><%= active %></a>
+<a>(<%= del %>)</a> --%>
 
 
 </body>

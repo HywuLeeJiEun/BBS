@@ -60,7 +60,7 @@ if(id != null){
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="update.jsp">수정/삭제</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
 							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
 						</ul>
 					</li>

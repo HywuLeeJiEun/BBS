@@ -73,6 +73,7 @@ public class UserDAO { //DAO : data access object
 			return ""; //데이터베이스 오류
 		}
 		
+
 		
 		// 사용자 담당업무 출력을 위한 메소드
 		public String getManager(String code) {
@@ -248,7 +249,7 @@ public class UserDAO { //DAO : data access object
 					return ""; //데이터베이스 오류
 				}
 		
-		//manager 삭제 또는 추가 기능 구현 (Update)
+			//manager 삭제 또는 추가 기능 구현 (Update)
 			public int UpdateManager(String codeNumber, String name) {
 				String sql = "update user set manager=? where name=?";
 				try {
@@ -261,5 +262,24 @@ public class UserDAO { //DAO : data access object
 				}
 				return -1;
 			}
+			
+			
+			//개인정보 수정
+			public int UpdateUser(String password, String name, String email, String id) {
+				String sql = "update user set password=?,name=?,email=? where id=?";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, password);
+					pstmt.setString(2, name);
+					pstmt.setString(3, email);
+					pstmt.setString(4, id);
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return -1; // 데이터베이스 오류
+			}
+			
+			
 		
 }

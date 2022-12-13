@@ -86,7 +86,6 @@
 				script.println("</script>");
 			// 글 삭제가 정상적으로 실행되면 알림창을 띄우고 게시판 메인으로 이동한다
 			}else {
-				bbsDAO.getActiveout(bbsID);
 				PrintWriter script = response.getWriter();
 				script.println("<script>");
 				script.println("alert('정상적으로 보고가 제거 되었습니다.')");

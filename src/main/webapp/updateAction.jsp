@@ -103,7 +103,6 @@
 				// 글 수정이 정상적으로 실행되면 알림창을 띄우고 게시판 메인으로 이동한다
 				}else {
 					// Update 제한을 풀어둠!! (수정이 완료되면)
-					bbsDAO.getActiveout(bbsID);
 					PrintWriter script = response.getWriter();
 					script.println("<script>");
 					script.println("alert('보고가 정상적으로 수정되었습니다.')");
