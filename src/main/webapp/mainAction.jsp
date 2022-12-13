@@ -66,78 +66,98 @@
 		List<String> bbsncontent = new ArrayList<String>();
 		List<String> bbsnstart = new ArrayList<String>();
 		List<String> bbsntarget = new ArrayList<String>();
-
 		
-		for(int i=0; i< 30; i++) {
+		// 몇번 반복하는지!
+		String trCnt = request.getParameter("trCnt");
+		String trNCnt = request.getParameter("trNCnt");
+		
+		
+		for(int i=5; i< Integer.parseInt(trCnt); i++) { //trCnt 개수만큼 반복 
 			//금주 업무 내용 + select box
 			String a = "bbsContent";
 			String jobs = "jobs";
 			// -[담당업무] CONTENT 내용~ 으로 나오도록 함.
-			if(request.getParameter(a+(i+5)) != null) { // 값이 비어있지 않다면,
-				if(!request.getParameter(jobs+(i+5)).contains("시스템") && !request.getParameter(jobs+(i+5)).contains("기타")) { //시스템이나 기타가 아니라면,
-			bbscontent.add("- ["+ request.getParameter(jobs+(i+5)) +"] " + request.getParameter(a+(i+5)));
+			if(request.getParameter(a+((i-5)+5)) != null) { // 값이 비어있지 않다면,
+				if(!request.getParameter(jobs+((i-5)+5)).contains("시스템") && !request.getParameter(jobs+((i-5)+5)).contains("기타")) { //시스템이나 기타가 아니라면,
+			bbscontent.add("- ["+ request.getParameter(jobs+((i-5)+5)) +"] " + request.getParameter(a+(i+5)));
 				}else {
-					bbscontent.add("- " + request.getParameter(a+(i+5)));
+					bbscontent.add("- " + request.getParameter(a+((i-5)+5)));
 				}
 			} else {
-			bbscontent.add(request.getParameter(a+(i+5)));
-			bbscontent.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
+			bbscontent.add(request.getParameter(a+((i-5)+5)));
+			//bbscontent.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
 			}
 			getbbscontent = String.join("&#10;&#10;",bbscontent); // 각 배열 요소마다 줄바꿈 하여 넣음.
 			getbbscontent = getbbscontent.replace("\r\n","&#10;"); // String 내부의 줄바꿈을 표현
 			
 			//금주 접수일
 			String b = "bbsStart";
-			bbsstart.add(request.getParameter(b+(i+5)));
-			bbsstart.removeAll(Arrays.asList("",null));
+			bbsstart.add(request.getParameter(b+((i-5)+5)));
+			//bbsstart.removeAll(Arrays.asList("",null));
 			getbbsstart = String.join(",",bbsstart);
 			getbbsstart = getbbsstart.replace("\r\n","&#10;");
 			
-			//금주 완료 목표일
+			//금주 완료 목표일 (null)
 			String c = "bbsTarget";
-			bbstarget.add(request.getParameter(c+(i+5)));
-			bbstarget.removeAll(Arrays.asList("",null));
+			if(request.getParameter(c+((i-5)+5)).isEmpty() || request.getParameter(c+((i-5)+5)) == null) {
+				bbstarget.add("[보류]");
+			} else {
+				bbstarget.add(request.getParameter(c+((i-5)+5)));
+			}
+			//bbstarget.removeAll(Arrays.asList("",null));
 			getbbstarget = String.join(",",bbstarget);
 			getbbstarget = getbbstarget.replace("\r\n","&#10;"); 
 			
-			//금주 진행율/완료일
+			//금주 진행율/완료일 (null)
 			String d = "bbsEnd";
-			bbsend.add(request.getParameter(d+(i+5)));
-			bbsend.removeAll(Arrays.asList("",null));
+			if(request.getParameter(d+((i-5)+5)).isEmpty() || request.getParameter(d+((i-5)+5)) == null) {
+				bbsend.add("[보류]");
+			} else {
+			bbsend.add(request.getParameter(d+((i-5)+5)));
+			}
+			//bbsend.removeAll(Arrays.asList("",null));
 			getbbsend = String.join(",",bbsend);
 			getbbsend = getbbsend.replace("\r\n","&#10;");
 			
+			
+		}
+		
+		for(int i=2; i< Integer.parseInt(trNCnt); i++) { //trNCnt 개수만큼 반복 
 			// << 차주 >> 
+			String jobs = "jobs";
 			//차주 업무 내용
 			String e = "bbsNContent";
-			if(request.getParameter(e+(i+2)) != null) {
-				if(!request.getParameter(jobs+(i+2)).contains("시스템") && !request.getParameter(jobs+(i+2)).contains("기타")) {
-			bbsncontent.add("- ["+ request.getParameter(jobs+(i+2)) + "] " + request.getParameter(e+(i+2)));
+			if(request.getParameter(e+((i-2)+2)) != null) {
+				if(!request.getParameter(jobs+((i-2)+2)).contains("시스템") && !request.getParameter(jobs+((i-2)+2)).contains("기타")) {
+			bbsncontent.add("- ["+ request.getParameter(jobs+((i-2)+2)) + "] " + request.getParameter(e+((i-2)+2)));
 				} else {
-					bbsncontent.add("- " + request.getParameter(e+(i+2)));
+					bbsncontent.add("- " + request.getParameter(e+((i-2)+2)));
 				}
 			} else {
-				bbsncontent.add(request.getParameter(e+(i+2)));
-				bbsncontent.removeAll(Arrays.asList("",null));
+				bbsncontent.add(request.getParameter(e+((i-2)+2)));
+				//bbsncontent.removeAll(Arrays.asList("",null));
 			}
 			getbbsncontent = String.join("&#10;&#10;",bbsncontent);
 			getbbsncontent = getbbsncontent.replace("\r\n","&#10;");
 			
 			//차주 접수일
 			String f = "bbsNStart";
-			bbsnstart.add(request.getParameter(f+(i+2)));
-			bbsnstart.removeAll(Arrays.asList("",null));
+			bbsnstart.add(request.getParameter(f+((i-2)+2)));
+			//bbsnstart.removeAll(Arrays.asList("",null));
 			getbbsnstart = String.join(",",bbsnstart);
 			getbbsnstart = getbbsnstart.replace("\r\n","&#10;"); 
 			
 			
-			//차주 완료 목표일
+			//차주 완료 목표일 (null)
 			String g = "bbsNTarget";
-			bbsntarget.add(request.getParameter(g+(i+2)));
-			bbsntarget.removeAll(Arrays.asList("",null));
+			if(request.getParameter(g+((i-2)+2)).isEmpty() || request.getParameter(g+((i-2)+2)) == null){
+				bbsntarget.add("[보류]");
+			}else {
+				bbsntarget.add(request.getParameter(g+((i-2)+2)));
+			}
+			//bbsntarget.removeAll(Arrays.asList("",null));
 			getbbsntarget = String.join(",",bbsntarget);
 			getbbsntarget = getbbsntarget.replace("\r\n","&#10;"); 
-			
 		}
 		
 	%>
@@ -165,7 +185,7 @@
 	
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>
-	
+ 	
 	<%
 	// <<<<<<<<<<<<< 금주 컨텐츠 >>>>>>>>>>>>>>>>>>>
 	List<String> b = new ArrayList<String>();
@@ -241,6 +261,9 @@
 		$('#post_item').submit();
 	} 
 	</script>   
-	
+
+	 
+	 <a> <%= trCnt %> </a>
+	 <a> <%= trNCnt %> </a>
 </body>
 </html>

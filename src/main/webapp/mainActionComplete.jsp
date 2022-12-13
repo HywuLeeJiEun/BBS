@@ -47,7 +47,6 @@
 			script.println("</script>");
 		}
 		
-		
 		// 담을 데이터 가져오기 (get이 없으면 배열, get 이 있다면 string)
 		String manager = request.getParameter("manager");
 		String title = request.getParameter("title");
@@ -65,18 +64,22 @@
 		
 		
 		// 배열로 만들기
+		String[] numarray = numlist.split(",");
+		String[] nnumarray = nnumlist.split(",");
+		
 		String [] getbbsstart = bbsstart.split(",");
 		String [] getbbstarget = bbstarget.split(",");
 		String[] getbbsend = bbsend.split(",");
 		String[] getbbsnstart = bbsnstart.split(",");
 		String[] getbbsntarget = bbsntarget.split(",");
 		
-		String[] numarray = numlist.split(",");
-		String[] nnumarray = nnumlist.split(",");
-		
-		
-		//금주 업무 실적 줄바꿈
+	//금주 업무 실적 줄바꿈
 		for(int i=0; i < numarray.length; i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
+			
+			if(getbbstarget[i].isEmpty() || getbbstarget[i] == null) {
+				getbbstarget[i] += "[보류]"; // 줄바꿈 추가
+			}
+		
 			for(int j=0; j < Integer.parseInt(numarray[i]); j++) { //줄바꿈의 개수만큼
 				getbbsstart[i] += "&#10;"; // 줄바꿈 추가
 				getbbstarget[i] += "&#10;"; // 줄바꿈 추가
@@ -88,6 +91,7 @@
 		for(int i=0; i < nnumarray.length; i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
 			for(int j=0; j < Integer.parseInt(nnumarray[i]); j++) { //줄바꿈의 개수만큼
 				getbbsnstart[i] += "&#10;"; // 줄바꿈 추가
+				
 				getbbsntarget[i] += "&#10;"; // 줄바꿈 추가
 			}
 		}
@@ -131,7 +135,7 @@
 			script.println("location.href='bbsUpdate.jsp'");
 			script.println("</script>");
 			} 
-		}  
+		}   
 		
 	%>
 
