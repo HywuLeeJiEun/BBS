@@ -93,7 +93,7 @@
 				String Staticemail = user.getEmail();
 				String[] email = Staticemail.split("@");
 		
-	%>
+	%>p`	
 	
 	 <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
