@@ -68,8 +68,21 @@
 		List<String> bbsntarget = new ArrayList<String>();
 		
 		// 몇번 반복하는지!
-		String trCnt = request.getParameter("trCnt");
-		String trNCnt = request.getParameter("trNCnt");
+		String trCnt = null;
+		if(request.getParameter("trCnt") != null){
+			trCnt = request.getParameter("trCnt");
+		} 
+		if(trCnt == null) {
+			trCnt = "6";
+		}
+		
+		String trNCnt = null;
+		if(request.getParameter("trNCnt") != null){
+			trNCnt = request.getParameter("trNCnt");
+		}
+		if(trNCnt == null) {
+			trNCnt = "3";
+		}
 		
 		
 		for(int i=5; i< Integer.parseInt(trCnt); i++) { //trCnt 개수만큼 반복 
@@ -90,19 +103,25 @@
 			getbbscontent = String.join("&#10;&#10;",bbscontent); // 각 배열 요소마다 줄바꿈 하여 넣음.
 			getbbscontent = getbbscontent.replace("\r\n","&#10;"); // String 내부의 줄바꿈을 표현
 			
-			//금주 접수일
+			//금주 접수일 (date)
 			String b = "bbsStart";
-			bbsstart.add(request.getParameter(b+((i-5)+5)));
+			String date = request.getParameter(b+((i-5)+5));
+			String[] adddate = date.split("-");
+			String start = adddate[1] +"/"+ adddate[2];
+			bbsstart.add(start);
 			//bbsstart.removeAll(Arrays.asList("",null));
 			getbbsstart = String.join(",",bbsstart);
 			getbbsstart = getbbsstart.replace("\r\n","&#10;");
 			
-			//금주 완료 목표일 (null)
+			//금주 완료 목표일 (null) (date)
 			String c = "bbsTarget";
 			if(request.getParameter(c+((i-5)+5)).isEmpty() || request.getParameter(c+((i-5)+5)) == null) {
 				bbstarget.add("[보류]");
 			} else {
-				bbstarget.add(request.getParameter(c+((i-5)+5)));
+				String datec = request.getParameter(c+((i-5)+5));
+				String[] adddatec = datec.split("-");
+				String target = adddatec[1]+"/"+adddatec[2];
+				bbstarget.add(target);
 			}
 			//bbstarget.removeAll(Arrays.asList("",null));
 			getbbstarget = String.join(",",bbstarget);
@@ -139,21 +158,28 @@
 			}
 			getbbsncontent = String.join("&#10;&#10;",bbsncontent);
 			getbbsncontent = getbbsncontent.replace("\r\n","&#10;");
+
 			
-			//차주 접수일
+			//차주 접수일 (date)
 			String f = "bbsNStart";
-			bbsnstart.add(request.getParameter(f+((i-2)+2)));
+			String datef = request.getParameter(f+((i-2)+2));
+			String[] adddatef = datef.split("-");
+			String nstart = adddatef[1]+"/"+adddatef[2];
+			bbsnstart.add(nstart);
 			//bbsnstart.removeAll(Arrays.asList("",null));
 			getbbsnstart = String.join(",",bbsnstart);
 			getbbsnstart = getbbsnstart.replace("\r\n","&#10;"); 
 			
 			
-			//차주 완료 목표일 (null)
+			//차주 완료 목표일 (null) (date)
 			String g = "bbsNTarget";
 			if(request.getParameter(g+((i-2)+2)).isEmpty() || request.getParameter(g+((i-2)+2)) == null){
 				bbsntarget.add("[보류]");
 			}else {
-				bbsntarget.add(request.getParameter(g+((i-2)+2)));
+				String dateg = request.getParameter(g+((i-2)+2));
+				String[] adddateg = dateg.split("-");
+				String ntarget = adddateg[1]+"/"+adddateg[2];
+				bbsntarget.add(ntarget);
 			}
 			//bbsntarget.removeAll(Arrays.asList("",null));
 			getbbsntarget = String.join(",",bbsntarget);
@@ -264,6 +290,6 @@
 
 	 
 	 <a> <%= trCnt %> </a>
-	 <a> <%= trNCnt %> </a>
+	 <a> <%= trNCnt %> </a> 
 </body>
 </html>

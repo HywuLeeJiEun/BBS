@@ -1,3 +1,5 @@
+<%@page import="user.User"%>
+<%@page import="java.util.List"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="user.UserDAO"%>
@@ -60,7 +62,36 @@
 			script.println("</script>");
 		}
 		
-		String name = userDAO.getName(id);
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+				String workSet;
+				
+				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+				List<String> works = new ArrayList<String>();
+				
+				if(code == null) {
+					workSet = "";
+				} else {
+					for(int i=0; i < code.size(); i++) {
+						
+						String number = code.get(i);
+						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+						String manager = userDAO.getManager(number);
+						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+					}
+					
+					workSet = String.join("/",works);
+					
+				}
+				
+				String name = userDAO.getName(id);
+				
+				// 사용자 정보 담기
+				User user = userDAO.getUser(name);
+				String password = user.getPassword();
+				String rank = user.getRank();
+				//이메일  로직 처리
+				String Staticemail = user.getEmail();
+				String[] email = Staticemail.split("@");
 		
 	%>
 	

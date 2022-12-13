@@ -1,5 +1,6 @@
 <%@page import="java.time.LocalDate"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
+<%@page import="user.User"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.stream.Collectors"%>
 <%@page import="java.util.List"%>
@@ -21,6 +22,8 @@
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
 <link rel="stylesheet" href="css/index.css">
+<!-- // 폰트어썸 이미지 사용하기 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <title>RMS</title>
 </head>
 
@@ -43,23 +46,22 @@
 		}
 		
 		// 유효한 글이라면 구체적인 정보를 'bbs'라는 인스턴스에 담는다
-				int bbsid = new BbsDAO().getMaxbbs(id);
-				Bbs bbs = new BbsDAO().getBbs(bbsid);
-				UserDAO user = new UserDAO();
-				
-				String DDline = bbs.getBbsDeadline();
-				//String DDline = "2022-10-24";
-				
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-				LocalDate date = LocalDate.parse(DDline, formatter);
-				date = date.plusWeeks(1); //일주일을 더하는 것.
-				
-				String rk = user.getRank((String)session.getAttribute("id"));
-				
+		int bbsid = new BbsDAO().getMaxbbs(id);
+		Bbs bbs = new BbsDAO().getBbs(bbsid);
+		UserDAO userDAO = new UserDAO();
+		
+		String DDline = bbs.getBbsDeadline();
+		//String DDline = "2022-10-24";
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		LocalDate date = LocalDate.parse(DDline, formatter);
+		date = date.plusWeeks(1); //일주일을 더하는 것.
+		
+		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
 		
-		UserDAO userDAO = new UserDAO();
 		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
 		List<String> works = new ArrayList<String>();
 		
@@ -79,7 +81,15 @@
 		}
 		
 		String name = userDAO.getName(id);
-	
+		
+		// 사용자 정보 담기
+		User user = userDAO.getUser(name);
+		String password = user.getPassword();
+		String rank = user.getRank();
+		//이메일  로직 처리
+		String Staticemail = user.getEmail();
+		String[] email = Staticemail.split("@");
+		
 	%>
 
 	<c:set var="works" value="<%= works %>" />
@@ -109,8 +119,8 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbs.jsp">조회</a></li>
-							<li><a href="bbsUpdate.jsp">작성</a></li>
+							<li ><a href="bbs.jsp">조회</a></li>
+							<li class="active"><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
 							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
 						</ul>
@@ -120,7 +130,7 @@
 			
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
-				<li><a href="bbs.jsp" style="color:#2E2E2E"><%= name %>(님)</a></li>
+				<li><a data-toggle="modal" href="#UserUpdateModal" style="color:#2E2E2E"><%= name %>(님)</a></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle"
 						data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -130,13 +140,15 @@
 					<%
 					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
 					%>
-						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
+						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					} else {
 					%>
-						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a>
+						
+						</li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					}
@@ -148,7 +160,131 @@
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
 	
-	
+	<!-- 모달 영역! -->
+	   <div class="modal fade" id="UserUpdateModal" role="dialog">
+		   <div class="modal-dialog">
+		    <div class="modal-content">
+		     <div class="modal-header">
+		      <button type="button" class="close" data-dismiss="modal">×</button>
+		      <h3 class="modal-title" align="center">개인정보 수정</h3>
+		     </div>
+		     <!-- 모달에 포함될 내용 -->
+		     <form method="post" action="ModalUpdateAction.jsp" id="modalform">
+		     <div class="modal-body">
+		     		<div class="row">
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">ID </label>
+		     				<input type="text" maxlength="20" class="form-control" readonly style="width:100%" id="updateid" name="updateid"  value="<%= id %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+						<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label"> Password </label>
+		     				<input type="password" maxlength="20" required class="form-control" style="width:100%" id="password" name="password" value="<%= password %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<i class="glyphicon glyphicon-eye-open" id="icon" style="right:20%; top:35px;" ></i>
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">name </label>
+		     				<input type="text" maxlength="20" required class="form-control" style="width:100%" id="name" name="name"  value="<%= name %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">rank </label>
+		     				<input type="text" required class="form-control" data-toggle="tooltip" data-placement="bottom" title="직급 변경은 관리자 권한이 필요합니다." readonly style="width:100%" id="rank" name="rank"  value="<%= rank %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-4 form-outline">
+		     				<label class="col-form-label">email </label>
+		     				<input type="text" maxlength="30" required class="form-control" style="width:100%" id="email" name="email"  value="<%= email[0] %>"> 
+		     			</div>
+		     			<div class="col-md-3" align="left" style="top:5px; right:20px">
+		     				<label class="col-form-label" > &nbsp; </label>
+		     				<div><i>@ s-oil.com</i></div>
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">duty </label>
+		     				<input type="text" required class="form-control" readonly data-toggle="tooltip" data-placement="bottom" title="업무 변경은 관리자 권한이 필요합니다." style="width:100%" id="duty" name="duty" value="<%= workSet %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     		</div>	
+		     </div>
+		     <div class="modal-footer">
+			     <div class="col-md-3" style="visibility:hidden">
+     			</div>
+     			<div class="col-md-6">
+			     	<button type="submit" class="btn btn-primary pull-left form-control" id="modalbtn" >수정</button>
+		     	</div>
+		     	 <div class="col-md-3" style="visibility:hidden">
+	   			</div>	
+		    </div>
+		    </form>
+		   </div>
+	  </div>
+	</div>
 	
 	<!-- ********** 게시판 글쓰기 양식 영역 ********* -->
 		<div class="container">
@@ -163,7 +299,7 @@
 		
 		<div class="container">
 			<div class="row">
-				<form method="post" action="mainAction.jsp">
+				<form method="post" action="mainAction.jsp" id="main">
 					<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 						<thead>
 							<tr>
@@ -190,7 +326,7 @@
 									</tr>
 									
 									<tr align="center">
-										<td style="display:none"><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:auto; width:100%; border:none; overflow:auto" placeholder="구분/담당자"   readonly><%= bbs.getBbsManager()  %></textarea></td> 
+										<td style="display:none"><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:auto; width:100%; border:none; overflow:auto" placeholder="구분/담당자"   readonly><%= workSet %><%= name %></textarea></td> 
 									</tr>
 									<tr>
 										 <td>
@@ -211,13 +347,9 @@
 											 <textarea class="textarea" id="bbsContent" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsContent5"></textarea>
 											 </div>
 										 </td>
-										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart5" ></td>
-										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget" class="form-control" placeholder="완료목표일" name="bbsTarget5" oninput="this.value = this.value
-												.replace(/[^0-9./.\s.%.-]/g, '')
-												.replace(/(\..*)\./g, '$1');"></td>		
-										 <td><textarea class="textarea" id="bbsEnd" required style="height:45px; width:100%; border:none;"  placeholder="진행율/완료일" name="bbsEnd5" oninput="this.value = this.value
-												.replace(/[^0-9./.\s.%.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
-												.replace(/(\..*)\./g, '$1');"></textarea></td>
+										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart5" ></td>
+										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget5" ></td>		
+										 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none;"  placeholder="진행율/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd5" ></textarea></td>
 												</tr>
 									</tbody>
 								</table>
@@ -261,16 +393,14 @@
 									 </div>
 								 </td>
 								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart2" ></td>
-								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNTarget2" class="form-control" placeholder="완료목표일" name="bbsNTarget2" oninput="this.value = this.value
-										.replace(/[^0-9./.\s.%.-]/g, '')
-										.replace(/(\..*)\./g, '$1');"></td>		
+								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget2" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget2"></td>		
 							</tr>
 							</tbody>
 						</table>
 							<div id="wrapper" style="width:100%; text-align: center;">
 								<button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" onclick="addNRow()" class="btn btn-primary"> + </button>
 								<!-- 저장 버튼 생성 -->
-								<button type="submit" id="save" style="margin-bottom:50px" class="btn btn-primary pull-right"> 저장 </button>									
+								<button type="button" id="save" style="margin-bottom:50px" class="btn btn-primary pull-right" onclick="saveData()"> 저장 </button>									
 							</div>					
 				</form>
 			</div>
@@ -280,6 +410,8 @@
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>
+	
+
 	<script>
 		// 자동 높이 확장 (textarea)
 		$("textarea").on('input keyup keydown focusin focusout blur mousemove', function() {
@@ -290,403 +422,7 @@
 			$(this).on('keyup input keydown focusin focusout blur mousemove', Document ,function() {resizeTextarea(this); });
 			
 		});
-	</script>
-	
-	<!-- <script>
-		//textarea 접수일 ... 유효성 검사
-		$(document.getElementById("bbsStart")).on('input', function() {
-			// ### 접수일 처리
-			var bbsst = document.getElementById("bbsStart").value;
-			var bbssta = bbsst.split("\n"); //줄바꿈으로 분리
-			
-				for(var i=0; i < bbssta.length; i++) { //bbssta = 10/21 같은 형태
-					if(bbssta[i].length > 5) {
-						alert("(접수일) 최대 5글자까지만 작성 가능합니다!");
-					}
-					if(bbssta[i].includes('/') == true) {
-						var a = bbssta[i].split("/");
-						var num1 = Number(a[0]);
-						var num2 = Number(a[1]);
-						if(num1 > 13 || num2 > 32) {
-							alert("(접수일) 유효한 월/일을 작성해주십시오.");
-							$("#bbsStart").focus();
-						}
-								
-					// 이부분이 문제 '-'의 개수세기가 원활하게 진행되지 않음!
-					} else if(bbssta[i].includes('-') == true){
-						var count = 0;
-						var searchChar = "-"; //찾고자하는 문자
-						var pos = bbssta[i].indexOf(searchChar); //pos는 0의 값
-						
-						while (pos != -1) {
-							count++;
-							pos = bbssta[i].indexOf(searchChar, pos + 1);
-						}
-						if(count > 3) {
-							alert("(접수일) 보류는 최대 3개까지만 표현합니다. (-)");
-							$("#bbsStart").focus();
-						} 		
-					} else {
-						 if(bbssta[i].length > 2) {
-							 alert("(접수일) 월/일 형태 또는 -로 작성되어야 합니다.");
-								$("#bbsStart").focus();
-						 }
-					}
-	
-			}
-		});
-	</script>
-	
-	<script>
-		//textarea 완료목표일 ... 유효성 검사
-		$(document.getElementById("bbsTarget")).on('input', function() {
-			// ### 접수일 처리
-			var bbsst = document.getElementById("bbsTarget").value;
-			var bbssta = bbsst.split("\n"); //줄바꿈으로 분리
-			
-				for(var i=0; i < bbssta.length; i++) { //bbssta = 10/21 같은 형태
-					if(bbssta[i].length > 5) {
-						alert("(목표일) 최대 5글자까지만 작성 가능합니다!");
-					}
-					if(bbssta[i].includes('/') == true) {
-						var a = bbssta[i].split("/");
-						var num1 = Number(a[0]);
-						var num2 = Number(a[1]);
-						if(num1 > 13 || num2 > 32) {
-							alert("(목표일) 유효한 월/일을 작성해주십시오.");
-							$("#bbsTarget").focus();
-						}
-								
-					// 이부분이 문제 '-'의 개수세기가 원활하게 진행되지 않음!
-					} else if(bbssta[i].includes('-') == true){
-						var count = 0;
-						var searchChar = "-"; //찾고자하는 문자
-						var pos = bbssta[i].indexOf(searchChar); //pos는 0의 값
-						
-						while (pos != -1) {
-							count++;
-							pos = bbssta[i].indexOf(searchChar, pos + 1);
-						}
-						if(count > 3) {
-							alert("(목표일) 보류는 최대 3개까지만 표현합니다. (-)");
-							$("#bbsTarget").focus();
-						} 		
-					} else {
-						 if(bbssta[i].length > 2) {
-							 alert("(목표일) 월/일 형태 또는 -로 작성되어야 합니다.");
-								$("#bbsTarget").focus();
-						 }
-					}
-	
-			}
-		});
-	</script>
-	
-	<script>
-		//textarea 진행율/완료일 ... 유효성 검사
-		$(document.getElementById("bbsEnd")).on('input', function() {
-			// ### 접수일 처리
-			var bbsst = document.getElementById("bbsEnd").value;
-			var bbssta = bbsst.split("\n"); //줄바꿈으로 분리
-			
-			for(var i=0; i < bbssta.length; i++) { //bbssta = 10/21, 100% 같은 형태
-				if(bbssta[i].length > 5) {
-					alert("(진행율) 최대 5글자까지만 작성 가능합니다!");
-					$("#bbsEnd").focus();
-				}
-				if(bbssta[i].includes('/') == true) {
-					var a = bbssta[i].split("/");
-					var num1 = Number(a[0]);
-					var num2 = Number(a[1]);
-					if(num1 > 13 || num2 > 32) {
-						alert("(진행율) 유효한 월/일을 작성해주십시오.");
-						$("#bbsEnd").focus();
-					}
-							
-				// 이부분이 문제 '-'의 개수세기가 원활하게 진행되지 않음!
-				} if(bbssta[i].includes('%') == true){ //%가 포함 되었는가?
-					var a = bbssta[i].split("%");
-					var one = Number(a[0]); 
-					var two = a[1]; //a[1]뒤에 문자가 오지 않도록 함!
-					var count = 0;
-					if(one > 100) {
-						alert("(진행율) 0% ~ 100% 이내여야 합니다.");
-						$("#bbsEnd").focus();
-					}
-					
-					if(two != "") {
-						alert("(진행율) %로 마무리 되어야 합니다. (ex> 100%)");
-						$("#bbsEnd").focus();
-					}
-					
-					var searchChar = "%"; //찾고자하는 문자
-					var pos = bbssta[i].indexOf(searchChar); //pos는 0의 값
-					while (pos != -1) {
-						count++;
-						pos = bbssta[i].indexOf(searchChar, pos + 1);
-					}
-					if(count > 1) {
-						alert("(진행율) %는 최대 1개까지만 표현 가능합니다. (%)");
-						$("#bbsEnd").focus();
-					}
-				} else {
-					if(bbssta[i].includes('/') == false && bbssta[i].includes('%') == false) {
-						if(bbssta[i].length > 3) {
-							 alert("(진행율) 월/일 형태 또는 % 형태로 작성되어야 합니다.");
-								$("#bbsEnd").focus();
-						 }
-					}
-				}
-			}
-		});
-	</script>
-	
-	<script>
-		//textarea (차주)접수일 ... 유효성 검사
-		$(document.getElementById("bbsNStart")).on('input', function() {
-			// ### 접수일 처리
-			var bbsst = document.getElementById("bbsNStart").value;
-			var bbssta = bbsst.split("\n"); //줄바꿈으로 분리
-			
-				for(var i=0; i < bbssta.length; i++) { //bbssta = 10/21 같은 형태
-					if(bbssta[i].length > 5) {
-						alert("(차주(접수일)) 최대 5글자까지만 작성 가능합니다!");
-					}
-					if(bbssta[i].includes('/') == true) {
-						var a = bbssta[i].split("/");
-						var num1 = Number(a[0]);
-						var num2 = Number(a[1]);
-						if(num1 > 13 || num2 > 32) {
-							alert("(차주(접수일)) 유효한 월/일을 작성해주십시오.");
-							$("#bbsNStart").focus();
-						}
-								
-					// 이부분이 문제 '-'의 개수세기가 원활하게 진행되지 않음!
-					} else if(bbssta[i].includes('-') == true){
-						var count = 0;
-						var searchChar = "-"; //찾고자하는 문자
-						var pos = bbssta[i].indexOf(searchChar); //pos는 0의 값
-						
-						while (pos != -1) {
-							count++;
-							pos = bbssta[i].indexOf(searchChar, pos + 1);
-						}
-						if(count > 3) {
-							alert("(차주(접수일)) 보류는 최대 3개까지만 표현합니다. (-)");
-							$("#bbsNStart").focus();
-						} 		
-					} else {
-						 if(bbssta[i].length > 2) {
-							 alert("(차주(접수일)) 월/일 형태 또는 -로 작성되어야 합니다.");
-								$("#bbsNStart").focus();
-						 }
-					}
-	
-			}
-		});
-	</script>
-	
-	<script>
-		//textarea (차주)완료목표일 ... 유효성 검사
-		$(document.getElementById("bbsNTarget")).on('input', function() {
-			// ### 접수일 처리
-			var bbsst = document.getElementById("bbsNTarget").value;
-			var bbssta = bbsst.split("\n"); //줄바꿈으로 분리
-			
-				for(var i=0; i < bbssta.length; i++) { //bbssta = 10/21 같은 형태
-					if(bbssta[i].length > 5) {
-						alert("(차주(목표일)) 최대 5글자까지만 작성 가능합니다!");
-					}
-					if(bbssta[i].includes('/') == true) {
-						var a = bbssta[i].split("/");
-						var num1 = Number(a[0]);
-						var num2 = Number(a[1]);
-						if(num1 > 13 || num2 > 32) {
-							alert("(차주(목표일)) 유효한 월/일을 작성해주십시오.");
-							$("#bbsNStart").focus();
-						}
-								
-					// 이부분이 문제 '-'의 개수세기가 원활하게 진행되지 않음!
-					} else if(bbssta[i].includes('-') == true){
-						var count = 0;
-						var searchChar = "-"; //찾고자하는 문자
-						var pos = bbssta[i].indexOf(searchChar); //pos는 0의 값
-						
-						while (pos != -1) {
-							count++;
-							pos = bbssta[i].indexOf(searchChar, pos + 1);
-						}
-						if(count > 3) {
-							alert("(차주(목표일)) 보류는 최대 3개까지만 표현합니다. (-)");
-							$("#bbsNTarget").focus();
-						} 		
-					} else {
-						 if(bbssta[i].length > 2) {
-							 alert("(차주(목표일)) 월/일 형태 또는 -로 작성되어야 합니다.");
-								$("#bbsNTarget").focus();
-						 }
-					}
-	
-			}
-		});
-	</script>
-	
-	<script>
-	// 금주 업무 실적 추가 script
-	function textAdd() {
-		var target = document.getElementById("jobs");
-		var option = target.options[target.selectedIndex].text;
-		var cadd = document.getElementById('content_add').value;
-		var sadd = document.getElementById('start_add').value;
-		var words = sadd.split("-");
-		var tadd = document.getElementById('target_add').value;
-		var word = tadd.split("-");
-		
-		// 줄바꿈 확인 개수
-		var lb_cadd = cadd.split("\n").length -1;
-		
-		if(option === "담당 업무 선택") {
-			alert("(금주) 담당 업무 선택이 완료되지 않았습니다.");
-			return false;
-		}
-		if($("#content_add").val() == "") {
-			alert("(금주) 업무 내용이 입력되지 않았습니다.");
-			$("#content_add").focus();
-			return false;
-		} 
-		var eadd = document.getElementById('end_add').value;
-		if($("#end_add").val() == "") {
-			alert("(금주) 진행율이 입력되지 않았습니다.");
-			$("#end_add").focus();
-			return false;
-		}
-		document.getElementById('bbsEnd').value += eadd + '\n';
-		for(var i=0; i < lb_cadd; i++) {
-			document.getElementById('bbsEnd').value += '\n';
-		}
-		
-		if(option === "무관") {
-			document.getElementById('bbsContent').value += '-' + ' ' + cadd + '\n';
-		} else {
-		document.getElementById('bbsContent').value += '-' + '[' + option + ']'+ ' ' + cadd + '\n';
-		}
-		
-
-		if(words == "") {
-				alert('(금주) 접수일 미입력으로 ---로 표시됩니다.');
-				document.getElementById('bbsStart').value += '---' + '\n';
-				for(var i=0; i < lb_cadd; i++) {
-					document.getElementById('bbsStart').value += '\n';
-				}
-		} else {
-			document.getElementById('bbsStart').value += words[1] + '/' + words[2] + '\n';
-			for(var i=0; i < lb_cadd; i++) {
-				document.getElementById('bbsStart').value += '\n';
-			}
-		}
-
-		if(word == "") {
-				alert("(금주) 목표일 미입력으로 ---로 표시됩니다.");
-				document.getElementById('bbsTarget').value += '---' + '\n';
-				for(var i=0; i < lb_cadd; i++) {
-					document.getElementById('bbsTarget').value += '\n';
-				}
-		} else {
-			document.getElementById('bbsTarget').value += words[1] + '/' + words[2] + '\n';
-			for(var i=0; i < lb_cadd; i++) {
-				document.getElementById('bbsTarget').value += '\n';
-			}
-		}
-		
-		var sdown = $("textarea").prop('scrollHeight');
-		$("textarea").scrollTop(sdown);
-	};
-	</script>
-	<script>
-	function textRe() {
-		document.getElementById("jobs").value="담당 업무 선택";
-		document.getElementById('content_add').value="";
-		document.getElementById('start_add').value="";
-		document.getElementById('target_add').value="";
-		document.getElementById('end_add').value="";
-	}
-	</script>
-	
-	<script>
-	// 차주 업무 계획 추가 script
-	function textNAdd() {
-		var target = document.getElementById("njobs");
-		var option = target.options[target.selectedIndex].text;
-		var cadd = document.getElementById('ncontent_add').value;
-		var sadd = document.getElementById('nstart_add').value;
-		var words = sadd.split("-");
-		var tadd = document.getElementById('ntarget_add').value;
-		var word = tadd.split("-");
-		
-		// 줄바꿈 확인 개수
-		var lb_cadd = cadd.split("\n").length -1;
-		
-		if(option === "담당 업무 선택") {
-			alert("(차주) 담당 업무 선택이 완료되지 않았습니다.");
-			return false;
-		}
-		if($("#ncontent_add").val() == "") {
-			alert("(차주) 업무 내용이 입력되지 않았습니다.");
-			$("#ncontent_add").focus();
-			return false;
-		} 
-		
-		if(option === "무관") {
-			document.getElementById('bbsNContent').value += '-' + ' ' + cadd + '\n';
-		} else {
-		document.getElementById('bbsNContent').value += '-' + '[' + option + ']'+ ' ' + cadd + '\n';
-		}
-		
-
-		if(words == "") {
-				alert('(차주) 접수일 미입력으로 ---로 표시됩니다.');
-				document.getElementById('bbsNStart').value += '---' + '\n';
-				for(var i=0; i < lb_cadd; i++) {
-					document.getElementById('bbsNStart').value += '\n';
-				}
-		} else {
-			document.getElementById('bbsNStart').value += words[1] + '/' + words[2] + '\n';
-			for(var i=0; i < lb_cadd; i++) {
-				document.getElementById('bbsNStart').value += '\n';
-			}
-		}
-
-		if(word == "") {
-				alert("(차주) 목표일 미입력으로 ---로 표시됩니다.");
-				document.getElementById('bbsNTarget').value += '---' + '\n';
-				for(var i=0; i < lb_cadd; i++) {
-					document.getElementById('bbsNTarget').value += '\n';
-				}
-		} else {
-			document.getElementById('bbsNTarget').value += words[1] + '/' + words[2] + '\n';
-			for(var i=0; i < lb_cadd; i++) {
-				document.getElementById('bbsNTarget').value += '\n';
-			}
-		}
-		
-		var sdown = $("textarea").prop('scrollHeight');
-		$("textarea").scrollTop(sdown);
-	};
-	</script>
-	<script>
-	function textRe() {
-		document.getElementById("njobs").value="담당 업무 선택";
-		document.getElementById('ncontent_add').value="";
-		document.getElementById('nstart_add').value="";
-		document.getElementById('ntarget_add').value="";
-		document.getElementById('nend_add').value="";
-	}
-	</script> -->
-	
-	
-	<script>
-	
-	</script>
+	</script>	
 	
 	<script>
 		function addRow() {
@@ -713,7 +449,7 @@
 			} 
 				var trCnt = $('#bbsTable tr').length;
 				if(trCnt <= 35) {
-				console.log(trCnt); // 버튼을 처음 눌렀을 때, 6 / 기본 5 -> + 누를 시, 1씩 증가
+				//console.log(trCnt); // 버튼을 처음 눌렀을 때, 6 / 기본 5 -> + 누를 시, 1씩 증가
 	            var innerHtml = "";
 	            innerHtml += '<tr>';
 	            innerHtml += '    <td>';
@@ -727,9 +463,9 @@
 	            innerHtml += '  <div style="float:left">';
 	            innerHtml += ' <textarea class="textarea" id="bbsContent'+Number(trCnt)+'" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsContent'+Number(trCnt)+'"></textarea>';
 	            innerHtml += '  </div> </td>';
-	            innerHtml += '  <td><input type="date" required max="9999-12-31" style="height:45px; width:auto;" id="bbsStart'+Number(trCnt)+'" class="form-control" placeholder="접수일" name="bbsStart'+Number(trCnt)+'" ></td>';
-	            innerHtml += ' <td><input type="date" required max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+Number(trCnt)+'" class="form-control" placeholder="완료목표일" name="bbsTarget'+Number(trCnt)+'" ></td>';
-	            innerHtml += '  <td><textarea class="textarea" required id="bbsEnd'+Number(trCnt)+'" required style="height:45px; width:100%; border:none;"  placeholder="진행율/완료일" name="bbsEnd'+Number(trCnt)+'" ></textarea></td>'; 
+	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart'+Number(trCnt)+'" class="form-control" placeholder="접수일" name="bbsStart'+Number(trCnt)+'" ></td>';
+	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+Number(trCnt)+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsTarget'+Number(trCnt)+'" ></td>';
+	            innerHtml += '  <td><textarea class="textarea" id="bbsEnd'+Number(trCnt)+'" style="height:45px; width:100%; border:none;"  data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다."  placeholder="진행율/완료일" name="bbsEnd'+Number(trCnt)+'" ></textarea></td>'; 
 	            innerHtml += '    <td>';
 	            innerHtml += '<button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button>';
 	            innerHtml += '    </td>';
@@ -768,7 +504,7 @@
 			} 
 				var trNCnt = $('#bbsNTable tr').length;
 				if(trNCnt <= 32) {
-				console.log(trNCnt); // 버튼을 처음 눌렀을 때, 3 / 기본 2 -> + 누를 시, 1씩 증가
+				//console.log(trNCnt); // 버튼을 처음 눌렀을 때, 3 / 기본 2 -> + 누를 시, 1씩 증가
 	            var innerHtml = "";
 	            innerHtml += '<tr>';
 	            innerHtml += '    <td>';
@@ -782,8 +518,8 @@
 	            innerHtml += '  <div style="float:left">';
 	            innerHtml += ' <textarea class="textarea" id="bbsNContent'+Number(trNCnt)+'" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsNContent'+Number(trNCnt)+'"></textarea>';
 	            innerHtml += '  </div> </td>';
-	            innerHtml += '  <td><input type="date" required max="9999-12-31" style="height:45px; width:auto;" id="bbsNStart'+Number(trNCnt)+'" class="form-control" placeholder="접수일" name="bbsNStart'+Number(trNCnt)+'" ></td>';
-	            innerHtml += ' <td><input type="date" required max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget'+Number(trNCnt)+'" class="form-control" placeholder="완료목표일" name="bbsNTarget'+Number(trNCnt)+'" ></td>';
+	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNStart'+Number(trNCnt)+'" class="form-control" placeholder="접수일" name="bbsNStart'+Number(trNCnt)+'" ></td>';
+	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget'+Number(trNCnt)+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsNTarget'+Number(trNCnt)+'" ></td>';
 	            innerHtml += '<td></td>'
 	            innerHtml += '<td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:100px" id="delRow" name="delNRow" class="btn btn-danger"> 삭제 </button>';
 	            innerHtml += '    </td>';
@@ -798,36 +534,65 @@
 	</script>
 	
 	<script>
-	$(document).on("click","button[name=delNRow]", function() {
-		var trHtml = $(this).parent().parent();
-		trHtml.remove();
-	});
+		$(document).on("click","button[name=delNRow]", function() {
+			var trHtml = $(this).parent().parent();
+			trHtml.remove();
+		});
+		</script>
+		
+		
+		<!-- modal 내, password 보이기(안보이기) 기능 -->
+		<script>
+		$(document).ready(function(){
+		    $('#icon').on('click',function(){
+		    	console.log("hello");
+		        $('#password').toggleClass('active');
+		        if($('#password').hasClass('active')){
+		            $(this).attr('class',"glyphicon glyphicon-eye-close")
+		            $('#password').attr('type',"text");
+		        }else{
+		            $(this).attr('class',"glyphicon glyphicon-eye-open")
+		            $('#password').attr('type','password');
+		        }
+		    });
+		});
 	</script>
 	
-<%-- 	<%
-	List<String> b = new ArrayList<String>();
-	for(int i=0; i < 30;  i++) {
-		String a = "bbsContent";
-		b.add(request.getParameter(a+(i+5)));
+	
+	<!-- 모달 툴팁 -->
+	<script>
+		$(document).ready(function(){
+			$('[data-toggle="tooltip"]').tooltip();
+		});
+	</script>
+	
+	
+	<!-- 모달 submit -->
+	<script>
+	$('#modalbtn').click(function(){
+		$('#modalform').text();
+	})
+	</script>
+	
+	<!-- 모달 update를 위한 history 감지 -->
+	<script>
+	window.onpageshow = function(event){
+		if(event.persisted || (window.performance && window.performance.navigation.type == 2)){ //history.back 감지
+			location.reload();
+		}
 	}
-	%>
-	<c:set var="content" value="<%= b %>"/>
-	<input type="hidden" id="value" value="<c:out value='${content}' />">
+	</script>
 	
 	<script>
-	/* for(var i=0; i< 30; i++) {
-		var a = "bbsContent" + (i+5);
-		var value = []; 
-		value =	document.getElementById("bbsConetent5").value; // bbsContent(i)의 값 구하기
-		value.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
-		var rows = []; 
-		rows =	value.split('&#10;').length;
-		console.log(rows); 
-
-	} */
-	var value = document.getElementById("value").value;
-	var rows = value.split('&#10;').length;
-	console.log(rows); 
-	</script> --%>
-	
+	// 데이터 보내기 (몇줄을 사용하는지!) <trCnt, trNCnt>
+	function saveData() {
+		var trCnt = $('#bbsTable tr').length; // 기본이 5
+		var trNCnt = $('#bbsNTable tr').length; // 기본이 2
+		var innerHtml = "";
+		innerHtml += '<td><textarea class="textarea" id="trCnt" name="trCnt" readonly>'+trCnt+'</textarea></td>';
+		innerHtml += '<td><textarea class="textarea" id="trNCnt" name="trNCnt" readonly>'+trNCnt+'</textarea></td>';
+        $('#bbsNTable > tbody> tr:last').append(innerHtml);
+		$('#main').submit();
+	}
+	</script>
 </body>

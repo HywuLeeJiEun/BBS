@@ -132,7 +132,7 @@
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('제출이 완료되었습니다.')");
-			script.println("location.href='bbsUpdate.jsp'");
+			script.println("location.href='bbs.jsp'");
 			script.println("</script>");
 			} 
 		}   

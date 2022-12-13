@@ -105,8 +105,8 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbs.jsp">조회</a></li>
-							<li><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="bbs.jsp">조회</a></li>
+							<li class="active"><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
 							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
 						</ul>
@@ -126,7 +126,7 @@
 					<%
 					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
 					%>
-						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
+						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
