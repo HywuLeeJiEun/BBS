@@ -92,7 +92,7 @@
 			// -[담당업무] CONTENT 내용~ 으로 나오도록 함.
 			if(request.getParameter(a+((i-5)+5)) != null) { // 값이 비어있지 않다면,
 				if(!request.getParameter(jobs+((i-5)+5)).contains("시스템") && !request.getParameter(jobs+((i-5)+5)).contains("기타")) { //시스템이나 기타가 아니라면,
-			bbscontent.add("- ["+ request.getParameter(jobs+((i-5)+5)) +"] " + request.getParameter(a+(i+5)));
+			bbscontent.add("- ["+ request.getParameter(jobs+((i-5)+5)) +"] " + request.getParameter(a+((i-5)+5)));
 				}else {
 					bbscontent.add("- " + request.getParameter(a+((i-5)+5)));
 				}
@@ -106,11 +106,15 @@
 			//금주 접수일 (date)
 			String b = "bbsStart";
 			String date = request.getParameter(b+((i-5)+5));
-			String[] adddate = date.split("-");
-			String start = adddate[1] +"/"+ adddate[2];
-			bbsstart.add(start);
+			//String[] adddate = date.split("-");
+			//start = adddate[1] +"/"+ adddate[2];
+			// 양식 2022-11-14 	
+			String start = date.substring(5); // 5번쨰 이후부터 출력 11-14 
+			String finalstart = start.replace("-","/");
+			
+			bbsstart.add(finalstart);
 			//bbsstart.removeAll(Arrays.asList("",null));
-			getbbsstart = String.join(",",bbsstart);
+			getbbsstart = String.join("§",bbsstart);
 			getbbsstart = getbbsstart.replace("\r\n","&#10;");
 			
 			//금주 완료 목표일 (null) (date)
@@ -119,12 +123,12 @@
 				bbstarget.add("[보류]");
 			} else {
 				String datec = request.getParameter(c+((i-5)+5));
-				String[] adddatec = datec.split("-");
-				String target = adddatec[1]+"/"+adddatec[2];
-				bbstarget.add(target);
+				String target = datec.substring(5);
+				String finaltarget = target.replace("-", "/");
+				bbstarget.add(finaltarget);
 			}
 			//bbstarget.removeAll(Arrays.asList("",null));
-			getbbstarget = String.join(",",bbstarget);
+			getbbstarget = String.join("§",bbstarget);
 			getbbstarget = getbbstarget.replace("\r\n","&#10;"); 
 			
 			//금주 진행율/완료일 (null)
@@ -135,7 +139,7 @@
 			bbsend.add(request.getParameter(d+((i-5)+5)));
 			}
 			//bbsend.removeAll(Arrays.asList("",null));
-			getbbsend = String.join(",",bbsend);
+			getbbsend = String.join("§",bbsend);
 			getbbsend = getbbsend.replace("\r\n","&#10;");
 			
 			
@@ -163,11 +167,11 @@
 			//차주 접수일 (date)
 			String f = "bbsNStart";
 			String datef = request.getParameter(f+((i-2)+2));
-			String[] adddatef = datef.split("-");
-			String nstart = adddatef[1]+"/"+adddatef[2];
-			bbsnstart.add(nstart);
+			String nstart = datef.substring(5);
+			String finalnstart = nstart.replace("-", "/");
+			bbsnstart.add(finalnstart);
 			//bbsnstart.removeAll(Arrays.asList("",null));
-			getbbsnstart = String.join(",",bbsnstart);
+			getbbsnstart = String.join("§",bbsnstart);
 			getbbsnstart = getbbsnstart.replace("\r\n","&#10;"); 
 			
 			
@@ -177,12 +181,12 @@
 				bbsntarget.add("[보류]");
 			}else {
 				String dateg = request.getParameter(g+((i-2)+2));
-				String[] adddateg = dateg.split("-");
-				String ntarget = adddateg[1]+"/"+adddateg[2];
-				bbsntarget.add(ntarget);
+				String ntarget = dateg.substring(5);
+				String finalntarget = ntarget.replace("-", "/");
+				bbsntarget.add(finalntarget);
 			}
 			//bbsntarget.removeAll(Arrays.asList("",null));
-			getbbsntarget = String.join(",",bbsntarget);
+			getbbsntarget = String.join("§",bbsntarget);
 			getbbsntarget = getbbsntarget.replace("\r\n","&#10;"); 
 		}
 		
@@ -215,13 +219,19 @@
 	<%
 	// <<<<<<<<<<<<< 금주 컨텐츠 >>>>>>>>>>>>>>>>>>>
 	List<String> b = new ArrayList<String>();
-	for(int i=0; i < 30;  i++) {
+	String finalb="";
+	for(int i=5; i < Integer.parseInt(trCnt);  i++) {
 		String a = "bbsContent";
-		b.add(request.getParameter(a+(i+5)));
+		b.add(request.getParameter(a+((i-5)+5)));
 		b.removeAll(Arrays.asList("",null));
+		finalb = String.join("§",b);
+		//finalb = finalb.replace("\r\n","&#10;");
 	}
 	%>
-	<c:set var="content" value="<%= b %>"/>
+	<textarea><%= finalb  %></textarea><br>
+	<textarea><%= b %></textarea>
+	<textarea><%= getbbscontent %></textarea>
+	<c:set var="content" value="<%= finalb %>"/>
 	<input type="hidden" id="value" value="<c:out value='${content}' />">
 	
 	<script>
@@ -231,27 +241,30 @@
 	value = document.getElementById("value").value;
 	value = value.replace("[","");
 	value = value.replace("]","");
-	value = value.split(',');
+	value = value.split('§');
 	
 	for(var i=0; i < value.length; i++ ) {
 		var content = value[i];		
 		var rows = content.split('\n').length;
 		numlist.push(rows); // content의 줄바꿈 갯수
 	}
-	numliststr = numlist.join(',');
+	numliststr = numlist.join('§');
 	</script>
 	
 	
 	<%
 	// <<<<<<<<<<<<<< 차주 컨텐츠 >>>>>>>>>>>>>>.
+	String finald = "";
 	List<String> c = new ArrayList<String>();
-	for(int i=0; i < 30;  i++) {
+	for(int i=2; i < Integer.parseInt(trNCnt);  i++) {
 		String d = "bbsNContent";
-		c.add(request.getParameter(d+(i+2)));
+		c.add(request.getParameter(d+((i-2)+2)));
 		c.removeAll(Arrays.asList("",null));
+		finald = String.join("§",c);
+		//finald = finald.replace("\r\n","&#10;");
 	}
 	%>
-	<c:set var="ncontent" value="<%= c %>"/>
+	<c:set var="ncontent" value="<%= finald %>"/>
 	<input type="hidden" id="nvalue" value="<c:out value='${ncontent}' />">
 	
 	<script>
@@ -261,14 +274,14 @@
 	nvalue = document.getElementById("nvalue").value;
 	nvalue = nvalue.replace("[","");
 	nvalue = nvalue.replace("]","");
-	nvalue = nvalue.split(',');
+	nvalue = nvalue.split('§');
 	
 	for(var i=0; i < nvalue.length; i++ ) {
 		var ncontent = nvalue[i];		
 		var nrows = ncontent.split('\n').length;
 		nnumlist.push(nrows); // content의 줄바꿈 갯수
 	}
-	nnumliststr=nnumlist.join(',');
+	nnumliststr=nnumlist.join('§');
 	</script>
 
 	<script>
@@ -286,10 +299,10 @@
 		$('#bbsTable > tbody > tr:last').append(innerHtml);
 		$('#post_item').submit();
 	} 
-	</script>   
+	</script> 
 
 	 
-	 <a> <%= trCnt %> </a>
+	 <a> <%= b %> </a>
 	 <a> <%= trNCnt %> </a> 
 </body>
 </html>

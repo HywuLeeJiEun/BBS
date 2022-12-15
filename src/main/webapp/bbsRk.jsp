@@ -1,3 +1,7 @@
+<%@page import="java.util.List"%>
+<%@page import="user.User"%>
+<%@page import="java.util.Date"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="user.UserDAO"%>
 <%@page import="java.util.Locale"%>
 <%@page import="java.util.Calendar"%>
@@ -10,31 +14,30 @@
 <%@ page import="bbs.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
 
 
 <!DOCTYPE html>
 <html>
 <head>
+<!-- // 폰트어썸 이미지 사용하기 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <meta charset="UTF-8">
 <!-- 화면 최적화 -->
-<meta name="viewport" content="width-device-width">
+<!-- <meta name="viewport" content="width-device-width", initial-scale="1"> -->
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
+<link rel="stylesheet" href="css/index.css">
 
-<title>Baynex 주간보고</title>
-<style type="css/text/css">
-	a, a:hover{
-		color: #000000;
-		text-decoration: none;
-	}
-</style>
+<title>RMS</title>
 </head>
+
 <body>
 	<%
+		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
-	
 		if(session.getAttribute("id") != null){
 			id = (String)session.getAttribute("id");
 		}
@@ -52,8 +55,88 @@
 			script.println("</script>");
 		}
 		
+	
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+				String workSet;
+				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+				List<String> works = new ArrayList<String>();
+				
+				if(code == null) {
+					workSet = "";
+				} else {
+					for(int i=0; i < code.size(); i++) {
+						
+						String number = code.get(i);
+						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+						String manager = userDAO.getManager(number);
+						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+					}
+					
+					workSet = String.join("/",works);
+					
+				}
+				
+		String name = userDAO.getName(id);
+		
+		// 사용자 정보 담기
+		User user = userDAO.getUser(name);
+		String password = user.getPassword();
+		String rank = user.getRank();
+		//이메일  로직 처리
+		String Staticemail = user.getEmail();
+		String[] email = Staticemail.split("@");
+		
+		
+		//(월요일) 제출 날짜 확인
+		String mon = "";
+		String day ="";
+		
+		Calendar cal = Calendar.getInstance(); 
+		Calendar cal2 = Calendar.getInstance(); //오늘 날짜 구하기
+		SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
+		
+		cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+		//cal.add(Calendar.DATE, 7); //일주일 더하기
+		
+		 // 비교하기 cal.compareTo(cal2) => 월요일이 작을 경우 -1, 같은 날짜 0, 월요일이 더 큰 경우 1 
+		 if(cal.compareTo(cal2) == -1) {
+			 //월요일이 해당 날짜보다 작다.
+			 cal.add(Calendar.DATE, 7);
+			 
+			 mon = dateFmt.format(cal.getTime());
+			day = dateFmt.format(cal2.getTime());
+		 } else { // 월요일이 해당 날짜보다 크거나, 같다 
+			 mon = dateFmt.format(cal.getTime());
+			day = dateFmt.format(cal2.getTime());
+		 }
+		 
+		 String bbsDeadline = mon;
+		
+		 
+		//pl 리스트 확인
+		String work = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
+		ArrayList<String> plist = userDAO.getpluser(work); //pl 관련 유저의 아이디만 출력
+		String[] pllist = plist.toArray(new String[plist.size()]);
+		
+		
+		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
+		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist);
+		
+		if(list.size() == 0) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('제출된 주간보고가 없습니다.')");
+			script.println("history.back();");
+			script.println("</script>");
+		}
+		
+		// 미제출자 인원 계산
+		int psize = plist.size();
+		int lsize = list.size();
+		int noSub =  psize - lsize;
 	%>
 	
+		
 	 <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
@@ -66,72 +149,216 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="bbsUpdate.jsp">Baynex 주간보고</a>
+			<a class="navbar-brand" href="bbs.jsp">Report Management System</a>
 		</div>
 		
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<ul class="nav navbar-nav">
-				<li><a href="bbsUpdate.jsp">주간보고</a></li>
-				<li class="active"><a href="bbs.jsp">제출목록</a></li>
-				<li><a href="gathering_search.jsp">취합하기</a></li>
-			</ul>
+				<ul class="nav navbar-nav navbar-left">
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle"
+							data-toggle="dropdown" role="button" aria-haspopup="true"
+							aria-expanded="false">주간보고<span class="caret"></span></a>
+						<!-- 드랍다운 아이템 영역 -->	
+						<ul class="dropdown-menu">
+							<li><a href="bbs.jsp">조회</a></li>
+							<li><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
+							<li><a href="signOn.jsp">승인(제출)</a></li>
+						</ul>
+					</li>
+						<%
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li class="active"><a href="bbsRk.jsp">조회</a></li>
+								<li><a href="bbsUpdate.jsp">작성</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
+				</ul>
 			
+		
 			
-			
-			<%
-				// 로그인 하지 않았을 때 보여지는 화면
-				if(id == null){
-			%>
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-haspopup="true"
-						aria-expanded="false">접속하기<span class="caret"></span></a>
-					<!-- 드랍다운 아이템 영역 -->	
-					<ul class="dropdown-menu">
-						<li class="active"><a href="login.jsp">로그인</a></li>
-					</ul>
-				</li>
-			</ul>
-			
-			
-			<%
-				// 로그인이 되어 있는 상태에서 보여주는 화면
-				}else{
-			%>
-			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
-			<ul class="nav navbar-nav navbar-right">
+				<li><a data-toggle="modal" href="#UserUpdateModal" style="color:#2E2E2E"><%= name %>(님)</a></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle"
 						data-toggle="dropdown" role="button" aria-haspopup="true"
 						aria-expanded="false">관리<span class="caret"></span></a>
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
-					<li><a href="workChange.jsp">담당업무 변경</a></li>
+					<%
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					%>
+						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
+						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
+					<%
+					} else {
+					%>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a>
+						
+						</li>
+						<li><a href="logoutAction.jsp">로그아웃</a></li>
+					<%
+					}
+					%>
 					</ul>
 				</li>
 			</ul>
-			<%
-				}
-			%>
 		</div>
 	</nav>
+	<!-- 네비게이션 영역 끝 -->
 	
+	
+		
+	
+	<!-- 모달 영역! -->
+	   <div class="modal fade" id="UserUpdateModal" role="dialog">
+		   <div class="modal-dialog">
+		    <div class="modal-content">
+		     <div class="modal-header">
+		      <button type="button" class="close" data-dismiss="modal">×</button>
+		      <h3 class="modal-title" align="center">개인정보 수정</h3>
+		     </div>
+		     <!-- 모달에 포함될 내용 -->
+		     <form method="post" action="ModalUpdateAction.jsp" id="modalform">
+		     <div class="modal-body">
+		     		<div class="row">
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">ID </label>
+		     				<input type="text" maxlength="20" class="form-control" readonly style="width:100%" id="updateid" name="updateid"  value="<%= id %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+						<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label"> Password </label>
+		     				<input type="password" maxlength="20" required class="form-control" style="width:100%" id="password" name="password" value="<%= password %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<i class="glyphicon glyphicon-eye-open" id="icon" style="right:20%; top:35px;" ></i>
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">name </label>
+		     				<input type="text" maxlength="20" required class="form-control" style="width:100%" id="name" name="name"  value="<%= name %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">rank </label>
+		     				<input type="text" required class="form-control" data-toggle="tooltip" data-placement="bottom" title="직급 변경은 관리자 권한이 필요합니다." readonly style="width:100%" id="rank" name="rank"  value="<%= rank %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-4 form-outline">
+		     				<label class="col-form-label">email </label>
+		     				<input type="text" maxlength="30" required class="form-control" style="width:100%" id="email" name="email"  value="<%= email[0] %>"> 
+		     			</div>
+		     			<div class="col-md-3" align="left" style="top:5px; right:20px">
+		     				<label class="col-form-label" > &nbsp; </label>
+		     				<div><i>@ s-oil.com</i></div>
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">duty </label>
+		     				<input type="text" required class="form-control" readonly data-toggle="tooltip" data-placement="bottom" title="업무 변경은 관리자 권한이 필요합니다." style="width:100%" id="duty" name="duty" value="<%= workSet %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     		</div>	
+		     </div>
+		     <div class="modal-footer">
+			     <div class="col-md-3" style="visibility:hidden">
+     			</div>
+     			<div class="col-md-6">
+			     	<button type="submit" class="btn btn-primary pull-left form-control" id="modalbtn" >수정</button>
+		     	</div>
+		     	 <div class="col-md-3" style="visibility:hidden">
+	   			</div>	
+		    </div>
+		    </form>
+		   </div>
+	  </div>
+	</div>
+
 		
 		
 	<!-- ***********검색바 추가 ************* -->
-	<div class="container">
+	<!-- <div class="container">
 		<div class="row">
-			<form method="post" name="search" action="searchbbsRk.jsp">
+			<form method="post" name="search" action="searchbbs.jsp">
 				<table class="pull-right">
 					<tr>
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
 								<option value="bbsDeadline">제출일</option>
 								<option value="bbsTitle">제목</option>
-								<option value="userName">작성자</option>
 						</select></td>
 						<td><input type="text" class="form-control"
 							placeholder="검색어 입력" name="searchText" maxlength="100"></td>
@@ -142,50 +369,105 @@
 			</form>
 		</div>
 	</div>
+	<br>  -->
+	<div class="container" style="cursor:pointer;" id="jb-title">
+		<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
+			<thead>
+				<tr>
+				</tr>
+				<tr>
+					<th colspan="5" style=" text-align: center;" data-toggle="tooltip" data-placement="bottom" title="클릭시, 상세 정보가 노출됩니다."> <%= work %> 업무 담당자 목록 
+					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	
+	<div class="container" id="jb-text" style="height:10%; width:20%; display:inline-flex; float:left; margin-left: 41%; display:none; position:absolute">
+		<table class="table" style="text-align: center; border:1px solid #444444 ; background-color:white" >
+			 <tr>
+			 	<td id="plist">업무 담당자 인원 : <%= plist.size() %></td>
+			 </tr> 
+			 <tr>
+			 	<td id="noSublist">미제출자 인원 : <%= noSub %> </td>
+			 </tr> 
+			 <%-- <tr>
+			 	<td>업무 담당자 인원 : <%= plist.size() %></td>
+			 </tr> --%> 
+		 </table>
+	 </div>
+	 
+	 <div class="container" style="height:10%; width:20%; display:flex; margin-left: 10px;">
+		<table class="table" style="text-align: center; border:1px solid #444444; " >
+			 <tr>
+			 	<td style="display:none;" id="plist_list">미제출자 인원 : <%= noSub %></td>
+			 </tr> 
+			 <tr>
+			 	<td style="display:none;" id="noSublist_list">미제출자 인원 : <%= noSub %> </td>
+			 </tr> 
+		 </table>
+	 </div>
 	<br>
 	
 	
 	<!-- 게시판 메인 페이지 영역 시작 -->
 	<div class="container">
 		<div class="row">
-			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
+			<table id="bbsTable" class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
 						<!-- <th style="background-color: #eeeeee; text-align: center;">번호</th> -->
 						<th style="background-color: #eeeeee; text-align: center;">제출일</th>
-						<th style="background-color: #eeeeee; text-align: center;">제목</th>
+						<th style="background-color: #eeeeee; text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
+						<th style="background-color: #eeeeee; text-align: center;">승인</th>
 					</tr>
 				</thead>
 				<tbody>
 					<%
-						BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
-						ArrayList<Bbs> list = bbsDAO.getList(pageNumber);
+						
+						
 						for(int i = 0; i < list.size(); i++){
 							
-/* 							// Deadline을 가져온다. 
-							String DDline = list.get(i).getBbsDeadline();
-							//String DDline = "2022-10-24";
+							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
+							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 							
-							DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-							LocalDate date = LocalDate.parse(DDline, formatter);
-							//date = date.plusWeeks(1); //일주일을 더하는 것. */
-							
-					%>
+							String dl = bbsDAO.getDLS(list.get(i).getBbsID());
+							Date time = new Date();
+							String timenow = dateFormat.format(time);
 
+							Date dldate = dateFormat.parse(dl);
+							Date today = dateFormat.parse(timenow);
+					%>
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 					<tr>
 						<td> <%= list.get(i).getBbsDeadline() %> </td>
 
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
-						<td><a href="update.jsp?bbsID=<%= list.get(i).getBbsID() %>">
+						<td style="text-align: left">
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<a href="signOnReport.jsp?bbsID=<%= list.get(i).getBbsID() %>">
 							<%= list.get(i).getBbsTitle() %></a></td>
 						<td><%= list.get(i).getUserName() %></td>
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
 							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
 						<td><%= list.get(i).getBbsUpdate() %></td>
+						<!-- 승인/미승인/마감 표시 -->
+						<td>
+						<%
+						String sign = null;
+						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
+							sign = list.get(i).getSign();
+						} else {
+							sign="마감";
+							// 데이터베이스에 마감처리 진행
+							int a = bbsDAO.getSignDeadLine(list.get(i).getBbsID());
+						}
+						%>
+						<%= sign %>
+						</td>
 					</tr>
 					<%
 						}
@@ -203,15 +485,18 @@
 				}if(bbsDAO.nextPage(pageNumber + 1)){
 			%>
 				<a href="bbsRk.jsp?pageNumber=<%=pageNumber + 1 %>"
-					class="btn btn-success btn-arraw-left">다음</a>
+					class="btn btn-success btn-arraw-left" id="next">다음</a>
 			<%
 				}
 			%>
 			
 			<!-- 글쓰기 버튼 생성 -->
-			<a href="bbsUpdate.jsp" class="btn btn-info pull-right">새 보고 작성</a>
+			<a href="bbsUpdate.jsp" class="btn btn-info pull-right">작성</a>
 		</div>
 	</div>
+	
+	
+	
 	<!-- 게시판 메인 페이지 영역 끝 -->
 	
 	<!-- 부트스트랩 참조 영역 -->
@@ -222,10 +507,83 @@
 			var value_str = document.getElementById('searchField');
 			
 		}
+		
+	
 	</script>
 	
-	<!-- 부트스트랩 참조 영역 -->
-	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script src="ccs/js/bootstrap.js"></script>
+    <!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
+	<script>
+	var trCnt = $('#bbsTable tr').length; 
+	
+	if(trCnt < 11) {
+		$('#next').hide();
+	}
+	</script>
+	
+	<!-- modal 내, password 보이기(안보이기) 기능 -->
+		<script>
+		$(document).ready(function(){
+		    $('#icon').on('click',function(){
+		    	console.log("hello");
+		        $('#password').toggleClass('active');
+		        if($('#password').hasClass('active')){
+		            $(this).attr('class',"glyphicon glyphicon-eye-close")
+		            $('#password').attr('type',"text");
+		        }else{
+		            $(this).attr('class',"glyphicon glyphicon-eye-open")
+		            $('#password').attr('type','password');
+		        }
+		    });
+		});
+	</script>
+	
+	
+	<!-- 모달 툴팁 -->
+	<script>
+		$(document).ready(function(){
+			$('[data-toggle="tooltip"]').tooltip();
+		});
+	</script>
+	
+	
+	<!-- 모달 submit -->
+	<script>
+	$('#modalbtn').click(function(){
+		$('#modalform').text();
+	})
+	</script>
+	
+	<!-- 모달 update를 위한 history 감지 -->
+	<script>
+	window.onpageshow = function(event){
+		if(event.persisted || (window.performance && window.performance.navigation.type == 2)){ //history.back 감지
+			location.reload();
+		}
+	}
+	</script>
+	
+	<script>
+	$("#jb-title").on('click', function() {
+		var con = document.getElementById("jb-text");
+		if(con.style.display=="none"){
+			con.style.display = 'block';
+		} else {
+			con.style.display = 'none';
+		}
+	});
+	</script>
+	
+	
+	<script>
+		// 자동 높이 확장 (textarea)
+		$("textarea").on('input keyup keydown focusin focusout blur mousemove', function() {
+			var offset = this.offsetHeight - this.clientHeight;
+			var resizeTextarea = function(el) {
+				$(el).css('height','auto').css('height',el.scrollHeight + offset);
+			};
+			$(this).on('keyup input keydown focusin focusout blur mousemove', Document ,function() {resizeTextarea(this); });
+			
+		});
+	</script>	
 </body>
 </html>

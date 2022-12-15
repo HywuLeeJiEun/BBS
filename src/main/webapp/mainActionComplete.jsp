@@ -64,37 +64,34 @@
 		
 		
 		// 배열로 만들기
-		String[] numarray = numlist.split(",");
-		String[] nnumarray = nnumlist.split(",");
+		String[] numarray = numlist.split("§");
+		String[] nnumarray = nnumlist.split("§");
 		
-		String [] getbbsstart = bbsstart.split(",");
-		String [] getbbstarget = bbstarget.split(",");
-		String[] getbbsend = bbsend.split(",");
-		String[] getbbsnstart = bbsnstart.split(",");
-		String[] getbbsntarget = bbsntarget.split(",");
+		String [] getbbsstart = bbsstart.split("§");
+		String [] getbbstarget = bbstarget.split("§");
+		String[] getbbsend = bbsend.split("§");
+		String[] getbbsnstart = bbsnstart.split("§");
+		String[] getbbsntarget = bbsntarget.split("§");
+		
+		
 		
 	//금주 업무 실적 줄바꿈
-		for(int i=0; i < numarray.length; i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
-			
-			if(getbbstarget[i].isEmpty() || getbbstarget[i] == null) {
-				getbbstarget[i] += "[보류]"; // 줄바꿈 추가
-			}
-		
-			for(int j=0; j < Integer.parseInt(numarray[i]); j++) { //줄바꿈의 개수만큼
+	for(int i=0; i < numarray.length; i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
+		 for(int j=0; j < Integer.parseInt(numarray[i]); j++) { //줄바꿈의 개수만큼
 				getbbsstart[i] += "&#10;"; // 줄바꿈 추가
 				getbbstarget[i] += "&#10;"; // 줄바꿈 추가
 				getbbsend[i] += "&#10;"; // 줄바꿈 추가
 			}
+			
 		}
 		
 		//차주 업무 계획 줄바꿈
 		for(int i=0; i < nnumarray.length; i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
 			for(int j=0; j < Integer.parseInt(nnumarray[i]); j++) { //줄바꿈의 개수만큼
 				getbbsnstart[i] += "&#10;"; // 줄바꿈 추가
-				
 				getbbsntarget[i] += "&#10;"; // 줄바꿈 추가
-			}
-		}
+			} 
+		} 
 
 		// 모두 String으로 변환
 		bbsstart = String.join("&#10;",getbbsstart);
@@ -102,10 +99,10 @@
 		bbsend = String.join("&#10;",getbbsend);
 		
 		bbsnstart = String.join("&#10;",getbbsnstart);
-		bbsntarget = String.join("&#10;",getbbsntarget);
+		bbsntarget = String.join("&#10;",getbbsntarget); 
 		
 		
-		// 정상적으로 입력이 되었다면 글쓰기 로직을 수행한다
+	    // 정상적으로 입력이 되었다면 글쓰기 로직을 수행한다
 		BbsDAO bbsDAO = new BbsDAO();
 		UserDAO user = new UserDAO();
 		String name = user.getName(id);
@@ -135,7 +132,7 @@
 			script.println("location.href='bbs.jsp'");
 			script.println("</script>");
 			} 
-		}   
+		} 
 		
 	%>
 
@@ -143,6 +140,9 @@
 <%-- <a> <%= Arrays.toString(getbbsntarget) %></a>
 <a> <%= getbbsnstart.length %></a>
 <a> <%= getbbsstart[0] %></a> --%>
-
+<%-- <a> <%= bbsstart %> </a>
+<a> <%= bbstarget %> </a>
+<a> <%= bbsend %> </a> --%>
+<a> <%= getbbscontent %></a>
 </body>
 </html>

@@ -55,14 +55,7 @@
 			script.println("</script>");
 		}
 		
-		//rank에 따른 뷰 전환
-
-		if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("location.href='bbsRk.jsp'");
-			script.println("</script>");
-		}
+	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 				String workSet;
 				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
@@ -92,6 +85,10 @@
 		//이메일  로직 처리
 		String Staticemail = user.getEmail();
 		String[] email = Staticemail.split("@");
+		
+		//요약본 처리를 위한 Deadline 
+		BbsDAO bbsDAO = new BbsDAO();
+		//ArrayList<Bbs> listbbs = bbsDAO.getDeadLineList(); 
 		
 	%>
 	
@@ -126,8 +123,25 @@
 							<li><a href="signOn.jsp">승인(제출)</a></li>
 						</ul>
 					</li>
+						<%
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="bbsRk.jsp">조회</a></li>
+								<li><a href="bbsUpdate.jsp">작성</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
 				</ul>
 			
+		
 			
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
@@ -161,6 +175,44 @@
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
 	
+	
+	<%-- <!-- (요약본) 모달 영역! -->
+	   <div class="modal fade" id="bbsRkModal" role="dialog">
+		   <div class="modal-dialog">
+		    <div class="modal-content">
+		     <div class="modal-header">
+		      <button type="button" class="close" data-dismiss="modal">×</button>
+		      <h3 class="modal-title" align="center">조회 일자</h3>
+		     </div>
+		     <!-- 모달에 포함될 내용 -->
+		     <form method="post" action="bbsRk.jsp" id="modalform">
+		     <div class="modal-body">
+			     <div class="col-md-3" style="visibility:hidden">
+			    	<a> 조회하고자 하는 '제출일'을 선택하여 주십시오. </a> 
+     			</div>
+		     		<select>
+		     		<%
+		     			for (int i=0; i<listbbs.size(); i++) {
+		     		%>
+		     			<option value="<%= listbbs.get(i).getBbsDeadline() %>"><%= listbbs.get(i).getBbsDeadline() %></option>
+		     		<%
+		     			}
+		     		%>
+		     		</select>
+		     </div>
+		     <div class="modal-footer">
+			     <div class="col-md-3" style="visibility:hidden">
+     			</div>
+     			<div class="col-md-6">
+			     	<button type="submit" class="btn btn-primary pull-left form-control" id="modalbtn" >수정</button>
+		     	</div>
+		     	 <div class="col-md-3" style="visibility:hidden">
+	   			</div>	
+		    </div>
+		    </form>
+		   </div>
+	  </div>
+	</div> --%>
 	
 	
 	<!-- 모달 영역! -->
@@ -330,7 +382,6 @@
 				</thead>
 				<tbody>
 					<%
-						BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
 						String userName = "userName";
 						ArrayList<Bbs> list = bbsDAO.getRkSearch(pageNumber, userName, name);
 						
@@ -397,7 +448,7 @@
 			%>
 			
 			<!-- 글쓰기 버튼 생성 -->
-			<a href="main.jsp" class="btn btn-info pull-right">작성</a>
+			<a href="bbsUpdate.jsp" class="btn btn-info pull-right">작성</a>
 		</div>
 	</div>
 	

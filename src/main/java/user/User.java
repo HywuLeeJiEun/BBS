@@ -8,6 +8,7 @@ public class User {
 	private String rank; //사원직급
 	private String email; //사원메일
 	private String manager; //담당업무
+	private String authority; //권한
 	
 	public String getId() {
 		return id;
@@ -44,6 +45,12 @@ public class User {
 	}
 	public void setManager(String manager) {
 		this.manager = manager;
+	}
+	public String getAuthority() {
+		return authority;
+	}
+	public void setAuthority(String authority) {
+		this.authority = authority;
 	}
 	
 	

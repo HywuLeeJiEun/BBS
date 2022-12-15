@@ -1,3 +1,4 @@
+<%@page import="user.User"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.time.LocalDateTime"%>
@@ -22,7 +23,8 @@
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
 <link rel="stylesheet" href="css/index.css">
-<title>Baynex 주간보고</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<title>RMS</title>
 </head>
 
 
@@ -33,6 +35,13 @@
 		String id = null;
 		if(session.getAttribute("id") != null){
 			id = (String)session.getAttribute("id");
+		}
+		if(id == null){
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('로그인이 필요한 서비스입니다.')");
+			script.println("location.href='login.jsp'");
+			script.println("</script>");
 		}
 		
 		// bbsID를 초기화 시키고
@@ -54,8 +63,8 @@
 		// 유효한 글이라면 구체적인 정보를 'bbs'라는 인스턴스에 담는다
 		BbsDAO bbsDAO = new BbsDAO();
 		Bbs bbs = new BbsDAO().getBbs(bbsID);
-		UserDAO user = new UserDAO();
-		String name = user.getName(id);
+		UserDAO userDAO = new UserDAO();
+		String name = userDAO.getName(id);
 
 		
 			// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
@@ -80,8 +89,7 @@
 		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 				String workSet;
-				
-				UserDAO userDAO = new UserDAO();
+			
 				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
 				List<String> works = new ArrayList<String>();
 				
@@ -102,6 +110,15 @@
 				}
 				
 				String rk = userDAO.getRank((String)session.getAttribute("id"));
+	
+				
+				// 사용자 정보 담기
+				User user = userDAO.getUser(name);
+				String password = user.getPassword();
+				String rank = user.getRank();
+				//이메일  로직 처리
+				String Staticemail = user.getEmail();
+				String[] email = Staticemail.split("@");
 	%>
 	
 	<c:set var="bbsID" value="<%= bbsID %>" />
@@ -143,7 +160,7 @@
 			
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
-				<li><a href="bbs.jsp" style="color:#2E2E2E"><%= name %>(님)</a></li>
+				<li><a data-toggle="modal" href="#UserUpdateModal" style="color:#2E2E2E"><%= name %>(님)</a></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle"
 						data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -153,13 +170,15 @@
 					<%
 					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
 					%>
-						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
+						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					} else {
 					%>
-						<li><a href="logoutAction.jsp">개인정보 수정</a></li>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a>
+						
+						</li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					}
@@ -171,6 +190,132 @@
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
 	
+	
+	<!-- 모달 영역! -->
+	   <div class="modal fade" id="UserUpdateModal" role="dialog">
+		   <div class="modal-dialog">
+		    <div class="modal-content">
+		     <div class="modal-header">
+		      <button type="button" class="close" data-dismiss="modal">×</button>
+		      <h3 class="modal-title" align="center">개인정보 수정</h3>
+		     </div>
+		     <!-- 모달에 포함될 내용 -->
+		     <form method="post" action="ModalUpdateAction.jsp" id="modalform">
+		     <div class="modal-body">
+		     		<div class="row">
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">ID </label>
+		     				<input type="text" maxlength="20" class="form-control" readonly style="width:100%" id="updateid" name="updateid"  value="<%= id %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+						<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label"> Password </label>
+		     				<input type="password" maxlength="20" required class="form-control" style="width:100%" id="password" name="password" value="<%= password %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<i class="glyphicon glyphicon-eye-open" id="icon" style="right:20%; top:35px;" ></i>
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">name </label>
+		     				<input type="text" maxlength="20" required class="form-control" style="width:100%" id="name" name="name"  value="<%= name %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">rank </label>
+		     				<input type="text" required class="form-control" data-toggle="tooltip" data-placement="bottom" title="직급 변경은 관리자 권한이 필요합니다." readonly style="width:100%" id="rank" name="rank"  value="<%= rank %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-4 form-outline">
+		     				<label class="col-form-label">email </label>
+		     				<input type="text" maxlength="30" required class="form-control" style="width:100%" id="email" name="email"  value="<%= email[0] %>"> 
+		     			</div>
+		     			<div class="col-md-3" align="left" style="top:5px; right:20px">
+		     				<label class="col-form-label" > &nbsp; </label>
+		     				<div><i>@ s-oil.com</i></div>
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">duty </label>
+		     				<input type="text" required class="form-control" readonly data-toggle="tooltip" data-placement="bottom" title="업무 변경은 관리자 권한이 필요합니다." style="width:100%" id="duty" name="duty" value="<%= workSet %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     		</div>	
+		     </div>
+		     <div class="modal-footer">
+			     <div class="col-md-3" style="visibility:hidden">
+     			</div>
+     			<div class="col-md-6">
+			     	<button type="submit" class="btn btn-primary pull-left form-control" id="modalbtn" >수정</button>
+		     	</div>
+		     	 <div class="col-md-3" style="visibility:hidden">
+	   			</div>	
+		    </div>
+		    </form>
+		   </div>
+	  </div>
+	</div>
 	
 		<div class="container">
 			<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
@@ -558,26 +703,46 @@
 	</script>
 	
 	
-	<%-- <script>
-	/* 제작할 필요 없나..?  */
-	window.addEventListener('beforeunload', (event) => {
-	      
-		$(document).on("beforeunload", function(event){
-		  <% 
-	     	// 작동 O -> row 유지가 안됨!
-	      	BbsDAO BBS = new BbsDAO(); 
-	      	BBS.getActiveout(bbsID);
-	      %> 
+	<!-- modal 내, password 보이기(안보이기) 기능 -->
+		<script>
+		$(document).ready(function(){
+		    $('#icon').on('click',function(){
+		    	console.log("hello");
+		        $('#password').toggleClass('active');
+		        if($('#password').hasClass('active')){
+		            $(this).attr('class',"glyphicon glyphicon-eye-close")
+		            $('#password').attr('type',"text");
+		        }else{
+		            $(this).attr('class',"glyphicon glyphicon-eye-open")
+		            $('#password').attr('type','password');
+		        }
+		    });
 		});
-	    
-	      
-	      
-	   // 표준에 따라 기본 동작 방지
-	      event.preventDefault();
-	      // Chrome에서는 returnValue 설정이 필요함
-	      event.returnValue = '';
-	});
-
-	</script> --%>
+	</script>
+	
+	
+	<!-- 모달 툴팁 -->
+	<script>
+		$(document).ready(function(){
+			$('[data-toggle="tooltip"]').tooltip();
+		});
+	</script>
+	
+	
+	<!-- 모달 submit -->
+	<script>
+	$('#modalbtn').click(function(){
+		$('#modalform').text();
+	})
+	</script>
+	
+	<!-- 모달 update를 위한 history 감지 -->
+	<script>
+	window.onpageshow = function(event){
+		if(event.persisted || (window.performance && window.performance.navigation.type == 2)){ //history.back 감지
+			location.reload();
+		}
+	}
+	</script>
 	
 </body>

@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import bbs.Bbs;
+
 
 public class UserDAO { //DAO : data access object
 	
@@ -182,6 +184,7 @@ public class UserDAO { //DAO : data access object
 							user.setRank(rs.getString(4));
 							user.setEmail(rs.getString(5));
 							user.setManager(rs.getString(6));
+							user.setAuthority(rs.getString(6));
 							return user;
 						}
 					}catch (Exception e) {
@@ -281,5 +284,40 @@ public class UserDAO { //DAO : data access object
 			}
 			
 			
+			//pluser 테이블의 web 구분
+			public ArrayList<String> getpluser(String work){
+				String sql =  "select * from pluser where work=?";
+						ArrayList<String> list = new ArrayList<String>();
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, work);
+					rs = pstmt.executeQuery();
+					while(rs.next()) {
+						//list.add(rs.getString(1)); //work
+						list.add(rs.getString(2)); //userid
+						//list.add(rs.getString(3)); //username
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return list;
+			}
 		
+			
+			
+			//pl의 담당 pl 구분
+			public String getpl(String id){
+				String sql =  "select id, pl from user where authority='pl' and id=?";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, id);
+					rs = pstmt.executeQuery();
+					while(rs.next()) {
+						return rs.getString(2);
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return "";
+			}
 }

@@ -1,3 +1,4 @@
+<%@page import="java.util.Calendar"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
 <%@page import="java.time.LocalDateTime"%>
 <%@page import="java.time.LocalDate"%>
@@ -48,12 +49,47 @@
 		}
 		int bbsID = 1;
 		
-	
 
+
+	//(월요일) 제출 날짜 확인
+	UserDAO userDAO = new UserDAO();
+			String mon = "";
+			String day ="";
+			
+			Calendar cal = Calendar.getInstance(); 
+			Calendar cal2 = Calendar.getInstance(); //오늘 날짜 구하기
+			SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
+			
+			cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+			//cal.add(Calendar.DATE, 7); //일주일 더하기
+			
+			 // 비교하기 cal.compareTo(cal2) => 월요일이 작을 경우 -1, 같은 날짜 0, 월요일이 더 큰 경우 1 
+			 if(cal.compareTo(cal2) == -1) {
+				 //월요일이 해당 날짜보다 작다.
+				 cal.add(Calendar.DATE, 7);
+				 
+				 mon = dateFmt.format(cal.getTime());
+				day = dateFmt.format(cal2.getTime());
+			 } else { // 월요일이 해당 날짜보다 크거나, 같다 
+				 mon = dateFmt.format(cal.getTime());
+				day = dateFmt.format(cal2.getTime());
+			 }
+			 
+			 String bbsDeadline = mon;
+			 
+			//pl 리스트 확인
+				String work = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
+				ArrayList<String> plist = userDAO.getpluser(work); //pl 관련 유저의 아이디만 출력
+				String[] pllist = plist.toArray(new String[plist.size()]);
+	
+	BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
+	ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist); 
 	%>
-	
-	
 
+<a><%= list.get(0).getBbsID() %></a>
+<a><%= pllist[0] %></a>
+<a><%= work %></a>
+<a><%= plist.size()%></a>
 <%-- <a><%= active %></a>
 <a>(<%= del %>)</a> --%>
 
