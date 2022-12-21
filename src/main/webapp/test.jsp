@@ -1,3 +1,4 @@
+<%@page import="java.util.Arrays"%>
 <%@page import="java.util.Calendar"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
 <%@page import="java.time.LocalDateTime"%>
@@ -84,12 +85,49 @@
 	
 	BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
 	ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist); 
-	%>
+	
+	ArrayList<String> username = new ArrayList<String>();
+	for(int i=0; i<plist.size(); i++) {
+		String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
+		username.add(userName);	
+	}
+	String[] usernamedata = username.toArray(new String[username.size()]);
+	Arrays.sort(usernamedata);
+	
+	//미제출자 인원
+	ArrayList<String> noSub = new ArrayList<String>();
+	ArrayList<String> Subname = new ArrayList<String>();
+	//제출한 인원 찾기
+	for(int i=0; i<list.size(); i++) {
+		Subname.add(list.get(i).getUserID()); //제출한 user id 도출.
+	}
+	for(int i=0; i<Subname.size(); i++) {
+		plist.remove(Subname.get(i));
+	}
+	
+	//제출 안한 인원 찾기
+	for(int i=0; i<plist.size(); i++) {
+		String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
+		noSub.add(userName);	
+	}
 
-<a><%= list.get(0).getBbsID() %></a>
+	
+	%>
+<a><%= list %></a>
+<a><%= pllist[0] %></a>
+<a><%= pllist[1] %></a>
+<a><%= pllist[2] %></a>
+<a><%= pllist[3] %></a>
+<a><%= pllist[4] %></a>
+<a><%= noSub.get(0) %></a>
+<a><%= noSub %></a>
+<a><%= list.get(0).getUserID() %></a>
 <a><%= pllist[0] %></a>
 <a><%= work %></a>
 <a><%= plist.size()%></a>
+<a><%= plist %></a>
+<a><%= username.get(0) %></a>
+<a><%= usernamedata[0] %></a>
 <%-- <a><%= active %></a>
 <a>(<%= del %>)</a> --%>
 

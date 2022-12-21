@@ -59,7 +59,7 @@ public class UserDAO { //DAO : data access object
 		} // return값에 따른 결과 ( 1 - 성공, 0 - 틀림, -1 - 존재하지 않음. -2 - DB에러 )
 		
 		
-		// 사용자 이름 출력을 위한 메소드
+		// 사용자 이름 출력을 위한 메소드 (userid)
 		public String getName(String id) {
 			String sql = "select name from user where id = ?";
 			try {

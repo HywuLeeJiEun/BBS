@@ -181,39 +181,58 @@ public class BbsDAO {
 		return -1; //데이터베이스 오류
 	}
 	
+	//게시글 리스트 메소드 -> 요약본 (작성)
+	public ArrayList<Bbs> getListBbs(String[] bbsID){
+		String sql =  "select * from bbs where (";
+				for(int i=0; i<bbsID.length; i++) {
+					if(i <bbsID.length-1) {
+						sql +="bbsID='"+bbsID[i].trim()+"'" +" or ";
+					}else {
+						sql += "bbsID='"+bbsID[i].trim()+"'";
+					}	
+				}
+					sql	+= ") order by bbsID desc";
+				ArrayList<Bbs> list = new ArrayList<Bbs>();
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				Bbs bbs = new Bbs();
+				bbs.setBbsID(rs.getInt(1));
+				bbs.setBbsManager(rs.getString(2));
+				bbs.setBbsTitle(rs.getString(3));
+				bbs.setUserID(rs.getString(4));
+				bbs.setUserName(rs.getString(5));
+				bbs.setBbsDate(rs.getString(6));
+				bbs.setBbsContent(rs.getString(7));
+				bbs.setBbsStart(rs.getString(8));
+				bbs.setBbsTarget(rs.getString(9));
+				bbs.setBbsEnd(rs.getString(10));
+				bbs.setBbsNContent(rs.getString(11));
+				bbs.setBbsNStart(rs.getString(12));
+				bbs.setBbsNTarget(rs.getString(13));
+				bbs.setBbsAvailable(rs.getInt(14));
+				bbs.setBbsDeadline(rs.getString(15));
+				bbs.setBbsUpdate(rs.getString(16));
+				bbs.setSign(rs.getString(17));
+				list.add(bbs);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 
-	/*
-	 * //게시글 리스트 메소드 (bbsRk) public ArrayList<Bbs> getList(int pageNumber, String
-	 * bbsDeadline, ArrayList<String> pllist){ String sql =
-	 * "select * from (select * from bbs where sign='마감' or sign='승인') a " +
-	 * "where a.bbsDeadline like '%"+bbsDeadline.trim()+"%' and a.userID=("; for(int
-	 * i=0; i<pllist.size(); i++) { if(i <pllist.size()-1) { sql
-	 * +="'"+pllist.get(i).trim()+"'" +" or "; }else { sql +=
-	 * "'"+pllist.get(i).trim()+"'"; } } sql +=
-	 * ") order by a.bbsID desc limit ?,10"; ArrayList<Bbs> list = new
-	 * ArrayList<Bbs>(); try { PreparedStatement pstmt = conn.prepareStatement(sql);
-	 * pstmt.setInt(1, (pageNumber-1) * 10 ); rs = pstmt.executeQuery();
-	 * while(rs.next()) { Bbs bbs = new Bbs(); bbs.setBbsID(rs.getInt(1));
-	 * bbs.setBbsManager(rs.getString(2)); bbs.setBbsTitle(rs.getString(3));
-	 * bbs.setUserID(rs.getString(4)); bbs.setUserName(rs.getString(5));
-	 * bbs.setBbsDate(rs.getString(6)); bbs.setBbsContent(rs.getString(7));
-	 * bbs.setBbsStart(rs.getString(8)); bbs.setBbsTarget(rs.getString(9));
-	 * bbs.setBbsEnd(rs.getString(10)); bbs.setBbsNContent(rs.getString(11));
-	 * bbs.setBbsNStart(rs.getString(12)); bbs.setBbsNTarget(rs.getString(13));
-	 * bbs.setBbsAvailable(rs.getInt(14)); bbs.setBbsDeadline(rs.getString(15));
-	 * bbs.setBbsUpdate(rs.getString(16)); bbs.setSign(rs.getString(17));
-	 * list.add(bbs); } }catch (Exception e) { e.printStackTrace(); } return list; }
-	 */
 		
 	//게시글 리스트 메소드 (bbsRk)
 			public ArrayList<Bbs> getList(int pageNumber, String bbsDeadline, String[] pllist){
 				String sql =  "select * from (select * from bbs where sign='마감' or sign='승인') a "
-						+ "where a.bbsDeadline like '%"+bbsDeadline.trim()+"%' and a.userID=(";
+						+ "where a.bbsDeadline like '%"+bbsDeadline.trim()+"%' and (";
 						for(int i=0; i<pllist.length; i++) {
 							if(i <pllist.length-1) {
-								sql +="'"+pllist[i].trim()+"'" +" or ";
+								sql +="a.userID='"+pllist[i].trim()+"'" +" or ";
 							}else {
-								sql += "'"+pllist[i].trim()+"'";
+								sql += "a.userID='"+pllist[i].trim()+"'";
 							}	
 						}
 							sql	+= ") order by a.bbsID desc limit ?,10";
