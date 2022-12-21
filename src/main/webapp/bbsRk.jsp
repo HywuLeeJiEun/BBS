@@ -219,8 +219,9 @@
 								aria-expanded="false">요약본<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li class="active"><a href="bbsRk.jsp">조회</a></li>
-								<li><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li class="active"><a href="bbsRk.jsp">작성</a></li>
+<%-- 								<li><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li> --%>
+								<li><a href="summaryRk.jsp">승인(제출)</a></li>
 							</ul>
 							</li>
 						<%
@@ -517,7 +518,7 @@
 				}
 			%>
 		
-			<a href="bbs.jsp" class="btn btn-primary pull-right">목록</a>
+			<a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>" style="width:5%" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성"> 작성</a>
 		</div>
 	</div>
 	

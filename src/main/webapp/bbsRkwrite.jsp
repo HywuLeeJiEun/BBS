@@ -484,7 +484,7 @@
 			</div>
 			</div>
 		</form>
-		<a type="button" class="btn btn-primary pull-right" id="save">선택</a>
+		<a type="button" style="width:5%" class="btn btn-primary pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="선택된 내용으로 요약본 생성" id="save" >선택</a>
 	</div>
 	<br><br><br>
 	
@@ -493,14 +493,6 @@
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>
-	<script>
-		function ChangeValue() {
-			var value_str = document.getElementById('searchField');
-			
-		}
-		
-	
-	</script>
 	
 	<!-- modal 내, password 보이기(안보이기) 기능 -->
 		<script>
@@ -542,44 +534,6 @@
 			location.reload();
 		}
 	}
-	</script>
-	
-	<!-- 밖으로 나가서 클릭시, 사라지도록 지정 -->
-	<script>
-	$("#jb-title").on('click', function() {
-		var con = document.getElementById("jb-text");
-		if(con.style.display=="none"){
-			con.style.display = 'block';
-		} else {
-			con.style.display = 'none';
-		}
-	});
-	$(document).on('click',function(e) {
-		var container = $("#jb-title");
-		if(!container.is(event.target) && !container.has(event.target).length) {
-			document.getElementById("jb-text").style.display = 'none';
-		}
-	});
-
-	
-	$("#plist").on('mouseover', function() {
-		var con = document.getElementById("plist_list");
-			con.style.display = 'block';
-	});
-	$("#plist").on('mouseout', function() {
-		var con = document.getElementById("plist_list");
-			con.style.display = 'none';	
-	});
-	
-	
-	$("#noSublist").on('mouseover', function() {
-		var con = document.getElementById("noSublist_list");
-			con.style.display = 'block';
-	});
-	$("#noSublist").on('mouseout', function() {
-		var con = document.getElementById("noSublist_list");
-			con.style.display = 'none';
-	});
 	</script>
 	
 	
@@ -692,6 +646,5 @@
 
 
 	</script>
-	<a> <%= list.get(0).getBbsDeadline() %> </a>
 </body>
 </html>

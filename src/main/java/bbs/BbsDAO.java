@@ -134,6 +134,23 @@ public class BbsDAO {
 		return -1; //데이터베이스 오류
 	}
 	
+	//게시글 번호 부여 메소드 (Summary)
+		public int getNextSum() {
+			//현재 게시글을 내림차순으로 조회하여 가장 마지막 글의 번호를 구한다
+			String sql = "select sum_id from summary order by sum_id desc";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				if(rs.next()) {
+					return rs.getInt(1) + 1;
+				}
+				return 1; //첫 번째 게시물인 경우
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return -1; //데이터베이스 오류
+		}
+	
 	// 이전 bbs개수 카운트 메소드
 	public int getCount(int bbsID) {
 		//현재 게시글을 내림차순으로 조회하여 가장 마지막 글의 번호를 구한다
@@ -537,20 +554,26 @@ public class BbsDAO {
 		
 		
 		/* 가장 최근에 생성된 bbs의 ID 조회 */
-		public int getMaxbbs(String id) {
-			String sql = "select bbsID from (select * from bbs where userID=?) bbs order by bbsDate desc";
-			try {
-				PreparedStatement pstmt = conn.prepareStatement(sql);
-				pstmt.setString(1, id); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입
-				rs = pstmt.executeQuery();
-				if(rs.next()) {
-					return rs.getInt(1);
-				}
-			}catch (Exception e) {
-				e.printStackTrace();
-			}
-			return -1; //데이터베이스 오류
-		}
+		/*
+		 * public int getMaxbbs(String id) { String sql =
+		 * "select bbsID from (select * from bbs where userID=?) bbs order by bbsDate desc"
+		 * ; try { PreparedStatement pstmt = conn.prepareStatement(sql);
+		 * pstmt.setString(1, id); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입 rs =
+		 * pstmt.executeQuery(); if(rs.next()) { return rs.getInt(1); } }catch
+		 * (Exception e) { e.printStackTrace(); } return -1; //데이터베이스 오류 }
+		 */
+		
+		
+		/* 가장 최근에 생성된 sum의 ID 조회  (summary) */ 
+		/*
+		 * public int getMaxsum(String bbsDeadline) { String sql =
+		 * "select sum_id from (select * from summary where bbsDeadline=?) summary order by bbsDeadline desc"
+		 * ; try { PreparedStatement pstmt = conn.prepareStatement(sql);
+		 * pstmt.setString(1, bbsDeadline); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입 rs =
+		 * pstmt.executeQuery(); if(rs.next()) { return rs.getInt(1); } }catch
+		 * (Exception e) { e.printStackTrace(); } return -1; //데이터베이스 오류 }
+		 */
+		
 		
 		/* n번째로 최근에 생성된 bbs의 ID 조회 */
 		public int getNMaxbbs(String id, int i) {
@@ -715,5 +738,58 @@ public class BbsDAO {
 			}
 
 						
+			//bbsRkAction -> summary 테이블에 데이터 삽입
+			public int SummaryWrite(String pl, String bbsContent, String bbsEnd, String progress, String state, String note, String bbsNContent, String bbsNTarget, String bbsDeadline, String nnote ) {
+				String sql = "insert into summary values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				String sign = "미승인";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, getNextSum()); //sum_id
+					pstmt.setString(2, pl); //pl
+					pstmt.setString(3, bbsContent); //bbsContent
+					pstmt.setString(4, bbsEnd); //bbsEnd
+					pstmt.setString(5, progress); //progress
+					pstmt.setString(6, state); //state
+					pstmt.setString(7, note); //note
+					pstmt.setString(8, bbsNContent); //bbsNContent
+					pstmt.setString(9, bbsNTarget); //bbsNTarget
+					pstmt.setString(10, bbsDeadline); //bbsDeadline
+					pstmt.setString(11, nnote); //nnote
+					pstmt.setString(12, sign);
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return -1; //데이터베이스 오류
+			}
+			
+			
+			//summary sum_id를 통해 내용 가져오기 
+			public ArrayList<String> getlistSum(String sum_id){
+				String sql =  "select * from summary where sum_id=?";
+						ArrayList<String> list = new ArrayList<String>();
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, sum_id);
+					rs = pstmt.executeQuery();
+					while(rs.next()) {
+						list.add(rs.getString(1)); //userid
+						list.add(rs.getString(2));
+						list.add(rs.getString(3));
+						list.add(rs.getString(4));
+						list.add(rs.getString(5));
+						list.add(rs.getString(6));
+						list.add(rs.getString(7));
+						list.add(rs.getString(8));
+						list.add(rs.getString(9));
+						list.add(rs.getString(10));
+						list.add(rs.getString(11));
+						list.add(rs.getString(12));
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return list;
+			}
 }
 

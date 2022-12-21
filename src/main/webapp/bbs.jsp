@@ -132,8 +132,7 @@
 								aria-expanded="false">요약본<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp">조회</a></li>
-								<li><a href="bbsUpdate.jsp">작성</a></li>
+								<li><a href="bbsRk.jsp">작성</a></li>
 							</ul>
 							</li>
 						<%
