@@ -408,7 +408,7 @@
 	
 	<!-- 목록 조회 table -->
 	<div class="container">
-	<form method="post" action="bbsRkAction.jsp" id="Rkwrite">
+	<form method="post" action="bbsRkwriteFinal.jsp" id="Rkwrite">
 		<div class="row">
 			<div class="col-6 col-md-6">
 				<table id="Table" class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
@@ -433,6 +433,7 @@
 							</td>
 							<td style="text-align: left;">
 								<textarea name="end<%=i%>" id="end<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= comend[i] %></textarea>
+								<textarea name="bbsDeadline" id="bbsDeadline" rows="1" style="resize: none; height:30px; width:60px; text-align: center; display:none"><%= list.get(0).getBbsDeadline() %></textarea>
 							</td>
 							<td>
 								<input type="checkbox" name="chk" id="chk<%=i%>" style="zoom:2.0;" value="<%= i %>">
@@ -486,6 +487,8 @@
 		<a type="button" class="btn btn-primary pull-right" id="save">선택</a>
 	</div>
 	<br><br><br>
+	
+	
 	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -674,6 +677,8 @@
 			
 			// 데이터 넘기기 
 			var innerHtml = "";
+			//innerHtml += '<td><textarea class="textarea" id="chk_arr" name="chk_arr" readonly>'+ chk_arr +'</textarea></td>';
+			//innerHtml += '<td><textarea class="textarea" id="nchk_arr" name="nchk_arr" readonly>'+ nchk_arr +'</textarea></td>';
 			innerHtml += '<td><textarea class="textarea" id="content" name="content" readonly>'+ content +'</textarea></td>';
 			innerHtml += '<td><textarea class="textarea" id="end" name="end" readonly>'+ end +'</textarea></td>';
 			innerHtml += '<td><textarea class="textarea" id="ncontent" name="ncontent" readonly>'+ ncontent +'</textarea></td>';
@@ -687,5 +692,6 @@
 
 
 	</script>
+	<a> <%= list.get(0).getBbsDeadline() %> </a>
 </body>
 </html>
