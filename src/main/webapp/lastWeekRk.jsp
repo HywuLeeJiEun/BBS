@@ -1,3 +1,5 @@
+<%@page import="net.sf.jasperreports.engine.type.CalculationEnum"%>
+<%@page import="java.time.LocalDateTime"%>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
 <%@page import="user.User"%>
@@ -29,13 +31,23 @@
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
 <link rel="stylesheet" href="css/index.css">
-
+<style>
+.ui-tooltip{
+	white-space: pre-line;
+}
+.ui-tooltip-content {
+	white-space: pre-line;
+}
+</style>
 <title>RMS</title>
 </head>
+
 
 <body>
 	<%
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		BbsDAO bbsDAO = new BbsDAO();
+		
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
@@ -55,7 +67,7 @@
 			script.println("location.href='login.jsp'");
 			script.println("</script>");
 		}
-		
+
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 				String workSet;
@@ -113,73 +125,48 @@
 		 
 		 String bbsDeadline = mon;
 		
-		 
-		//pl 리스트 확인
-		String work = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
-		ArrayList<String> plist = userDAO.getpluser(work); //pl 관련 유저의 아이디만 출력
-		//제출한 사람만 남기기
+		// summary 둘러보기를 위한 week 표시
+		int week = 0; 
+		if(request.getParameter("week") != null) {
+			week = Integer.parseInt(request.getParameter("week"));
+		}
+			
+		// lastweek, nextweek 
+		 String pl = userDAO.getpl(id); 
+		//저장된 summary중, 가장 최근을 불러옴!
+		String sum_id = Integer.toString(bbsDAO.getNMaxSum(pl, week));
+		int count = bbsDAO.getCountSum(pl)-1;
+		ArrayList<String> list = bbsDAO.getlistSum(sum_id, pl);
 		
-		String[] pllist = plist.toArray(new String[plist.size()]); //해당 pllist를 바꿔야함! (제출한 사람만)
-		
-		
-		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
-		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist);
-		
-		if(list.size() == 0) {
+		/* if(list == null) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('제출된 주간보고가 없습니다.')");
+			script.println("alert('제출된 요약본이 없습니다.')");
 			script.println("history.back();");
 			script.println("</script>");
-		}
+		} */
 		
-		// 미제출자 인원 계산
-		int psize = plist.size();
-		int lsize = list.size();
-		int noSub =  psize - lsize;
+		String str = "미승인 - 관리자의 미승인 상태<br>";
+		str += "승인 - 관리자가 확정한 상태<br>";
+		str += "마감 - 기한이 지나 승인된 상태";
 		
-		//해당 인원 전원 불러오기
-		ArrayList<String> username = new ArrayList<String>();
-		for(int i=0; i<plist.size(); i++) {
-			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
-			username.add(userName);	
-		}
-		String[] usernamedata = username.toArray(new String[username.size()]);
-		Arrays.sort(usernamedata);
-		
-		String userdata = String.join(", ", usernamedata);
-		
-		
-		//미제출자 인원
-		ArrayList<String> noSubname = new ArrayList<String>();
-		ArrayList<String> Subname = new ArrayList<String>();
-		// 넘기기 위한 bbsID
-		ArrayList<String> bbsId = new ArrayList<String>();
-		//제출한 bbsID 찾기
-		for(int i=0; i<list.size(); i++) {
-			Subname.add(list.get(i).getUserID()); //제출한 user id 도출.
-			bbsId.add(Integer.toString(list.get(i).getBbsID()));
-		}
-		for(int i=0; i<Subname.size(); i++) {
-			plist.remove(Subname.get(i));
-		}
-		//제출 안한 인원 찾기
-		for(int i=0; i<plist.size(); i++) {
-			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
-			noSubname.add(userName);	
-		}
-		
-		String[] nousernamedata = noSubname.toArray(new String[noSubname.size()]);
-		Arrays.sort(nousernamedata);
-		
-		String nouserdata = String.join(", ", nousernamedata);
-		
-		//bbsID string으로 변환
-		String bbsID = String.join(",",bbsId);
-
-	%>
 	
+		//week에 date 표시
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = format.parse(list.get(9));
 		
+		Calendar cal3 = Calendar.getInstance();
+		cal3.setTime(date);
+		cal3.add(Calendar.DATE, -7);
+		//지난주,
+		String lastweek = format.format(cal3.getTime());
+		cal3.add(Calendar.DATE, 14);
+		//다음주,
+		String nextweek = format.format(cal3.getTime());
+	
+		%>
+	
+
 	 <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
@@ -219,9 +206,9 @@
 								aria-expanded="false">요약본<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li class="active"><a href="bbsRk.jsp">작성</a></li>
-<%-- 								<li><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li> --%>
-								<li><a href="summaryRk.jsp">제출 목록</a></li>
+								<li ><a href="bbsRk.jsp">작성</a></li>
+								<%-- <li><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li> --%>
+								<li class="active"><a href="summaryRk.jsp">제출 목록</a></li>
 							</ul>
 							</li>
 						<%
@@ -393,26 +380,53 @@
 	</div>
 
 		
-	<div class="container area" style="cursor:pointer;" id="jb-title">
+	<br>
+	<div class="container">
 		<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
 			<thead>
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center;" data-toggle="tooltip" data-placement="bottom" title="클릭시, 상세 정보가 노출됩니다."> <%= work %> 업무 담당자 목록 
-					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
+					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인(제출) 및 마감 상태에선 수정/삭제가 불가합니다." > <%= pl %> 요약본(Summary) </th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	<br>
+	
+	
+	<!-- 메인 게시글 영역 -->
+	<%
+	// 즉, summary가 없다면, 
+	if(list.isEmpty() || list == null) {
+	%>
+	<br><br><br>
+	<div class="container">
+		<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
+			<thead>
+				<tr>
+				</tr>
+				<tr>
+					<th colspan="5" style=" text-align: center;" class="form-control" data-toggle="tooltip" data-placement="bottom" title="요약본 작성으로 이동하기" > <a href="bbsRk.jsp">작성된 요약본(Summary)이 없습니다. </a></th>
 				</tr>
 			</thead>
 		</table>
 	</div>
 	
-	<div class="container" id="jb-text" style="height:10%; width:20%; display:inline-flex; float:left; margin-left: 41%; display:none; position:absolute">
+	<%
+	} else {
+	%>
+	<!-- 목록 조회 table -->
+	<div class="container" id="jb-text" style="height:10%; width:10%; display:inline-flex; float:left; margin-left: 50%; display:none; position:absolute">
 		<table class="table" style="text-align: center; border:1px solid #444444 ; background-color:white" >
 			 <tr>
-			 	<td id="plist">업무 담당자 인원 : <span style="color:blue; text-decoration:underline"><%= psize %></span></td>
+			 	<td id="complete" style="text-align: center; align:center;"><div style="border:1px solid #00ff00; background-color:#00ff00; width:10px; height:10px; float:left; margin-left: 35%; margin-top: 3%"></div><span style="float:left">&nbsp; : 완료</span></td>
+			 </tr>
+			 <tr>
+			 	<td id="proceeding" style="text-align: center; align:center;"><div style="border:1px solid #ffff00; background-color:#ffff00; width:10px; height:10px; float:left; margin-left: 35%; margin-top: 3%"></div><span style="float:left">&nbsp; : 진행중</span></td>
 			 </tr> 
 			 <tr>
-			 	<td id="noSublist">미제출자 인원 : <span style="color:blue; text-decoration:underline"><%= noSub %></span></td>
+			 	<td id="incomplete" style="text-align: center; align:center;"><div style="border:1px solid #ff0000; background-color:#ff0000; width:10px; height:10px; float:left; margin-left: 35%; margin-top: 3%"></div><span style="float:left">&nbsp; : 미완료(문제)</span></td>
 			 </tr> 
 			 <%-- <tr>
 			 	<td>업무 담당자 인원 : <%= plist.size() %></td>
@@ -420,135 +434,137 @@
 		 </table>
 	 </div>
 	 
-	 <div class="container" id="plist_list" style="height:10%; width:20%; display:flex; margin-left: 62%; position:absolute; display:none; ">
-		<table  class="table" style="text-align: center; border:1px solid #444444; background-color:white; " >
-			 <tr>
-			 	<td style="background-color:#444444; color:#ffffff"> <%= userdata %></td>
-			 </tr> 
-		 </table>
-	 </div>
-	 
-	 <div class="container" id="noSublist_list" style="height:10%; width:20%; display:flex; margin-left: 62%; margin-top:2.5%; position:absolute; display:none; ">
-		<table  class="table" style="text-align: center; border:1px solid #444444; background-color:white; " >
-			 <tr>
-			 	<td style="background-color:#444444; color:#ffffff"> <%= nouserdata %> </td>
-			 </tr> 
-		 </table>
-	 </div>
-	<br>
-	
-	
-	<!-- 게시판 메인 페이지 영역 시작 -->
 	<div class="container">
+	<form method="post" action="bbsRkUpdate.jsp" id="bbsRk">
 		<div class="row">
-			<table id="bbsTable" class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
-				<thead>
-					<tr>
-						<!-- <th style="background-color: #eeeeee; text-align: center;">번호</th> -->
-						<th style="background-color: #eeeeee; text-align: center;">제출일</th>
-						<th style="background-color: #eeeeee; text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;제목</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
-						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
-						<th style="background-color: #eeeeee; text-align: center;">승인</th>
-					</tr>
-				</thead>
-				<tbody>
-					<%
+			<div class="container">
+				<!-- 금주 업무 실적 테이블 -->
+				<table id="Table" class="table" style="text-align: center;">
+					<thead>
+						<tr>
+							<td><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= list.get(9) %></textarea> </td>
+							<td><textarea id="pl" name="pl" style="display:none"><%= list.get(1) %></textarea> </td>
+							<td><textarea id="sum_id" name="sum_id" style="display:none"><%= sum_id %></textarea></td>
+							<td><textarea id="sign" name="sign" style="display:none"><%= list.get(11) %></textarea></td>
+							<td><textarea id="state_value" name="state_value" style="display:none"><%= list.get(5) %></textarea></td>
+							<td colspan="2" style="background-color:#D4D2FF; align:left;" >제출일 : <%= list.get(9) %></td>
+						</tr>
+						<tr>
+							<th colspan="2" style="background-color:#D4D2FF; align:left;" > &nbsp;금주 업무 실적</th>
+							<th colspan="3" style="align:left; border:none"></th>
+							<th colspan="1" style="txet:center" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" > &nbsp;승인 : <%= list.get(11) %></th>
+						</tr>
+						<tr>
+							<td></td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr style="background-color:#FFC57B; text-align: center; align:center; ">
+							<th width="10%" style="text-align: center; border: 1px solid">구분</th>
+							<th width="40%" style="text-align: center; border: 1px solid">업무 내용</th>
+							<th width="10%" style="text-align: center; border: 1px solid">완료일</th>
+							<th width="10%" style="text-align: center; border: 1px solid">진행율</th>
+							<th width="5%" style="text-align: center; border: 1px solid">상태</th>
+							<th width="25%" style="text-align: center; border: 1px solid">비고</th>
+						</tr>
 						
+						<tr>
+							<!-- 구분 -->
+							<td style="text-align: center; border: 1px solid"><%= list.get(1) %></td>
+							<!-- 업무 내용 -->
+							<td style=" border: 1px solid"><textarea required name="content" id="content" style="resize: none; width:100%; height:100px"><%= list.get(2) %></textarea></td>
+							<!-- 완료일 -->
+							<td style="text-align: center; border: 1px solid"><textarea required name="end" id="end" style="resize: none; width:100%; height:100px"><%= list.get(3) %></textarea></td>
+							<!-- 진행율 -->
+							<td style="text-align: center; border: 1px solid"><textarea required name="progress" id="progress" style="resize: none; width:100%; height:100px"><%= list.get(4) %></textarea></td>
+							<!-- 상태 -->
+							<td style="text-align: center; border: 1px solid;" id="state"></td>
+							<!-- 비고 -->
+							<td style=" border: 1px solid"><textarea  name="note" id="note" style="resize: none; width:100%; height:100px"><%= list.get(6) %></textarea></td>
+						</tr>
+						<tr>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+				
+				<!-- 차주 업무 계획 테이블 -->
+				<table  class="table" style="text-align: center;">
+					<thead>
+						<tr>
+							<td></td>
+						</tr>
+						<tr>
+							<th colspan="2" style="background-color:#FF9900; align:left;" > &nbsp;차주 업무 계획</th>
+						</tr>
+						<tr>
+							<td></td>
+						</tr>
+					</thead>
+					<tbody style="border: 1px solid">
+						<tr style="background-color:#FFC57B; text-align: center; align:center; ">
+							<th width="10%" style="text-align: center; border: 1px solid">구분</th>
+							<th width="40%" style="text-align: center; border: 1px solid">업무 내용</th>
+							<th width="10%" style="text-align: center; border: 1px solid">완료예정</th>
+							<th width="50%" style="text-align: center; border: 1px solid">비고</th>
+						</tr>
 						
-						for(int i = 0; i < list.size(); i++){
-							
-							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
-							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-							
-							String dl = bbsDAO.getDLS(list.get(i).getBbsID());
-							Date time = new Date();
-							String timenow = dateFormat.format(time);
+						<tr>
+							<!-- 구분 -->
+							<td style="text-align: center; border: 1px solid"><textarea id="pl" name="pl" style="display:none"><%= list.get(1) %></textarea><%= list.get(1) %></td>
+							<!-- 업무 내용 -->
+							<td style=" border: 1px solid"><textarea required name="ncontent" id="ncontent" style="resize: none; width:100%; height:100px"><%= list.get(7) %></textarea></td>
+							<!-- 완료예정 -->
+							<td style="text-align: center; border: 1px solid"><textarea required name="ntarget" id="ntarget" style="resize: none; width:100%; height:100px"><%= list.get(8) %></textarea></td>
+							<!-- 비고 -->
+							<td style=" border: 1px solid"><textarea name="nnote" id="nnote" style="resize: none; width:100%; height:100px"><%= list.get(10) %></textarea></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div style="display:inline-block">
+			<%
+			if(count != week) {
+			%>
+				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-left" type="button" style=" margin-left:45%; " data-toggle="tooltip" title="<%= lastweek %>" onclick="location.href='lastWeekRk.jsp?week=<%= week + 1 %>'"></button>
+			<%
+			}
+			%>
+			</div>
 
-							Date dldate = dateFormat.parse(dl);
-							Date today = dateFormat.parse(timenow);
-					%>
-						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
-					<tr>
-						<td> <%= list.get(i).getBbsDeadline() %> </td>
-
-						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
-						<td style="text-align: left">
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="signOnReport.jsp?bbsID=<%= list.get(i).getBbsID() %>">
-							<%= list.get(i).getBbsTitle() %></a></td>
-						<td><%= list.get(i).getUserName() %></td>
-						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
-							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
-						<td><%= list.get(i).getBbsUpdate() %></td>
-						<!-- 승인/미승인/마감 표시 -->
-						<td>
-						<%
-						String sign = null;
-						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
-							sign = list.get(i).getSign();
-						} else {
-							sign="마감";
-							// 데이터베이스에 마감처리 진행
-							int a = bbsDAO.getSignDeadLine(list.get(i).getBbsID());
-						}
-						%>
-						<%= sign %>
-						</td>
-					</tr>
-					<%
-						}
-					%>
-				</tbody>
-			</table>
-			
-			<!-- 페이징 처리 영역 -->
+			<div style="display:inline-block">
 			<%
-				if(pageNumber != 1){
+			if(week != 0) {
 			%>
-				<a href="bbsRk.jsp?pageNumber=<%=pageNumber - 1 %>"
-					class="btn btn-success btn-arraw-left">이전</a>
+				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-right" type="button" style=" margin-left:40%; " data-toggle="tooltip" title="<%= nextweek %>" onclick="location.href='lastWeekRk.jsp?week=<%= week - 1%>'"></button>
 			<%
-				}if(bbsDAO.nextPage(pageNumber + 1)){
+			} else if(week == 1) {
 			%>
-				<a href="bbsRk.jsp?pageNumber=<%=pageNumber + 1 %>"
-					class="btn btn-success btn-arraw-left" id="next">다음</a>
+				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-right" type="button" style=" margin-left:40%; " data-toggle="tooltip" title="<%= nextweek %>" onclick="location.href='summaryRk.jsp'"></button>
+			<% } %>
+			</div>
 			<%
-				}
+			if(list.get(11).equals("미승인")) {
 			%>
-		
-			<a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>" style="width:5%" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성"> 작성</a>
+				<button type="button" class="btn btn-danger pull-right" style="width:5%; margin-left:10px; text-align:center; align:center" onclick="location.href='bbsRkDelete.jsp?sum_id=<%= sum_id %>'">삭제</button> 
+				<button type="button" class="btn btn-info pull-right" style="width:5%; text-align:center; align:center" onclick="update()">수정</button> 
+			<%
+			}
+			%>
 		</div>
+	</form>
 	</div>
-	
-	
-	
-	<!-- 게시판 메인 페이지 영역 끝 -->
+	<br><br><br>	
+<%
+	}
+%>
 	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>
-	<script>
-		function ChangeValue() {
-			var value_str = document.getElementById('searchField');
-			
-		}
-		
-	
-	</script>
-	
-    <!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
-	<script>
-	var trCnt = $('#bbsTable tr').length; 
-	
-	if(trCnt < 11) {
-		$('#next').hide();
-	}
-	</script>
 	
 	<!-- modal 내, password 보이기(안보이기) 기능 -->
-		<script>
+	<script>
 		$(document).ready(function(){
 		    $('#icon').on('click',function(){
 		    	console.log("hello");
@@ -589,43 +605,6 @@
 	}
 	</script>
 	
-	<script>
-	$("#jb-title").on('click', function() {
-		var con = document.getElementById("jb-text");
-		if(con.style.display=="none"){
-			con.style.display = 'block';
-		} else {
-			con.style.display = 'none';
-		}
-	});
-	$(document).on('click',function(e) {
-		var container = $("#jb-title");
-		if(!container.is(event.target) && !container.has(event.target).length) {
-			document.getElementById("jb-text").style.display = 'none';
-		}
-	});
-
-	
-	$("#plist").on('mouseover', function() {
-		var con = document.getElementById("plist_list");
-			con.style.display = 'block';
-	});
-	$("#plist").on('mouseout', function() {
-		var con = document.getElementById("plist_list");
-			con.style.display = 'none';	
-	});
-	
-	
-	$("#noSublist").on('mouseover', function() {
-		var con = document.getElementById("noSublist_list");
-			con.style.display = 'block';
-	});
-	$("#noSublist").on('mouseout', function() {
-		var con = document.getElementById("noSublist_list");
-			con.style.display = 'none';
-	});
-	</script>
-	
 	
 	<script>
 		// 자동 높이 확장 (textarea)
@@ -638,5 +617,75 @@
 			
 		});
 	</script>	
+	
+	
+	<script>
+	// 상태 색상 지정
+	$(document).ready(function() {
+		var con = document.getElementById("state_value").value; //완료, 진행중, 미완료(문제)
+		var state = document.getElementById("state");
+		if(con == "완료") {
+			state.style.backgroundColor = "#00ff00";
+		} else if (con =="진행중") {
+			state.style.backgroundColor = "#ffff00";
+		} else {
+			state.style.backgroundColor = "#ff0000";
+		}
+	});
+	</script>
+	
+	<!-- 상태 선택을 위한 script -->
+	<script>
+	$("#state").on('click', function() {
+		var con = document.getElementById("jb-text");
+		if(con.style.display=="none"){
+			con.style.display = 'block';
+		} else {
+			con.style.display = 'none';
+		}
+	});
+	$(document).on('click',function(e) {
+		var container = $("#state");
+		if(!container.is(event.target) && !container.has(event.target).length) {
+			document.getElementById("jb-text").style.display = 'none';
+		}
+	});
+	
+	var con = document.getElementById("state");
+	$("#complete").on('click', function() {
+			con.style.backgroundColor = "#00ff00";
+	});
+	
+	$("#proceeding").on('click', function() {
+		con.style.backgroundColor = "#ffff00";
+	});
+
+	$("#incomplete").on('click', function() {
+		con.style.backgroundColor = "#ff0000";
+	});
+	
+	// con.style.backgroundColor = ''; 이라면, 설정하시오! (경고)
+	if(con.style.backgroundColor = '') {
+		
+	}
+	</script>
+	
+	
+	<script>
+	function update() {
+		if(document.getElementById("progress").value == '' || document.getElementById("progress").value == null) {
+			alert("금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
+		} else {
+			if(con.style.backgroundColor == '' || con.style.backgroundColor == null) {
+				alert("금주 업무 실적의 '상태'가 선택되지 않았습니다.");
+			} else {
+			var innerHtml = '<td><textarea class="textarea" id="color" name="color" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
+			$('#Table > tbody > tr:last').append(innerHtml);
+			$('#bbsRk').submit();
+			}
+		}
+	}
+	</script>
+	
 </body>
 </html>

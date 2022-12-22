@@ -137,7 +137,7 @@
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
 								<li class="active"><a href="bbsRk.jsp">조회</a></li>
-								<li><a href="bbsRkwrite.jsp">작성</a></li>
+								<li><a href="summaryRk.jsp">제출 목록</a></li>
 							</ul>
 							</li>
 						<%
@@ -427,15 +427,6 @@
 	<button type="button" class="btn btn-primary pull-right" style="width:5%; text-align:center; align:center" onclick="save()">제출</button>
 	</div>
 	
-
-<%-- <textarea><%= bbsContent[0] %></textarea> <br>
-<textarea><%= bbsEnd[0] %></textarea> <br>
-<textarea><%= bbsNContent[0] %></textarea> <br>
-<textarea><%= bbsNTarget[0] %></textarea> <br>
-<textarea><%= bbsDeadline %></textarea> <br> --%>
-
-
-
 
 <!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>

@@ -1,3 +1,5 @@
+<%@page import="net.sf.jasperreports.engine.type.CalculationEnum"%>
+<%@page import="java.time.LocalDateTime"%>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
 <%@page import="user.User"%>
@@ -29,9 +31,17 @@
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
 <link rel="stylesheet" href="css/index.css">
-
+<style>
+.ui-tooltip{
+	white-space: pre-line;
+}
+.ui-tooltip-content {
+	white-space: pre-line;
+}
+</style>
 <title>RMS</title>
 </head>
+
 
 <body>
 	<%
@@ -57,7 +67,7 @@
 			script.println("location.href='login.jsp'");
 			script.println("</script>");
 		}
-		
+
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 				String workSet;
@@ -117,21 +127,46 @@
 		
 
 		
-		
+		 String pl = userDAO.getpl(id); 
 		//저장된 summary중, 가장 최근을 불러옴!
 		String sum_id = Integer.toString(bbsDAO.getNextSum()-1);
-		ArrayList<String> list = bbsDAO.getlistSum(sum_id);
+		ArrayList<String> list = bbsDAO.getlistSum(sum_id, pl);
 		
-		if(list == null) {
+		/* if(list == null) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('제출된 요약본이 없습니다.')");
 			script.println("history.back();");
 			script.println("</script>");
+		} */
+		
+		String str = "미승인 - 관리자의 미승인 상태<br>";
+		str += "승인 - 관리자가 확정한 상태<br>";
+		str += "마감 - 기한이 지나 승인된 상태";
+		
+		
+		// summary 둘러보기를 위한 week 표시
+		int week = 0; 
+		if(request.getParameter("week") != null) {
+			week = Integer.parseInt(request.getParameter("week"));
 		}
+		//week에 date 표시
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = format.parse(list.get(9));
+		
+		Calendar cal3 = Calendar.getInstance();
+		cal3.setTime(date);
+		cal3.add(Calendar.DATE, -7);
+		//지난주,
+		String lastweek = format.format(cal3.getTime());
+		cal3.add(Calendar.DATE, 14);
+		//다음주,
+		String nextweek = format.format(cal3.getTime());
+		
+		int count = bbsDAO.getCountSum(pl)-1;
 		%>
 	
-		
+
 	 <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
@@ -352,16 +387,34 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인(제출) 처리시, 수정/삭제가 불가합니다." > <%= list.get(1) %> 요약본(Summary) </th>
+					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인(제출) 및 마감 상태에선 수정/삭제가 불가합니다." > <%= pl %> 요약본(Summary) </th>
 				</tr>
 			</thead>
 		</table>
 	</div>
-	<br>
 	
 	
 	<!-- 메인 게시글 영역 -->
+	<%
+	// 즉, summary가 없다면, 
+	if(list.isEmpty() || list == null) {
+	%>
+	<br><br><br>
+	<div class="container">
+		<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
+			<thead>
+				<tr>
+				</tr>
+				<tr>
+					<th colspan="5" style=" text-align: center;" class="form-control" data-toggle="tooltip" data-placement="bottom" title="요약본 작성으로 이동하기" > <a href="bbsRk.jsp">작성된 요약본(Summary)이 없습니다. </a></th>
+				</tr>
+			</thead>
+		</table>
+	</div>
 	
+	<%
+	} else {
+	%>
 	<!-- 목록 조회 table -->
 	<div class="container" id="jb-text" style="height:10%; width:10%; display:inline-flex; float:left; margin-left: 50%; display:none; position:absolute">
 		<table class="table" style="text-align: center; border:1px solid #444444 ; background-color:white" >
@@ -381,7 +434,7 @@
 	 </div>
 	 
 	<div class="container">
-	<form method="post" action="bbsRkAction.jsp" id="bbsRk">
+	<form method="post" action="bbsRkUpdate.jsp" id="bbsRk">
 		<div class="row">
 			<div class="container">
 				<!-- 금주 업무 실적 테이블 -->
@@ -390,10 +443,15 @@
 						<tr>
 							<td><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= list.get(9) %></textarea> </td>
 							<td><textarea id="pl" name="pl" style="display:none"><%= list.get(1) %></textarea> </td>
-							<td><textarea id="state_value" name="state" style="display:none"><%= list.get(5) %></textarea></td>
+							<td><textarea id="sum_id" name="sum_id" style="display:none"><%= sum_id %></textarea></td>
+							<td><textarea id="sign" name="sign" style="display:none"><%= list.get(11) %></textarea></td>
+							<td><textarea id="state_value" name="state_value" style="display:none"><%= list.get(5) %></textarea></td>
+							<td colspan="2" style="background-color:#D4D2FF; align:left;" >제출일 : <%= list.get(9) %></td>
 						</tr>
 						<tr>
 							<th colspan="2" style="background-color:#D4D2FF; align:left;" > &nbsp;금주 업무 실적</th>
+							<th colspan="3" style="align:left; border:none"></th>
+							<th colspan="1" style="txet:center" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" > &nbsp;승인 : <%= list.get(11) %></th>
 						</tr>
 						<tr>
 							<td></td>
@@ -458,17 +516,38 @@
 							<!-- 완료예정 -->
 							<td style="text-align: center; border: 1px solid"><textarea required name="ntarget" id="ntarget" style="resize: none; width:100%; height:100px"><%= list.get(8) %></textarea></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea name="nnote" id="nnote" style="resize: none; width:100%; height:100px"><%= list.get(9) %></textarea></td>
+							<td style=" border: 1px solid"><textarea name="nnote" id="nnote" style="resize: none; width:100%; height:100px"><%= list.get(10) %></textarea></td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
+			<div style="display:inline-block">
+			<%
+			if(count != week) {
+			%>
+				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-left" type="button" style=" margin-left:45%; " data-toggle="tooltip" title="<%= lastweek %>" onclick="location.href='lastWeekRk.jsp?week=<%= week + 1 %>'"></button>
+			<%
+			}
+			%>
+			</div>
+			<%-- <div style="display:inline-block">
+				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-right" type="button" style=" margin-left:40%; " data-toggle="tooltip" title="<%= nextweek %>" onclick="location.href='lastWeekRk.jsp?week=<%= week %>'"></button>
+			</div> --%>
+			<%
+			if(list.get(11).equals("미승인")) {
+			%>
+				<button type="button" class="btn btn-danger pull-right" style="width:5%; margin-left:10px; text-align:center; align:center" onclick="location.href='bbsRkDelete.jsp?sum_id=<%= sum_id %>'">삭제</button> 
+				<button type="button" class="btn btn-info pull-right" style="width:5%; text-align:center; align:center" onclick="update()">수정</button> 
+			<%
+			}
+			%>
 		</div>
 	</form>
-	<button type="button" class="btn btn-primary pull-right" style="width:5%; text-align:center; align:center" onclick="save()">제출</button> 
 	</div>
-		
-
+	<br><br><br>	
+<%
+	}
+%>
 	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -543,10 +622,60 @@
 			state.style.backgroundColor = "#ff0000";
 		}
 	});
+	</script>
 	
+	<!-- 상태 선택을 위한 script -->
+	<script>
+	$("#state").on('click', function() {
+		var con = document.getElementById("jb-text");
+		if(con.style.display=="none"){
+			con.style.display = 'block';
+		} else {
+			con.style.display = 'none';
+		}
+	});
+	$(document).on('click',function(e) {
+		var container = $("#state");
+		if(!container.is(event.target) && !container.has(event.target).length) {
+			document.getElementById("jb-text").style.display = 'none';
+		}
+	});
+	
+	var con = document.getElementById("state");
+	$("#complete").on('click', function() {
+			con.style.backgroundColor = "#00ff00";
+	});
+	
+	$("#proceeding").on('click', function() {
+		con.style.backgroundColor = "#ffff00";
+	});
+
+	$("#incomplete").on('click', function() {
+		con.style.backgroundColor = "#ff0000";
+	});
+	
+	// con.style.backgroundColor = ''; 이라면, 설정하시오! (경고)
+	if(con.style.backgroundColor = '') {
+		
+	}
 	</script>
 	
 	
+	<script>
+	function update() {
+		if(document.getElementById("progress").value == '' || document.getElementById("progress").value == null) {
+			alert("금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
+		} else {
+			if(con.style.backgroundColor == '' || con.style.backgroundColor == null) {
+				alert("금주 업무 실적의 '상태'가 선택되지 않았습니다.");
+			} else {
+			var innerHtml = '<td><textarea class="textarea" id="color" name="color" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
+			$('#Table > tbody > tr:last').append(innerHtml);
+			$('#bbsRk').submit();
+			}
+		}
+	}
+	</script>
 	
 </body>
 </html>

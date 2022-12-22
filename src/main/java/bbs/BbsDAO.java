@@ -377,7 +377,19 @@ public class BbsDAO {
 			return -1; //데이터베이스 오류 
 		}
 
-		
+		//요약본(summary) 삭제 메소드
+		public int deleteSum(int sum_id) {
+			//실제 데이터 또한 삭제한다.
+			String sql = "delete from summary where sum_id = ?";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setInt(1, sum_id);
+				return pstmt.executeUpdate();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return -1; //데이터베이스 오류 
+		}
 		
 		
 		// 검색 메소드 
@@ -592,12 +604,45 @@ public class BbsDAO {
 			return -1; //데이터베이스 오류
 		}
 		
+		/* n번째로 최근에 생성된 sum_id의 ID 조회 */
+		public int getNMaxSum(String pl, int week) {
+			String sql = " select sum_id from (select * from summary where pl=?) summary order by sum_id desc limit 1 offset ?";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, pl); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입
+				pstmt.setInt(2, week);
+				rs = pstmt.executeQuery();
+				if(rs.next()) {
+					return rs.getInt(1);
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return -1; //데이터베이스 오류
+		}
+		
 		// 아이디의 bbs 총 개수 세기
 		public int getCountbbs(String id) {
 			String sql = "select count(bbsID) from (select * from bbs where userID=?) bbs order by bbsDate desc";
 			try {
 				PreparedStatement pstmt = conn.prepareStatement(sql);
 				pstmt.setString(1, id); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입
+				rs = pstmt.executeQuery();
+				if(rs.next()) {
+					return rs.getInt(1);
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return -1; //데이터베이스 오류
+		}
+		
+		// pl에 해당되는 총 개수 세기
+		public int getCountSum(String pl) {
+			String sql = "select count(sum_id) from (select * from summary where pl=?) summary order by sum_id desc";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, pl); 
 				rs = pstmt.executeQuery();
 				if(rs.next()) {
 					return rs.getInt(1);
@@ -765,12 +810,13 @@ public class BbsDAO {
 			
 			
 			//summary sum_id를 통해 내용 가져오기 
-			public ArrayList<String> getlistSum(String sum_id){
-				String sql =  "select * from summary where sum_id=?";
+			public ArrayList<String> getlistSum(String sum_id, String pl){
+				String sql =  "select * from summary where sum_id=? and pl=?";
 						ArrayList<String> list = new ArrayList<String>();
 				try {
 					PreparedStatement pstmt = conn.prepareStatement(sql);
 					pstmt.setString(1, sum_id);
+					pstmt.setString(2, pl);
 					rs = pstmt.executeQuery();
 					while(rs.next()) {
 						list.add(rs.getString(1)); //userid
@@ -790,6 +836,30 @@ public class BbsDAO {
 					e.printStackTrace();
 				}
 				return list;
+			}
+			
+			
+			//게시글 수정 메소드
+			public int updateSum(int sum_id, String bbsContent, String bbsEnd, String progress, String state, String note, String bbsNContent, String bbsNTarget, String bbsDeadline, String nnote, String sign) {
+				String sql = "update summary set bbsContent = ?,  bbsEnd = ?, progress = ?, state = ?, note = ?, bbsNContent= ? ,bbsNTarget = ?, bbsDeadline = ?, nnote = ?, sign = ? where sum_id =?";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, bbsContent);
+					pstmt.setString(2, bbsEnd);
+					pstmt.setString(3, progress);
+					pstmt.setString(4, state);
+					pstmt.setString(5, note);
+					pstmt.setString(6, bbsNContent);
+					pstmt.setString(7, bbsNTarget);
+					pstmt.setString(8, bbsDeadline);
+					pstmt.setString(9, nnote);
+					pstmt.setString(10, sign);
+					pstmt.setInt(11, sum_id);
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return -1; //데이터베이스 오류
 			}
 }
 

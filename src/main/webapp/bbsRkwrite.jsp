@@ -221,7 +221,7 @@
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
 								<li class="active"><a href="bbsRk.jsp">조회</a></li>
-								<li><a href="bbsRkwrite.jsp">작성</a></li>
+								<li><a href="summaryRk.jsp">제출 목록</a></li>
 							</ul>
 							</li>
 						<%
