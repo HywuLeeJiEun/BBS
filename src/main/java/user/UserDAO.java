@@ -150,7 +150,6 @@ public class UserDAO { //DAO : data access object
 				}
 		
 		//rank를 출력한다 (직급)
-
 		public String getRank(String id) {
 		String sql = "select rank from user where id = ?";
 		try {

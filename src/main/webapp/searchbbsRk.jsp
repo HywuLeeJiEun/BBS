@@ -230,7 +230,7 @@
 				}if(bbsDAO.nextPage(pageNumber + 1)){
 			%>
 				<a href="searchbbs.jsp?pageNumber=<%=pageNumber + 1 %>&searchField=<%= category %>&searchText=<%= str %>"
-					class="btn btn-success btn-arraw-left">다음</a>
+					class="btn btn-success btn-arraw-left" id="next">다음</a>
 			<%
 				}
 			%>
@@ -252,5 +252,13 @@
 			return true;
 		}
 	</script> -->
+	<!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
+	<script>
+	var trCnt = $('#bbsTable tr').length; 
+	
+	if(trCnt < 11) {
+		$('#next').hide();
+	}
+	</script>
 </body>
 </html>

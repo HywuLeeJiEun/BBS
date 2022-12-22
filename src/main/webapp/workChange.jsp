@@ -121,9 +121,10 @@
 							aria-expanded="false">관리<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="workChange.jsp">담당업무 변경</a></li>
-							<li><a href="logoutAction.jsp">로그아웃</a></li>
-						</ul>
+								<li><a href="#UserUpdateModal">개인정보 수정</a></li>
+								<li class="active"><a href="workChange.jsp">담당업무 변경</a></li>
+								<li><a href="logoutAction.jsp">로그아웃</a></li>
+							</ul>
 					</li>
 			</ul>
 			<%

@@ -51,7 +51,7 @@
 		UserDAO userDAO = new UserDAO();
 		
 		String DDline = bbs.getBbsDeadline();
-		//String DDline = "2022-10-24";
+		//String DDline = "2022-12-19";
 		
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		LocalDate date = LocalDate.parse(DDline, formatter);

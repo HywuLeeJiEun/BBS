@@ -37,6 +37,8 @@
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
 		BbsDAO bbsDAO = new BbsDAO();
 		
+		String rk = userDAO.getRank(id);
+		
 		// DAO 내의 메소드를 실행시킴.
 		int result = userDAO.login(user.getId(), user.getPassword());
 		// bbs 이력을 확인해 보이는 페이지를 다르게 함.

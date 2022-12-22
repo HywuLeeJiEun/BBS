@@ -54,10 +54,10 @@
 			script.println("location.href='login.jsp'");
 			script.println("</script>");
 		}
-		if(rk.equals("실장") || rk.equals("관리자")) {
+		if(!rk.equals("실장") && !rk.equals("관리자")) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("location.href='bbsAdmin.jsp'");
+			script.println("location.href='bbs.jsp'");
 			script.println("</script>");
 		}
 	
@@ -89,12 +89,13 @@
 		String rank = user.getRank();
 		//이메일  로직 처리
 		String Staticemail = user.getEmail();
-		String[] email;
-		email = Staticemail.split("@");
+		String[] email = Staticemail.split("@");
+		
 		//요약본 처리를 위한 Deadline 
 		BbsDAO bbsDAO = new BbsDAO();
 		//ArrayList<Bbs> listbbs = bbsDAO.getDeadLineList(); 
 		
+		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 	%>
 	
 		
@@ -122,23 +123,44 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbs.jsp">조회</a></li>
-							<li><a href="bbsUpdate.jsp">작성</a></li>
+							<li class="active"><a href="bbsAdmin.jsp">조회</a></li>
+							<!-- <li><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li>
+							<li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+						%>
+						<%
+						 if (pl.equals("WEB") || pl.equals("ERP")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
 								aria-expanded="false">요약본<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
+						
 							<ul class="dropdown-menu">
 								<li><a href="bbsRk.jsp">작성</a></li>
-								<li><a href="summaryRk.jsp">제출 목록</a></li>
+							</ul>
+						<%
+						 }
+						%>
+							</li>
+						<%
+							}
+						%>
+						<%
+							if(rk.equals("실장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="bbsRkAdmin.jsp">조회</a></li>
 							</ul>
 							</li>
 						<%
@@ -158,7 +180,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
 					%>
 						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
@@ -351,7 +373,7 @@
 	<!-- ***********검색바 추가 ************* -->
 	<div class="container">
 		<div class="row">
-			<form method="post" name="search" action="searchbbs.jsp">
+			<form method="post" name="search" action="searchbbsRk.jsp">
 				<table class="pull-right">
 					<tr>
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
@@ -388,7 +410,7 @@
 				<tbody>
 					<%
 						String userName = "userName";
-						ArrayList<Bbs> list = bbsDAO.getRkSearch(pageNumber, userName, name);
+						ArrayList<Bbs> list = bbsDAO.getList(pageNumber);
 						
 						for(int i = 0; i < list.size(); i++){
 							
@@ -441,19 +463,19 @@
 			<%
 				if(pageNumber != 1){
 			%>
-				<a href="bbs.jsp?pageNumber=<%=pageNumber - 1 %>"
+				<a href="bbsAdmin.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
 				}if(bbsDAO.nextPage(pageNumber + 1)){
 			%>
-				<a href="bbs.jsp?pageNumber=<%=pageNumber + 1 %>"
+				<a href="bbsAdmin.jsp?pageNumber=<%=pageNumber + 1 %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>
 			<%
 				}
 			%>
 			
 			<!-- 글쓰기 버튼 생성 -->
-			<a href="bbsUpdate.jsp" class="btn btn-info pull-right">작성</a>
+			<!-- <a href="bbsUpdate.jsp" class="btn btn-info pull-right">작성</a> -->
 		</div>
 	</div>
 	

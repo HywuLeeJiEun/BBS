@@ -242,49 +242,84 @@ public class BbsDAO {
 
 		
 	//게시글 리스트 메소드 (bbsRk)
-			public ArrayList<Bbs> getList(int pageNumber, String bbsDeadline, String[] pllist){
-				String sql =  "select * from (select * from bbs where sign='마감' or sign='승인') a "
-						+ "where a.bbsDeadline like '%"+bbsDeadline.trim()+"%' and (";
-						for(int i=0; i<pllist.length; i++) {
-							if(i <pllist.length-1) {
-								sql +="a.userID='"+pllist[i].trim()+"'" +" or ";
-							}else {
-								sql += "a.userID='"+pllist[i].trim()+"'";
-							}	
-						}
-							sql	+= ") order by a.bbsID desc limit ?,10";
-						ArrayList<Bbs> list = new ArrayList<Bbs>();
-				try {
-					PreparedStatement pstmt = conn.prepareStatement(sql);
-					pstmt.setInt(1, (pageNumber-1) * 10 );
-					rs = pstmt.executeQuery();
-					while(rs.next()) {
-						Bbs bbs = new Bbs();
-						bbs.setBbsID(rs.getInt(1));
-						bbs.setBbsManager(rs.getString(2));
-						bbs.setBbsTitle(rs.getString(3));
-						bbs.setUserID(rs.getString(4));
-						bbs.setUserName(rs.getString(5));
-						bbs.setBbsDate(rs.getString(6));
-						bbs.setBbsContent(rs.getString(7));
-						bbs.setBbsStart(rs.getString(8));
-						bbs.setBbsTarget(rs.getString(9));
-						bbs.setBbsEnd(rs.getString(10));
-						bbs.setBbsNContent(rs.getString(11));
-						bbs.setBbsNStart(rs.getString(12));
-						bbs.setBbsNTarget(rs.getString(13));
-						bbs.setBbsAvailable(rs.getInt(14));
-						bbs.setBbsDeadline(rs.getString(15));
-						bbs.setBbsUpdate(rs.getString(16));
-						bbs.setSign(rs.getString(17));
-						list.add(bbs);
-					}
-				}catch (Exception e) {
-					e.printStackTrace();
+	public ArrayList<Bbs> getList(int pageNumber, String bbsDeadline, String[] pllist){
+		String sql =  "select * from (select * from bbs where sign='마감' or sign='승인') a "
+				+ "where a.bbsDeadline like '%"+bbsDeadline.trim()+"%' and (";
+				for(int i=0; i<pllist.length; i++) {
+					if(i <pllist.length-1) {
+						sql +="a.userID='"+pllist[i].trim()+"'" +" or ";
+					}else {
+						sql += "a.userID='"+pllist[i].trim()+"'";
+					}	
 				}
-				return list;
+					sql	+= ") order by a.bbsID desc limit ?,10";
+				ArrayList<Bbs> list = new ArrayList<Bbs>();
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, (pageNumber-1) * 10 );
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				Bbs bbs = new Bbs();
+				bbs.setBbsID(rs.getInt(1));
+				bbs.setBbsManager(rs.getString(2));
+				bbs.setBbsTitle(rs.getString(3));
+				bbs.setUserID(rs.getString(4));
+				bbs.setUserName(rs.getString(5));
+				bbs.setBbsDate(rs.getString(6));
+				bbs.setBbsContent(rs.getString(7));
+				bbs.setBbsStart(rs.getString(8));
+				bbs.setBbsTarget(rs.getString(9));
+				bbs.setBbsEnd(rs.getString(10));
+				bbs.setBbsNContent(rs.getString(11));
+				bbs.setBbsNStart(rs.getString(12));
+				bbs.setBbsNTarget(rs.getString(13));
+				bbs.setBbsAvailable(rs.getInt(14));
+				bbs.setBbsDeadline(rs.getString(15));
+				bbs.setBbsUpdate(rs.getString(16));
+				bbs.setSign(rs.getString(17));
+				list.add(bbs);
 			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 		
+	
+	// Admin 권한(rank - 실장) => 모든 게시글 확인하기
+	public ArrayList<Bbs> getList(int pageNumber){
+		String sql =  "select * from (select * from bbs where sign='마감' or sign='승인') a order by a.bbsID desc limit ?,10";
+				ArrayList<Bbs> list = new ArrayList<Bbs>();
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, (pageNumber-1) * 10 );
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				Bbs bbs = new Bbs();
+				bbs.setBbsID(rs.getInt(1));
+				bbs.setBbsManager(rs.getString(2));
+				bbs.setBbsTitle(rs.getString(3));
+				bbs.setUserID(rs.getString(4));
+				bbs.setUserName(rs.getString(5));
+				bbs.setBbsDate(rs.getString(6));
+				bbs.setBbsContent(rs.getString(7));
+				bbs.setBbsStart(rs.getString(8));
+				bbs.setBbsTarget(rs.getString(9));
+				bbs.setBbsEnd(rs.getString(10));
+				bbs.setBbsNContent(rs.getString(11));
+				bbs.setBbsNStart(rs.getString(12));
+				bbs.setBbsNTarget(rs.getString(13));
+				bbs.setBbsAvailable(rs.getInt(14));
+				bbs.setBbsDeadline(rs.getString(15));
+				bbs.setBbsUpdate(rs.getString(16));
+				bbs.setSign(rs.getString(17));
+				list.add(bbs);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 		//페이징 처리 메소드
 		public boolean nextPage(int pageNumber) {
 			String sql = "select * from bbs where bbsID < ? and bbsAvailable = 1";
@@ -566,25 +601,30 @@ public class BbsDAO {
 		
 		
 		/* 가장 최근에 생성된 bbs의 ID 조회 */
-		/*
-		 * public int getMaxbbs(String id) { String sql =
-		 * "select bbsID from (select * from bbs where userID=?) bbs order by bbsDate desc"
-		 * ; try { PreparedStatement pstmt = conn.prepareStatement(sql);
-		 * pstmt.setString(1, id); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입 rs =
-		 * pstmt.executeQuery(); if(rs.next()) { return rs.getInt(1); } }catch
-		 * (Exception e) { e.printStackTrace(); } return -1; //데이터베이스 오류 }
-		 */
+	 public int getMaxbbs(String id) { 
+	 String sql ="select bbsID from (select * from bbs where userID=?) bbs order by bbsDate desc"; 
+	 try { PreparedStatement pstmt = conn.prepareStatement(sql);
+	 	pstmt.setString(1, id); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입 
+	 	rs =pstmt.executeQuery(); 
+	 	if(rs.next()) { return rs.getInt(1); } 
+	 }catch (Exception e) { 
+	 e.printStackTrace(); } return -1; //데이터베이스 오류 
+	 }
+			 		 
+		 
 		
-		
-		/* 가장 최근에 생성된 sum의 ID 조회  (summary) */ 
-		/*
-		 * public int getMaxsum(String bbsDeadline) { String sql =
-		 * "select sum_id from (select * from summary where bbsDeadline=?) summary order by bbsDeadline desc"
-		 * ; try { PreparedStatement pstmt = conn.prepareStatement(sql);
-		 * pstmt.setString(1, bbsDeadline); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입 rs =
-		 * pstmt.executeQuery(); if(rs.next()) { return rs.getInt(1); } }catch
-		 * (Exception e) { e.printStackTrace(); } return -1; //데이터베이스 오류 }
-		 */
+	
+	/* 가장 최근에 생성된 sum의 ID 조회  (summary) */ 
+ 	public int getMaxsum(String bbsDeadline) { 
+	 String sql ="select sum_id from (select * from summary where bbsDeadline=?) summary order by bbsDeadline desc" ; 
+	 try { PreparedStatement pstmt = conn.prepareStatement(sql);
+	 		  pstmt.setString(1, bbsDeadline); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입 
+	 	rs =pstmt.executeQuery();
+	  if(rs.next()) { return rs.getInt(1); } 
+	 }catch
+	   (Exception e) { e.printStackTrace(); } return -1; //데이터베이스 오류 
+	  }
+		 
 		
 		
 		/* n번째로 최근에 생성된 bbs의 ID 조회 */
@@ -753,6 +793,21 @@ public class BbsDAO {
 			      return list;
 			   }
 			
+			
+			// 요약본(Summary) BbsDeadline 중, 가장 큰 제출일 검색 메소드 
+			public String getDeadLineListSum() {
+			      String sql = " select bbsDeadline from summary order by bbsDeadline desc";
+			      try {
+			            PreparedStatement pstmt=conn.prepareStatement(sql);
+						rs=pstmt.executeQuery();//select
+			         while(rs.next()) {
+			        	 return rs.getString(1);
+			         }         
+			      } catch(Exception e) {
+			         e.printStackTrace();
+			      }
+			      return "";
+			   }
 				
 			
 			// bbs의 Sign을 마감으로 변경함! ((제출 날짜가 지남!))
@@ -860,6 +915,23 @@ public class BbsDAO {
 					e.printStackTrace();
 				}
 				return -1; //데이터베이스 오류
+			}
+			
+			//ERP, WEB)) bbsDeadline을 통한 sum_id 검색
+			public String getSumid(String bbsDeadline, String pl) {
+				String sql = "select sum_id from summary where bbsDeadline = ? and pl=?";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, bbsDeadline); 
+					pstmt.setString(2, pl); 
+					rs = pstmt.executeQuery();
+					if(rs.next()) {
+						return rs.getString(1);
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return ""; //데이터베이스 오류
 			}
 }
 
