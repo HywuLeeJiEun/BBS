@@ -1,9 +1,20 @@
 @charset "UTF-8";
 
-textarea {
-	/* style="background-image:url('css/index.JPG')" */
-	width:90%;
-	height: 20em;
-	resize: vertical;
-	background-repeat: repeat-y;
+@media (min-width: 768px) {
+  .container {
+    width: 750px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    width: 940px;
+  }
+}
+
+/*사실 이 블럭은 없어도 된다*/
+@media (min-width: 1200px) {
+  .container {
+    width: 940px;
+  }
 }
