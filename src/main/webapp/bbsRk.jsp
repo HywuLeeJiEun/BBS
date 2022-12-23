@@ -125,6 +125,14 @@
 		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
 		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist);
 		
+		if(work.equals("") || work == null) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('PL(파트리더) 권한이 없습니다. 관리자에게 문의바랍니다.')");
+			script.println("history.back();");
+			script.println("</script>");
+		}
+		
 		if(list.size() == 0) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");

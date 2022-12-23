@@ -133,6 +133,13 @@
 		String sum_id = bbsDAO.getSumid_Deadline(bbsDeadline, pl); //자신에게 맞는 sum_id를 가져옴!
 		ArrayList<String> list = bbsDAO.getlistSum(sum_id, pl);
 		
+		if(pl.equals("") || pl == null) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('PL(파트리더) 권한이 없습니다. 관리자에게 문의바랍니다.')");
+			script.println("history.back();");
+			script.println("</script>");
+		}
 		
 		String str = "미승인 - 관리자의 미승인 상태<br>";
 		str += "승인 - 관리자가 확정한 상태<br>";

@@ -1133,6 +1133,19 @@ public class BbsDAO {
 				 return -1;
 			}
 			
+			// bbs의 Sign을 마감으로 변경함! ((제출 날짜가 지남!)) // summary_admin
+			public int sumadSign(int sumad_id) {
+				String sql = " update summary_admin set sign='마감' where sumad_id=?";
+				 try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, sumad_id); // bbsId 삽입
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				 return -1;
+			}
+			
 			
 }
 

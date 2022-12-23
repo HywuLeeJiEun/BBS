@@ -45,6 +45,7 @@
 
 <body>
 	<%
+		String sign = "";
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
 		BbsDAO bbsDAO = new BbsDAO();
 		
@@ -417,7 +418,6 @@
 	} else {
 		
 		//기간이 지나면 sign에 '마감' 표시를 함. 
-		String sign = "";
 		String dl = (list.get(9));
 		Date time = new Date();
 		String timenow = format.format(time);
@@ -469,7 +469,7 @@
 						<tr>
 							<th colspan="2" style="background-color:#D4D2FF; align:left;" > &nbsp;금주 업무 실적</th>
 							<th colspan="3" style="align:left; border:none"></th>
-							<th colspan="1" style="txet:center" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" > &nbsp;승인 : <%= list.get(11) %></th>
+							<th colspan="1" style="txet:center" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" > &nbsp;승인 : <%= sign %></th>
 						</tr>
 						<tr>
 							<td></td>
@@ -561,7 +561,7 @@
 			<% } %>
 			</div>
 			<%
-			if(list.get(11).equals("미승인")) {
+			if(sign.equals("미승인")) {
 			%>
 				<button type="button" class="btn btn-danger pull-right" style="width:5%; margin-left:10px; text-align:center; align:center" onclick="location.href='bbsRkDelete.jsp?sum_id=<%= sum_id %>'">삭제</button> 
 				<button type="button" class="btn btn-info pull-right" style="width:5%; text-align:center; align:center" onclick="update()">수정</button> 

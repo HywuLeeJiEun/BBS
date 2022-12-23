@@ -168,7 +168,25 @@
 		nextweek = format.format(cal3.getTime());
 		
 		int count = bbsDAO.getCountSumAddmin()-1;
-	
+		
+		
+		//기간이 지나면 sign에 '마감' 표시를 함. (summary_admin)
+		String dl = (sumad.get(18));
+		Date time = new Date();
+		String timenow = format.format(time);
+		
+		Date dldate = format.parse(dl);
+		Date today = format.parse(timenow);
+		
+		String sign ="";
+		if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
+			sign = sumad.get(18);
+		} else {
+			sign="마감";
+			// 데이터베이스에 마감처리 진행
+			int a = bbsDAO.sumadSign(Integer.parseInt(sumad_id));
+		
+		}
 		%>
 
 
@@ -632,11 +650,11 @@
 			<% } %>
 			</div> 
 			<%
-			if(sumad.get(17).equals("미승인")) {
+			if(sign.equals("미승인")) {
 			%>
 				<button type="button" class="btn btn-success pull-right" style="width:5%; margin-left:10px; text-align:center; align:center" onclick="signOn()">승인</button> 
 				<button type="button" class="btn btn-info pull-right" style="width:5%; text-align:center; align:center" onclick="update()">수정</button> 
-		<% } %>
+			<% } %>
 		</div>
 	</form>
 	</div>
