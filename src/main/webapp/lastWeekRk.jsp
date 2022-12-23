@@ -163,7 +163,7 @@
 		cal3.add(Calendar.DATE, 14);
 		//다음주,
 		String nextweek = format.format(cal3.getTime());
-	
+		
 		%>
 	
 
@@ -415,6 +415,23 @@
 	
 	<%
 	} else {
+		
+		//기간이 지나면 sign에 '마감' 표시를 함. 
+		String sign = "";
+		String dl = (list.get(9));
+		Date time = new Date();
+		String timenow = format.format(time);
+		
+		Date dldate = format.parse(dl);
+		Date today = format.parse(timenow);
+		
+		if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
+			sign = list.get(11);
+		} else {
+			sign="마감";
+			// 데이터베이스에 마감처리 진행
+			int a = bbsDAO.sumSign(Integer.parseInt(sum_id));
+		}
 	%>
 	<!-- 목록 조회 table -->
 	<div class="container" id="jb-text" style="height:10%; width:10%; display:inline-flex; float:left; margin-left: 50%; display:none; position:absolute">
@@ -534,7 +551,7 @@
 
 			<div style="display:inline-block">
 			<%
-			if(week != 0) {
+			if(week != 1) {
 			%>
 				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-right" type="button" style=" margin-left:40%; " data-toggle="tooltip" title="<%= nextweek %>" onclick="location.href='lastWeekRk.jsp?week=<%= week - 1%>'"></button>
 			<%

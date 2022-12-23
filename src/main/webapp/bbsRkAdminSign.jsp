@@ -34,7 +34,7 @@
 		
 	// String 가져오기
 	String bbsDeadline = request.getParameter("bbsDeadline");
-	String sign = request.getParameter("sign");
+	String sign = "승인";
 	//ERP
 	int esum_id = Integer.parseInt(request.getParameter("esum_id"));
 	String econtent = request.getParameter("econtent");
@@ -72,20 +72,13 @@
 	String wntarget = request.getParameter("wntarget");
 	String wnnote = request.getParameter("wnnote");
 	
-	
+	//sumad_id 구하기
+	int sumad_id = Integer.parseInt(bbsDAO.getSumAdminid(bbsDeadline));
 	
 	int erp = bbsDAO.updateSum(esum_id, econtent, eend, eprogress, estate, enote, encontent, entarget, bbsDeadline, ennote, sign);
 	int web = bbsDAO.updateSum(wsum_id, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, bbsDeadline, wnnote, sign);
 	
-	int num= -1;
-	
-	String sumad_id = bbsDAO.getSumAdminid(bbsDeadline);
-	
-	if(sumad_id.equals("")) { //데이터가 없기 때문에 저장!  (insert)
-		num = bbsDAO.SummaryAdminWrite(econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline);
-	} else { //데이터가 이미 있으므로 수정! (update)
-		num = bbsDAO.SummaryAdminUpdate(Integer.parseInt(sumad_id), econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline);
-	}
+	int num = bbsDAO.SummaryAdminUpdate(sumad_id,econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline);
 	
 	if(num==-1){
 		PrintWriter script = response.getWriter();

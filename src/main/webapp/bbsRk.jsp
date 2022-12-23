@@ -176,6 +176,17 @@
 		
 		//bbsID string으로 변환
 		String bbsID = String.join(",",bbsId);
+		
+		/// 이미 해당 날짜에 제추뢴 요약본이 있다면, 작성 불가!
+		String sum_id =  bbsDAO.getSumid(bbsDeadline, work);
+		if(sum_id != null && !sum_id.equals("")) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('이미 작성된 요약본이 있습니다. 해당 내용으로 이동합니다. ')");
+			script.println("location.href='summaryRk.jsp'");
+			script.println("</script>");
+		}
+		
 
 	%>
 	

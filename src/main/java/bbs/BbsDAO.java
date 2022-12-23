@@ -151,6 +151,23 @@ public class BbsDAO {
 			return -1; //데이터베이스 오류
 		}
 	
+	//게시글 번호 부여 메소드 (Summary_admin)
+			public int getNextSumAdmin() {
+				//현재 게시글을 내림차순으로 조회하여 가장 마지막 글의 번호를 구한다
+				String sql = "select sumad_id from summary_admin order by sumad_id desc";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					rs = pstmt.executeQuery();
+					if(rs.next()) {
+						return rs.getInt(1) + 1;
+					}
+					return 1; //첫 번째 게시물인 경우
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return -1; //데이터베이스 오류
+			}
+	
 	// 이전 bbs개수 카운트 메소드
 	public int getCount(int bbsID) {
 		//현재 게시글을 내림차순으로 조회하여 가장 마지막 글의 번호를 구한다
@@ -646,11 +663,28 @@ public class BbsDAO {
 		
 		/* n번째로 최근에 생성된 sum_id의 ID 조회 */
 		public int getNMaxSum(String pl, int week) {
-			String sql = " select sum_id from (select * from summary where pl=?) summary order by sum_id desc limit 1 offset ?";
+			String sql = " select sum_id from (select * from summary where pl=?) summary order by bbsDeadline desc limit 1 offset ?";
 			try {
 				PreparedStatement pstmt = conn.prepareStatement(sql);
 				pstmt.setString(1, pl); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입
 				pstmt.setInt(2, week);
+				rs = pstmt.executeQuery();
+				if(rs.next()) {
+					return rs.getInt(1);
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return -1; //데이터베이스 오류
+		}
+		
+		
+		/* n번째로 최근에 생성된 sumad_id의 ID 조회 (summary_admin)*/
+		public int getNMaxSumad(int week) {
+			String sql = " select sumad_id, bbsDeadline from summary_admin order by bbsDeadline desc limit 1 offset ?";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setInt(1, week);
 				rs = pstmt.executeQuery();
 				if(rs.next()) {
 					return rs.getInt(1);
@@ -692,6 +726,21 @@ public class BbsDAO {
 			}
 			return -1; //데이터베이스 오류
 		}
+		
+		// summaey_admin 총 개수 세기
+			public int getCountSumAddmin() {
+				String sql = "select count(sumad_id) from summary_admin order by sumad_id desc";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					rs = pstmt.executeQuery();
+					if(rs.next()) {
+						return rs.getInt(1);
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return -1; //데이터베이스 오류
+			}
 		
 		//가장 최근 작성된 게시글 하나를 보는 메소드
 		public Bbs getBbsLast(String id) {
@@ -894,6 +943,41 @@ public class BbsDAO {
 			}
 			
 			
+			//summary_admin sumad_id를 통해 내용 가져오기 
+			public ArrayList<String> getlistSumad(String sumad_id){
+				String sql =  "select * from summary_admin where sumad_id=? ";
+						ArrayList<String> list = new ArrayList<String>();
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, sumad_id);
+					rs = pstmt.executeQuery();
+					while(rs.next()) {
+						list.add(rs.getString(1)); //
+						list.add(rs.getString(2));
+						list.add(rs.getString(3));
+						list.add(rs.getString(4));
+						list.add(rs.getString(5));
+						list.add(rs.getString(6));
+						list.add(rs.getString(7));
+						list.add(rs.getString(8));
+						list.add(rs.getString(9));
+						list.add(rs.getString(10));
+						list.add(rs.getString(11));
+						list.add(rs.getString(12));
+						list.add(rs.getString(13));
+						list.add(rs.getString(14));
+						list.add(rs.getString(15));
+						list.add(rs.getString(16));
+						list.add(rs.getString(17));
+						list.add(rs.getString(18));
+						list.add(rs.getString(19));
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return list;
+			}
+			
 			//게시글 수정 메소드
 			public int updateSum(int sum_id, String bbsContent, String bbsEnd, String progress, String state, String note, String bbsNContent, String bbsNTarget, String bbsDeadline, String nnote, String sign) {
 				String sql = "update summary set bbsContent = ?,  bbsEnd = ?, progress = ?, state = ?, note = ?, bbsNContent= ? ,bbsNTarget = ?, bbsDeadline = ?, nnote = ?, sign = ? where sum_id =?";
@@ -933,5 +1017,122 @@ public class BbsDAO {
 				}
 				return ""; //데이터베이스 오류
 			}
+			
+			
+			//bbsRkAction -> summary 테이블에 데이터 삽입
+			public int SummaryAdminWrite(String e_content, String e_end, String e_progress, String e_state, String e_note, String e_ncontent, String e_ntarget, String e_nnote, String w_content, String w_end, String w_progress, String w_state, String w_note, String w_ncontent, String w_ntarget, String w_nnote, String sign, String bbsDeadline) {
+				String sql = "insert into summary_admin values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, getNextSumAdmin()); 
+					pstmt.setString(2, e_content); 
+					pstmt.setString(3, e_end);
+					pstmt.setString(4, e_progress); 
+					pstmt.setString(5, e_state); 
+					pstmt.setString(6, e_note); 
+					pstmt.setString(7, e_ncontent); 
+					pstmt.setString(8, e_ntarget);
+					pstmt.setString(9, e_nnote); 
+					pstmt.setString(10, w_content); 
+					pstmt.setString(11, w_end); 
+					pstmt.setString(12, w_progress);
+					pstmt.setString(13, w_state);
+					pstmt.setString(14, w_note);
+					pstmt.setString(15, w_ncontent);
+					pstmt.setString(16, w_ntarget);
+					pstmt.setString(17, w_nnote);
+					pstmt.setString(18, sign);
+					pstmt.setString(19, bbsDeadline);
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return -1; //데이터베이스 오류
+			}
+			
+			
+			//bbsRkAction -> summary 테이블에 데이터 삽입
+			public int SummaryAdminUpdate(int sumad_id,String e_content, String e_end, String e_progress, String e_state, String e_note, String e_ncontent, String e_ntarget, String e_nnote, String w_content, String w_end, String w_progress, String w_state, String w_note, String w_ncontent, String w_ntarget, String w_nnote, String sign, String bbsDeadline) {
+				String sql = "update summary_admin set e_content=?, e_end=?, e_progress=?, e_state=?, e_note=?, e_ncontent=?, e_ntarget=?, e_nnote=?, w_content=?, w_end=?, w_progress=?, w_state=?, w_note=?, w_ncontent=?, w_ntarget=?, w_nnote=?, sign=?, bbsDeadline=? where sumad_id = ?";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					//pstmt.setInt(1, getNextSumAdmin()); 
+					pstmt.setString(1, e_content); 
+					pstmt.setString(2, e_end);
+					pstmt.setString(3, e_progress); 
+					pstmt.setString(4, e_state); 
+					pstmt.setString(5, e_note); 
+					pstmt.setString(6, e_ncontent); 
+					pstmt.setString(7, e_ntarget);
+					pstmt.setString(8, e_nnote); 
+					pstmt.setString(9, w_content); 
+					pstmt.setString(10, w_end); 
+					pstmt.setString(11, w_progress);
+					pstmt.setString(12, w_state);
+					pstmt.setString(13, w_note);
+					pstmt.setString(14, w_ncontent);
+					pstmt.setString(15, w_ntarget);
+					pstmt.setString(16, w_nnote);
+					pstmt.setString(17, sign);
+					pstmt.setString(18, bbsDeadline);
+					pstmt.setInt(19, sumad_id);
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return -1; //데이터베이스 오류
+			}
+			
+			
+			//select sumad_id from summary_admin where bbsDeadline ="2022-12-26";
+			//ERP, WEB)) bbsDeadline을 통한 sum_id 검색
+			public String getSumAdminid(String bbsDeadline) {
+				String sql = "select sumad_id from summary_admin where bbsDeadline = ?";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, bbsDeadline);  
+					rs = pstmt.executeQuery();
+					if(rs.next()) {
+						return rs.getString(1);
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return ""; //데이터베이스 오류
+			}
+			
+			
+			//bbsDeadline을 통한 sum_id 검색
+			public String getSumid_Deadline(String bbsDeadline, String pl) {
+				String sql = "select sum_id from summary where bbsDeadline = ? and pl=?";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, bbsDeadline);  
+					pstmt.setString(2, pl);  
+					rs = pstmt.executeQuery();
+					if(rs.next()) {
+						return rs.getString(1);
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return ""; //데이터베이스 오류
+			}
+			
+			
+			// bbs의 Sign을 마감으로 변경함! ((제출 날짜가 지남!))
+			public int sumSign(int sum_id) {
+				String sql = " update summary set sign='마감' where sum_id=?";
+				 try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, sum_id); // bbsId 삽입
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				 return -1;
+			}
+			
+			
 }
 
