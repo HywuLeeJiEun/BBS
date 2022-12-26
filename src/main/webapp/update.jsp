@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="css/css/bootstrap.css">
 <link rel="stylesheet" href="css/index.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link href="css/index.css" rel="stylesheet" type="text/css">
 <title>RMS</title>
 </head>
 
@@ -150,11 +151,45 @@
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
+							<% if(!rk.equals("실장")) { %>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
 							<li class="active"><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
 							<li><a href="signOn.jsp">승인(제출)</a></li>
+							<% } %>
 						</ul>
 					</li>
+						<%
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+						
+							<ul class="dropdown-menu">
+								<li><a href="bbsRk.jsp">작성</a></li>
+								<li><a href="summaryRk.jsp">제출 목록</a></li>
+							</ul>
+						<%
+						 }
+						%>
+							</li>
+						<%
+							if(rk.equals("실장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="bbsRkAdmin.jsp">조회</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
 				</ul>
 			
 			
@@ -168,7 +203,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
 					%>
 						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
@@ -417,11 +452,11 @@
 													.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsNTarget() %></textarea></td>										
 								</tr>
 								<tr align="center">	
-										 <td><input class="textarea" id="content_add" style="height:45px;width:150px;border:none;" readonly ></td>
-										 <td><input class="textarea" id="content_add" style="height:45px;width:100%;border:none;" readonly ></td>
-										 <td><input type="text" style="height:45px; width:100px;border:none;" class="form-control"  ></td>
-										 <td><input type="text" style="height:45px; width:100px;border:none;" id="target_add" class="form-control"></td>	
-										 <td><input type="text" style="height:45px; width:100px;border:none;" id="target_add" class="form-control"></td>
+										 <td><input class="textarea" id="content_add" style="height:5px;width:150px;border:none;" readonly ></td>
+										 <td><input class="textarea" id="content_add" style="height:5px;width:100%;border:none;" readonly ></td>
+										 <td><input class="textarea" style="height:5px; width:100px;border:none;" class="form-control"  readonly></td>
+										 <td><input class="textarea" style="height:5px; width:100px;border:none;" id="target_add" class="form-control" readonly></td>	
+										 <td><input class="textarea" style="height:5px; width:100px;border:none;" id="target_add" class="form-control" readonly></td>
 									</tr>	
 									<tr>
 									 <td colspan="5" >

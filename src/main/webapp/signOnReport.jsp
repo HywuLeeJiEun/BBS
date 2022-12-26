@@ -19,6 +19,8 @@
 <link rel="stylesheet" href="css/css/bootstrap.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <title>RMS</title>
+<link href="css/index.css" rel="stylesheet" type="text/css">
+
 </head>
 <body id="weekreport">
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -144,6 +146,22 @@
 							<li class="active"><a href="signOn.jsp">승인(제출)</a></li>
 						</ul>
 					</li>
+						<%
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="bbsRk.jsp">작성</a></li>
+								<li><a href="summaryRk.jsp">제출 목록</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
 				</ul>
 			
 			
@@ -309,8 +327,8 @@
 	
 	
 	
-<div class="container-fluid">
-<table id="JR_PAGE_ANCHOR_0_1" role="none" class="jrPage" data-jr-height="595" style="empty-cells: show; width: 90%; border-collapse: collapse; background-color: white;">
+<div class="container-fluid" style="margin-left:15%">
+<table id="JR_PAGE_ANCHOR_0_1" role="none" class="jrPage" data-jr-height="595" style="empty-cells: show; width: 70%; border-collapse: collapse; background-color: white; top:5%; ">
 <tr role="none" valign="top" style="height:0">
 <td style="width:70px"></td>
 <td style="width:3px"></td>
@@ -406,33 +424,33 @@
 	<td colspan="2">
 	</td>
    	 <td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea" id="bbsManager" name="bbsManager" style="resize:none; height:180px; width:100%; border:none; overflow:auto; vertical-align:top; text-align: center;" placeholder="구분/담당자"  readonly><%= bbs.getBbsManager() %></textarea></td>
+	<textarea class="textarea" readonly id="bbsManager" name="bbsManager" style="resize:none; height:180px; width:100%; border:none; overflow:auto; vertical-align:top; text-align: center;" placeholder="구분/담당자"  readonly><%= bbs.getBbsManager() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
-	<textarea class="textarea" id="bbsContent" required style="resize:none; height:180px;width:100%; border:none;  " placeholder="업무내용" name="bbsContent"><%= bbs.getBbsContent() %></textarea></td>
+	<textarea class="textarea" readonly id="bbsContent" required style="resize:none; height:180px;width:100%; border:none;  " placeholder="업무내용" name="bbsContent"><%= bbs.getBbsContent() %></textarea></td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea" id="bbsStart" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsStart"  oninput="this.value = this.value
+	<textarea class="textarea" readonly id="bbsStart" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsStart"  oninput="this.value = this.value
 												.replace(/[^0-9./.\s.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
 												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsStart() %></textarea></td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea" id="bbsTarget" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="완료목표일" name="bbsTarget" oninput="this.value = this.value
+	<textarea class="textarea" readonly id="bbsTarget" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="완료목표일" name="bbsTarget" oninput="this.value = this.value
 												.replace(/[^0-9./.\s.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
 												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsTarget() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea" id="bbsEnd" required style="resize:none; height:180px; width:100%; border:none; text-align: center;"  placeholder="진행율/완료일" name="bbsEnd" oninput="this.value = this.value
+	<textarea class="textarea" readonly id="bbsEnd" required style="resize:none; height:180px; width:100%; border:none; text-align: center;"  placeholder="진행율/완료일" name="bbsEnd" oninput="this.value = this.value
 												.replace(/[^0-9./.\s.%.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
 												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsEnd() %></textarea></td>
 	<td>
 	</td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea" style="resize:none; height:180px; width:100%; border:none; overflow:auto; text-align: center;" placeholder="구분/담당자"   readonly><%= bbs.getBbsManager() %></textarea></td>
+	<textarea class="textarea"  readonly style="resize:none; height:180px; width:100%; border:none; overflow:auto; text-align: center;" placeholder="구분/담당자"   readonly><%= bbs.getBbsManager() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
-	<textarea class="textarea" required id="bbsNContent" style="resize:none; height:180px;width:100%; border:none; " placeholder="업무내용" name="bbsNContent"><%= bbs.getBbsNContent() %></textarea></td>
+	<textarea class="textarea" readonly required id="bbsNContent" style="resize:none; height:180px;width:100%; border:none; " placeholder="업무내용" name="bbsNContent"><%= bbs.getBbsNContent() %></textarea></td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea" required id="bbsNStart" style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsNStart"  oninput="this.value = this.value
+	<textarea class="textarea" readonly required id="bbsNStart" style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsNStart"  oninput="this.value = this.value
 												.replace(/[^0-9./.\s.-]/g, '')
 												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsNStart() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
-	<textarea class="textarea" required id="bbsNTarget" style="resize:none; height:180px; width:100%; border:none; text-align: center; " placeholder="완료목표일" name="bbsNTarget" oninput="this.value = this.value
+	<textarea class="textarea" readonly required id="bbsNTarget" style="resize:none; height:180px; width:100%; border:none; text-align: center; " placeholder="완료목표일" name="bbsNTarget" oninput="this.value = this.value
 												.replace(/[^0-9./.\s.-]/g, '')
 												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsNTarget() %></textarea></td>
 	<td colspan="2">
@@ -440,11 +458,11 @@
 	</td>
 </tr>
 <tr  style="height:80px">
-	<td colspan="15" style="right-margin:50px;">
+	<td colspan="15" style="margin-right:50px;">
 		<a href="signOn.jsp" style="margin-left:130px;" class="btn btn-primary pull-right">목록</a>
 	</td>
 	<td>
-		<button class="btn btn-success pull-right" id="<%= bbs.getBbsID() %>" onclick="signOn_click(this.id);"> 승인 </button>
+		<button style="margin-left:20px;" class="btn btn-success pull-right" id="<%= bbs.getBbsID() %>" onclick="signOn_click(this.id);"> 승인 </button>
 	</td>
 	<td>
 		<%-- <a class="btn btn-success pull-right" href="ppt.jsp?deadLine=<%= list.get(0).getBbsDeadline() %>">PPTX</a> --%>

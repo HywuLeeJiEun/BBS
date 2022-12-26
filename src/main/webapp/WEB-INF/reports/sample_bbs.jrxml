@@ -21,7 +21,7 @@
 		<![CDATA[SELECT *
 FROM bbs
 WHERE 
-	 bbs.`bbsDeadLine` = $P{deadLine} 
+	 bbs.`bbsDeadLine` like '%$P!{deadLine}%' 
 ORDER BY bbs.`bbsID` DESC]]>
 	</queryString>
 	<field name="bbsID" class="java.lang.Integer">

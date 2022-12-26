@@ -34,8 +34,14 @@
 <body>
 
 <%
-	String bbsDeadline = request.getParameter("deadLine");
-	String templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
+	// sumad_id에 해당하는 bbsDeadline
+	String bbsDeadline = "2022-12-19"; //request.getParameter("deadLine");
+	//e_state, w_state => 색상표
+	String e_state = "#ff0000";
+	String w_state = "#ffff00";
+	
+	
+	String templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\SummaryAD.jrxml";
 	//String templatePath = "D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
 	//String templatePath = "D:\\workspace\\sample\\sample_bbs.jrxml";
 	//String templatePath2 = "D:\\workspace\\sample\\sample_bbs.jasper";
@@ -57,6 +63,8 @@
 	
 	 paramMap.put("deadLine",bbsDeadline);	  
 	 paramMap.put("logo",logo);
+	 paramMap.put("e_state",e_state);
+	 paramMap.put("w_state",w_state);
 	
 	 // (3)데이타소스 생성
 	 Class.forName("org.mariadb.jdbc.Driver");
@@ -71,7 +79,7 @@
 	 JRPptxExporter pptxExporter = new JRPptxExporter();
 	 pptxExporter.setExporterInput(new SimpleExporterInput(print));
 	 //pptxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(new File("D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\주간보고_sample.pptx")));
-	 pptxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(new File("C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\주간보고_sample.pptx")));
+	 pptxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(new File("C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\요약본_sample.pptx")));
 	 
 	 // frame으로 출력
 	 /* JFrame frame = new JFrame("Report");
@@ -87,7 +95,7 @@
 	
 	}
 	
-	String fileName = "주간보고_sample.pptx";
+	String fileName = "요약본_sample.pptx";
 	String downLoadFile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\" + fileName;
 	
 	File file = new File(downLoadFile);

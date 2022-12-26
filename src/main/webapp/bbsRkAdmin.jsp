@@ -31,14 +31,6 @@
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
 <link rel="stylesheet" href="css/index.css">
-<style>
-.ui-tooltip{
-	white-space: pre-line;
-}
-.ui-tooltip-content {
-	white-space: pre-line;
-}
-</style>
 <title>RMS</title>
 </head>
 
@@ -250,7 +242,7 @@
 								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li  class="active"><a href="bbsRkAdmin.jsp">조회</a></li>
+								<li  class="active"><a href="bbsRkAdmin.jsp">작성 및 조회</a></li>
 							</ul>
 							</li>
 						<%
@@ -270,7 +262,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
@@ -429,7 +421,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인(제출) 및 마감 처리시, 수정/삭제가 불가합니다." > 요약본(Summary) 최종 수정 </th>
+					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인(제출) 및 마감 처리시, 수정/삭제가 불가합니다." > 요약본(Summary) 최종 확인 </th>
 				</tr>
 			</thead>
 		</table>
@@ -641,14 +633,17 @@
 				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-right" type="button" style=" margin-left:40%; " data-toggle="tooltip" title="<%= nextweek %>" onclick="location.href='lastWeekRk.jsp?week=<%= week %>'"></button>
 			</div> --%>
 			<%
-			if(sign.equals("미승인")) {
+			if(sign.equals("미승인") && !bbsDAO.getSumAdminid(bbsDeadline).equals("")) {
 			%>
 				<button type="button" class="btn btn-success pull-right" style="width:5%; margin-left:10px; text-align:center; align:center" onclick="signOn()">승인</button> 
 				<button type="button" class="btn btn-info pull-right" style="width:5%; text-align:center; align:center" onclick="update()">수정</button> 
+		<% } else if(bbsDAO.getSumAdminid(bbsDeadline).equals("")) { // 즉, 작성되지 않았다면!  %> 
+				<button type="button" class="btn btn-primary pull-right" style="width:5%; text-align:center; align:center" onclick="update()">작성</button> 
 		<% } %>
 		</div>
 	</form>
 	</div>
+	<a> <%= count %></a>
 	<br><br><br>	
 	
 	<!-- 부트스트랩 참조 영역 -->

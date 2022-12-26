@@ -9,10 +9,15 @@
 <!DOCTYPE html>
 <html>
 <head>
+<!-- // 폰트어썸 이미지 사용하기 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <meta charset="UTF-8">
+<!-- 화면 최적화 -->
+<!-- <meta name="viewport" content="width-device-width", initial-scale="1"> -->
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
-<title>Baynex 주간보고</title>
+<link rel="stylesheet" href="css/index.css">
+<title>RMS</title>
 </head>
 <body id="weekreport">
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -98,7 +103,7 @@
 	
 	
 	
-<div class="container-fluid">
+<div class="container-fluid" style="margin-left:5%">
 <table id="JR_PAGE_ANCHOR_0_1" role="none" class="jrPage" data-jr-height="595" style="empty-cells: show; width: 90%; border-collapse: collapse; background-color: white;">
 <tr role="none" valign="top" style="height:0">
 <td style="width:70px"></td>
@@ -259,7 +264,7 @@
 		<button class="btn btn-info" onclick="window.scrollTo({top:0 ,behavior:'smooth'});">상단으로</button>
 	</td>
 	<td>
-		<a class="btn btn-success pull-right" href="ppt.jsp?deadLine=<%= list.get(0).getBbsDeadline() %>">PPTX</a>
+		<a class="btn btn-success pull-right" href="ppt.jsp?deadLine=<%= text %>">PPTX</a>
 	</td>
 </tr>
 <tr valign="top" style="height:30px">

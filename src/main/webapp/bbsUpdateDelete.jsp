@@ -26,7 +26,6 @@
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
 <link rel="stylesheet" href="css/index.css">
-
 <title>RMS</title>
 </head>
 
@@ -122,6 +121,22 @@
 							<li><a href="signOn.jsp">승인(제출)</a></li>
 						</ul>
 					</li>
+						<%
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="bbsRk.jsp">작성</a></li>
+								<li><a href="summaryRk.jsp">제출 목록</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
 				</ul>
 			
 			

@@ -486,10 +486,10 @@ public class BbsDAO {
 		// 검색 메소드 (일반 사용자용)
 				public ArrayList<Bbs> getRkSearch(int pageNumber, String searchField, String searchText){//특정한 리스트를 받아서 반환
 				      ArrayList<Bbs> list = new ArrayList<Bbs>();
-				      String SQL ="select * from bbs WHERE "+searchField.trim();
+				      String SQL ="select * from (select * from bbs where sign='마감' or sign='승인') a WHERE a."+searchField.trim();
 				      try {
 				            if(searchText != null && !searchText.equals("") ){
-				                SQL +=" LIKE '%"+searchText.trim()+"%' order by bbsDeadline desc limit ?,10";
+				                SQL +=" LIKE '%"+searchText.trim()+"%' order by a.bbsDeadline desc limit ?,10";
 				            }
 				            PreparedStatement pstmt=conn.prepareStatement(SQL);
 				            pstmt.setInt(1, (pageNumber-1) * 10);

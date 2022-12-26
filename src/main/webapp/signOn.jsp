@@ -27,8 +27,8 @@
 <!-- <meta name="viewport" content="width-device-width", initial-scale="1"> -->
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
-<link rel="stylesheet" href="css/index.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="css/index.css">
 <title>RMS</title>
 </head>
 
@@ -115,6 +115,7 @@
 			<a class="navbar-brand" href="bbs.jsp">Report Management System</a>
 		</div>
 		
+			
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav navbar-left">
@@ -124,43 +125,29 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li><a href="bbs.jsp">조회</a></li>
+							<li ><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
 							<li class="active"><a href="signOn.jsp">승인(제출)</a></li>
 						</ul>
 					</li>
+						<%
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="bbsRk.jsp">작성</a></li>
+								<li><a href="summaryRk.jsp">제출 목록</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
 				</ul>
-			
-			
-			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
-			<ul class="nav navbar-nav navbar-right">
-				<li><a data-toggle="modal" href="#UserUpdateModal" style="color:#2E2E2E"><%= name %>(님)</a></li>
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-haspopup="true"
-						aria-expanded="false">관리<span class="caret"></span></a>
-					<!-- 드랍다운 아이템 영역 -->	
-					<ul class="dropdown-menu">
-					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-					%>
-						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
-						<li><a href="workChange.jsp">담당업무 변경</a></li>
-						<li><a href="logoutAction.jsp">로그아웃</a></li>
-					<%
-					} else {
-					%>
-						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a>
-						
-						</li>
-						<li><a href="logoutAction.jsp">로그아웃</a></li>
-					<%
-					}
-					%>
-					</ul>
-				</li>
-			</ul>
 		</div>
 	</nav>
 	<!-- 네비게이션 영역 끝 -->

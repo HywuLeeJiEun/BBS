@@ -182,7 +182,7 @@
 					<%
 					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
 					%>
-						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
@@ -201,45 +201,6 @@
 		</div>
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
-	
-	
-	<%-- <!-- (요약본) 모달 영역! -->
-	   <div class="modal fade" id="bbsRkModal" role="dialog">
-		   <div class="modal-dialog">
-		    <div class="modal-content">
-		     <div class="modal-header">
-		      <button type="button" class="close" data-dismiss="modal">×</button>
-		      <h3 class="modal-title" align="center">조회 일자</h3>
-		     </div>
-		     <!-- 모달에 포함될 내용 -->
-		     <form method="post" action="bbsRk.jsp" id="modalform">
-		     <div class="modal-body">
-			     <div class="col-md-3" style="visibility:hidden">
-			    	<a> 조회하고자 하는 '제출일'을 선택하여 주십시오. </a> 
-     			</div>
-		     		<select>
-		     		<%
-		     			for (int i=0; i<listbbs.size(); i++) {
-		     		%>
-		     			<option value="<%= listbbs.get(i).getBbsDeadline() %>"><%= listbbs.get(i).getBbsDeadline() %></option>
-		     		<%
-		     			}
-		     		%>
-		     		</select>
-		     </div>
-		     <div class="modal-footer">
-			     <div class="col-md-3" style="visibility:hidden">
-     			</div>
-     			<div class="col-md-6">
-			     	<button type="submit" class="btn btn-primary pull-left form-control" id="modalbtn" >수정</button>
-		     	</div>
-		     	 <div class="col-md-3" style="visibility:hidden">
-	   			</div>	
-		    </div>
-		    </form>
-		   </div>
-	  </div>
-	</div> --%>
 	
 	
 	<!-- 모달 영역! -->
@@ -395,7 +356,7 @@
 	<!-- 게시판 메인 페이지 영역 시작 -->
 	<div class="container">
 		<div class="row">
-			<table id="bbsTable" class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
+			<table id="bbsTable" class="table table-striped" style="text-align: center; border: 1px solid #dddddd;">
 				<thead>
 					<tr>
 						<!-- <th style="background-color: #eeeeee; text-align: center;">번호</th> -->

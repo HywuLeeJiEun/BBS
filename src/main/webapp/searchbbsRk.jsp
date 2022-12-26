@@ -1,3 +1,5 @@
+<%@page import="java.util.List"%>
+<%@page import="user.User"%>
 <%@page import="user.UserDAO"%>
 <%@page import="org.mariadb.jdbc.internal.failover.tools.SearchFilter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -31,11 +33,48 @@
 			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
 		}
 		
-		UserDAO user = new UserDAO();
-		String rk = user.getRank((String)session.getAttribute("id"));
+		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+		String workSet;
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		List<String> works = new ArrayList<String>();
+		
+		if(code == null) {
+			workSet = "";
+		} else {
+			for(int i=0; i < code.size(); i++) {
+				
+				String number = code.get(i);
+				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+				String manager = userDAO.getManager(number);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			
+			workSet = String.join("/",works);
+			
+		}
+		
+		String name = userDAO.getName(id);
+		
+		// 사용자 정보 담기
+		User user = userDAO.getUser(name);
+		String password = user.getPassword();
+		String rank = user.getRank();
+		//이메일  로직 처리
+		String Staticemail = user.getEmail();
+		String[] email = Staticemail.split("@");
+		
+		//요약본 처리를 위한 Deadline 
+		BbsDAO bbsDAO = new BbsDAO();
+		//ArrayList<Bbs> listbbs = bbsDAO.getDeadLineList(); 
+		
+		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 	%>
-	<nav class="navbar navbar-default"> <!-- 네비게이션 -->
-		<div class="navbar-header"> 	<!-- 네비게이션 상단 부분 -->
+	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	<nav class="navbar navbar-default"> 
+		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
 			<button type="button" class="navbar-toggle collapsed"
 				data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"
@@ -45,51 +84,68 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<!-- 상단 바에 제목이 나타나고 클릭하면 main 페이지로 이동한다 -->
-			<% 
-			BbsDAO bbsDAO = new BbsDAO();
-			int confirm = bbsDAO.getBbsRecord((String)session.getAttribute("id"));
-			
-			if(confirm == 1 ) {%>
-			<a class="navbar-brand" href="bbsUpdate.jsp">Baynex 주간보고</a>
-			<% } else { %>
-			<a class="navbar-brand" href="main.jsp">Baynex 주간보고</a>
-			<% } %>
+			<a class="navbar-brand" href="bbs.jsp">Report Management System</a>
 		</div>
+		
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			<ul class="nav navbar-nav">
-			<% if(confirm == 1 ) { %>
-				<li><a href="bbsUpdate.jsp">주간보고</a></li>
-			<% } else { %>
-				<li><a href="main.jsp">주간보고</a></li>
-			<% } %>
-				<li class="active"><a href="bbs.jsp">제출목록</a></li>
-				<li><a href="gathering_search.jsp">취합하기</a></li>
-			</ul>
+				<ul class="nav navbar-nav navbar-left">
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle"
+							data-toggle="dropdown" role="button" aria-haspopup="true"
+							aria-expanded="false">주간보고<span class="caret"></span></a>
+						<!-- 드랍다운 아이템 영역 -->	
+						<ul class="dropdown-menu">
+							<li class="active"><a href="bbsAdmin.jsp">조회</a></li>
+							<!-- <li><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
+							<li><a href="signOn.jsp">승인(제출)</a></li> -->
+						</ul>
+					</li>
+						<%
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+						%>
+						<%
+						 if (pl.equals("WEB") || pl.equals("ERP")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+						
+							<ul class="dropdown-menu">
+								<li><a href="bbsRk.jsp">작성</a></li>
+							</ul>
+						<%
+						 }
+						%>
+							</li>
+						<%
+							}
+						%>
+						<%
+							if(rk.equals("실장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="bbsRkAdmin.jsp">작성 및 조회</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
+				</ul>
 			
-			<%
-				// 로그인 하지 않았을 때 보여지는 화면
-				if(id == null){
-			%>
+		
+			
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle"
-						data-toggle="dropdown" role="button" aria-haspopup="true"
-						aria-expanded="false">접속하기<span class="caret"></span></a>
-					<!-- 드랍다운 아이템 영역 -->	
-					<ul class="dropdown-menu">
-						<li><a href="login.jsp">로그인</a></li>
-					</ul>
-				</li>
-			</ul>
-			<%
-				// 로그인이 되어 있는 상태에서 보여주는 화면
-				}else{
-			%>
-			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
-			<ul class="nav navbar-nav navbar-right">
+				<li><a data-toggle="modal" href="#UserUpdateModal" style="color:#2E2E2E"><%= name %>(님)</a></li>
 				<li class="dropdown">
 					<a href="#" class="dropdown-toggle"
 						data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -97,14 +153,17 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
 					%>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
-					
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					} else {
 					%>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a>
+						
+						</li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					}
@@ -112,12 +171,136 @@
 					</ul>
 				</li>
 			</ul>
-			<%
-				}
-			%>
 		</div>
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
+	
+		
+	<!-- 모달 영역! -->
+	   <div class="modal fade" id="UserUpdateModal" role="dialog">
+		   <div class="modal-dialog">
+		    <div class="modal-content">
+		     <div class="modal-header">
+		      <button type="button" class="close" data-dismiss="modal">×</button>
+		      <h3 class="modal-title" align="center">개인정보 수정</h3>
+		     </div>
+		     <!-- 모달에 포함될 내용 -->
+		     <form method="post" action="ModalUpdateAction.jsp" id="modalform">
+		     <div class="modal-body">
+		     		<div class="row">
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">ID </label>
+		     				<input type="text" maxlength="20" class="form-control" readonly style="width:100%" id="updateid" name="updateid"  value="<%= id %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+						<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label"> Password </label>
+		     				<input type="password" maxlength="20" required class="form-control" style="width:100%" id="password" name="password" value="<%= password %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<i class="glyphicon glyphicon-eye-open" id="icon" style="right:20%; top:35px;" ></i>
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">name </label>
+		     				<input type="text" maxlength="20" required class="form-control" style="width:100%" id="name" name="name"  value="<%= name %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">rank </label>
+		     				<input type="text" required class="form-control" data-toggle="tooltip" data-placement="bottom" title="직급 변경은 관리자 권한이 필요합니다." readonly style="width:100%" id="rank" name="rank"  value="<%= rank %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-4 form-outline">
+		     				<label class="col-form-label">email </label>
+		     				<input type="text" maxlength="30" required class="form-control" style="width:100%" id="email" name="email"  value="<%= email[0] %>"> 
+		     			</div>
+		     			<div class="col-md-3" align="left" style="top:5px; right:20px">
+		     				<label class="col-form-label" > &nbsp; </label>
+		     				<div><i>@ s-oil.com</i></div>
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			
+		     			
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label">duty </label>
+		     				<input type="text" required class="form-control" readonly data-toggle="tooltip" data-placement="bottom" title="업무 변경은 관리자 권한이 필요합니다." style="width:100%" id="duty" name="duty" value="<%= workSet %>">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     		</div>	
+		     </div>
+		     <div class="modal-footer">
+			     <div class="col-md-3" style="visibility:hidden">
+     			</div>
+     			<div class="col-md-6">
+			     	<button type="submit" class="btn btn-primary pull-left form-control" id="modalbtn" >수정</button>
+		     	</div>
+		     	 <div class="col-md-3" style="visibility:hidden">
+	   			</div>	
+		    </div>
+		    </form>
+		   </div>
+	  </div>
+	</div>
 	
 		
 	<!-- ***********검색바 추가 ************* -->
@@ -187,6 +370,7 @@
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
+						<th style="background-color: #eeeeee; text-align: center;">승인</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -213,6 +397,7 @@
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
 							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>	
 						<td><%= list.get(i).getBbsUpdate() %></td>		
+						<td><%= list.get(i).getSign() %></td>	
 					</tr>
 					<%
 						}
@@ -245,19 +430,63 @@
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>
-	<!-- <script>
-		function submit2(frm) {
-			frm.action='gathering.jsp';
-			frm.submit();
-			return true;
+	<script>
+		function ChangeValue() {
+			var value_str = document.getElementById('searchField');
+			
 		}
-	</script> -->
-	<!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
+		
+	
+	</script>
+	
+    <!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
 	<script>
 	var trCnt = $('#bbsTable tr').length; 
 	
 	if(trCnt < 11) {
 		$('#next').hide();
+	}
+	</script>
+	
+	<!-- modal 내, password 보이기(안보이기) 기능 -->
+		<script>
+		$(document).ready(function(){
+		    $('#icon').on('click',function(){
+		    	console.log("hello");
+		        $('#password').toggleClass('active');
+		        if($('#password').hasClass('active')){
+		            $(this).attr('class',"glyphicon glyphicon-eye-close")
+		            $('#password').attr('type',"text");
+		        }else{
+		            $(this).attr('class',"glyphicon glyphicon-eye-open")
+		            $('#password').attr('type','password');
+		        }
+		    });
+		});
+	</script>
+	
+	
+	<!-- 모달 툴팁 -->
+	<script>
+		$(document).ready(function(){
+			$('[data-toggle="tooltip"]').tooltip();
+		});
+	</script>
+	
+	
+	<!-- 모달 submit -->
+	<script>
+	$('#modalbtn').click(function(){
+		$('#modalform').text();
+	})
+	</script>
+	
+	<!-- 모달 update를 위한 history 감지 -->
+	<script>
+	window.onpageshow = function(event){
+		if(event.persisted || (window.performance && window.performance.navigation.type == 2)){ //history.back 감지
+			location.reload();
+		}
 	}
 	</script>
 </body>
