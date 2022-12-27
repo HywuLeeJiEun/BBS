@@ -35,10 +35,12 @@
 
 <%
 	// sumad_id에 해당하는 bbsDeadline
-	String bbsDeadline = "2022-12-19"; //request.getParameter("deadLine");
+	String bbsDeadline = request.getParameter("bbsDeadline");
 	//e_state, w_state => 색상표
-	String e_state = "#ff0000";
-	String w_state = "#ffff00";
+	//String e_color = request.getParameter("ecolor");
+	//String w_color = request.getParameter("wcolor");
+	String e_state = request.getParameter("ecolor");//"#ff0000";
+	String w_state = request.getParameter("wcolor");//"#ffff00";
 	
 	
 	String templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\SummaryAD.jrxml";

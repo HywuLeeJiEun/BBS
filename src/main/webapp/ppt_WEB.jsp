@@ -35,7 +35,7 @@
 
 <%
 	String bbsDeadline = request.getParameter("deadLine");
-	String templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
+	String templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_WEB.jrxml";
 	//String templatePath = "D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
 	//String templatePath = "D:\\workspace\\sample\\sample_bbs.jrxml";
 	//String templatePath2 = "D:\\workspace\\sample\\sample_bbs.jasper";

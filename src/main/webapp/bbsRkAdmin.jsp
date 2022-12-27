@@ -515,7 +515,7 @@
 						} else {
 						%>
 						<tr>
-							<td>ERP</td>
+							<td style="text-align: center; border: 1px solid">ERP</td>
 							<td colspan=5 style=" border: 1px solid"><br>해당 제출일로 작성된 ERP 요약본이 없습니다. </td>
 						</tr>
 						<%
@@ -525,7 +525,7 @@
 						<tr>
 							
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid"><%= web.get(1) %><textarea id="wstate_value" name="wstate_value" style="display:none"><%= web.get(5) %></textarea></td>
+							<td style="border: 1px solid; text-align: center; "><textarea id="wstate_value" name="wstate_value" style="display:none"><%= web.get(5) %></textarea><%= web.get(1) %></td>
 							<!-- 업무 내용 -->
 							<td style=" border: 1px solid"><textarea required name="wcontent" id="wcontent" style="resize: none; width:100%; height:100px"><%= web.get(2) %></textarea></td>
 							<!-- 완료일 -->
@@ -541,7 +541,7 @@
 						} else {
 						%>
 						<tr>
-							<td>WEB</td>
+							<td style="text-align: center; border: 1px solid">WEB</td>
 							<td colspan=5 style=" border: 1px solid"><br>해당 제출일로 작성된 WEB 요약본이 없습니다. <br></td>
 						</tr>
 						<%
@@ -590,7 +590,7 @@
 						} else { 
 						%>
 						<tr>
-							<td>ERP</td>
+							<td style="text-align: center; border: 1px solid">ERP</td>
 							<td colspan=3 style=" border: 1px solid"><br>해당 제출일로 작성된 ERP 요약본이 없습니다. </td>
 						</tr>
 						<% 
@@ -611,7 +611,7 @@
 						} else {
 						%>
 						<tr>
-							<td>WEB</td>
+							<td style="text-align: center; border: 1px solid">WEB</td>
 							<td colspan=3 style=" border: 1px solid"><br>해당 제출일로 작성된 WEB 요약본이 없습니다. </td>
 						</tr>
 						<%
@@ -635,15 +635,17 @@
 			<%
 			if(sign.equals("미승인") && !bbsDAO.getSumAdminid(bbsDeadline).equals("")) {
 			%>
-				<button type="button" class="btn btn-success pull-right" style="width:5%; margin-left:10px; text-align:center; align:center" onclick="signOn()">승인</button> 
-				<button type="button" class="btn btn-info pull-right" style="width:5%; text-align:center; align:center" onclick="update()">수정</button> 
+				<button type="button" class="btn btn-success pull-right" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="signOn()">승인</button> 
+				<button type="button" class="btn btn-info pull-right" style="width:50px; text-align:center; align:center" onclick="update()">수정</button> 
 		<% } else if(bbsDAO.getSumAdminid(bbsDeadline).equals("")) { // 즉, 작성되지 않았다면!  %> 
-				<button type="button" class="btn btn-primary pull-right" style="width:5%; text-align:center; align:center" onclick="update()">작성</button> 
+				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center" onclick="update()">작성</button> 
 		<% } %>
+		<% if(sign.equals("승인") || sign.equals("마감")) {  //승인이나 마감 상태시에만 pptx로 출력 가능!%>
+				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center" onclick="print()">pptx</button> 
+		<% } %> 
 		</div>
 	</form>
 	</div>
-	<a> <%= count %></a>
 	<br><br><br>	
 	
 	<!-- 부트스트랩 참조 영역 -->
@@ -822,6 +824,15 @@
 			$('#bbsRk').attr("action","bbsRkAdminSign.jsp").submit();
 		}
 	}
+	</script>
+	
+	<script>
+	function print() {
+			var innerHtml = '<td><textarea class="textarea" id="ecolor" name="ecolor" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="wcolor" name="wcolor" style="display:none">'+wcon.style.backgroundColor+'</textarea></td>';
+			$('#Table > tbody > tr:last').append(innerHtml);
+			$('#bbsRk').attr("action","pptAdmin.jsp").submit();
+		}
 	</script>
 	
 </body>

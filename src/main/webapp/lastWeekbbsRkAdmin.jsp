@@ -143,7 +143,7 @@
 		String pl = userDAO.getpl(id);
 		//String MaxbbsDeadline = bbsDAO.getDeadLineListSum();
 		//summary_admin 관련 수집 (sumad_id)
-		String sumad_id = Integer.toString(bbsDAO.getNMaxSumad(week));
+		String sumad_id = Integer.toString(bbsDAO.getNMaxSumad(week-1));
 		ArrayList<String> sumad = bbsDAO.getlistSumad(sumad_id);
 		
 		
@@ -190,7 +190,7 @@
 		%>
 
 
-	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	<!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -251,7 +251,7 @@
 								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li  class="active"><a href="bbsRkAdmin.jsp">조회</a></li>
+								<li  class="active"><a href="bbsRkAdmin.jsp">작성 및 조회</a></li>
 							</ul>
 							</li>
 						<%
@@ -271,7 +271,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
@@ -292,6 +292,7 @@
 		</div>
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
+	
 	
 	
 		
@@ -473,17 +474,16 @@
 				<table id="Table" class="table" style="text-align: center;">
 					<thead>
 						<tr>
-							<%-- <td><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= list.get(9) %></textarea> </td>
-							<td><textarea id="pl" name="pl" style="display:none"><%= list.get(1) %></textarea> </td>
+							<%-- <td><textarea id="pl" name="pl" style="display:none"><%= list.get(1) %></textarea> </td>
 							<td><textarea id="sum_id" name="sum_id" style="display:none"><%= sum_id %></textarea></td>
 							<td><textarea id="sign" name="sign" style="display:none"><%= list.get(11) %></textarea></td>
-							<td><textarea id="state_value" name="state_value" style="display:none"><%= list.get(5) %></textarea></td> --%>
+							<td><textarea id="state_value" name="state_value" style="display:none"><%= list.get(5) %></textarea></td>  --%>
 							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>
-							<td colspan="2" style="background-color:#D4D2FF; align:left;" >제출일 : <%= sumad.get(18) %><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= sumad.get(18) %></textarea></td>
+							<td colspan="2" style="background-color:#D4D2FF; align:left;" >제출일 : <%= sumad.get(18) %><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= sumad.get(18) %></textarea><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= sumad.get(18) %></textarea></td>
 						</tr>
 						<tr>
 							<th colspan="2" style="background-color:#D4D2FF; align:left;" > &nbsp;금주 업무 실적</th>
@@ -631,7 +631,7 @@
 			</div>
 			<div style="display:inline-block">
 			<%
-			if (count != week){
+			if (count != week-1){
 			%>
 				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-left" type="button" style=" margin-left:45%; " data-toggle="tooltip" title="<%= lastweek %>" onclick="location.href='lastWeekbbsRkAdmin.jsp?week=<%= week + 1 %>'"></button>
 			<%
@@ -642,7 +642,7 @@
 			<%
 			if (week != 1){
 			%>
-				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-right" type="button" style=" margin-left:40%; " data-toggle="tooltip" title="<%= nextweek %>" onclick="location.href='lastWeekRk.jsp?week=<%= week-1 %>'"></button>
+				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-right" type="button" style=" margin-left:40%; " data-toggle="tooltip" title="<%= nextweek %>" onclick="location.href='lastWeekbbsRkAdmin.jsp?week=<%= week-1 %>'"></button>
 			<%
 			} else if (week == 1){
 			%>
@@ -652,9 +652,12 @@
 			<%
 			if(sign.equals("미승인")) {
 			%>
-				<button type="button" class="btn btn-success pull-right" style="width:5%; margin-left:10px; text-align:center; align:center" onclick="signOn()">승인</button> 
-				<button type="button" class="btn btn-info pull-right" style="width:5%; text-align:center; align:center" onclick="update()">수정</button> 
+				<button type="button" class="btn btn-success pull-right" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="signOn()">승인</button> 
+				<button type="button" class="btn btn-info pull-right" style="width:50px; text-align:center; align:center" onclick="update()">수정</button> 
 			<% } %>
+			<% if(sign.equals("승인") || sign.equals("마감")) {  //승인이나 마감 상태시에만 pptx로 출력 가능!%>
+				<button type="button" class="btn btn-success pull-right" style="width:50px; text-align:center; align:center" onclick="print()">pptx</button> 
+			<% } %> 
 		</div>
 	</form>
 	</div>
@@ -836,6 +839,15 @@
 			$('#bbsRk').attr("action","bbsRkAdminSign.jsp").submit();
 		}
 	}
+	</script>
+	
+	<script>
+	function print() {
+			var innerHtml = '<td><textarea class="textarea" id="ecolor" name="ecolor" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="wcolor" name="wcolor" style="display:none">'+wcon.style.backgroundColor+'</textarea></td>';
+			$('#Table > tbody > tr:last').append(innerHtml);
+			$('#bbsRk').attr("action","pptAdmin.jsp").submit();
+		}
 	</script>
 	
 </body>
