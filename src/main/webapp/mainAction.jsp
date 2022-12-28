@@ -192,31 +192,31 @@
 		
 		
 		//만약, ERP 디버깅 데이터가  들어왔다면
-		String trACnt = request.getParameter("trACnt");
-		/* int trACnt = Integer.parseInt(request.getParameter("trACnt"));
+		int trACnt = Integer.parseInt(request.getParameter("trACnt"));
 		String erp_date = "";
 		String erp_user = "";
 		String erp_stext = "";
 		String erp_authority ="";
 		String erp_division = "";
-		
+	
 		for(int i=2; i < trACnt; i++) { 
-			String a = erp_date;
-			erp_date += request.getParameter(a+i) + "\r\n";
-			String b = erp_user;
-			erp_user += request.getParameter(b+i) + "\r\n";
-			String c = erp_stext;
-			erp_stext += request.getParameter(c+i);
-			String d = erp_authority;
-			erp_authority += request.getParameter(d+i);
-			String e = erp_division;
-			erp_division += request.getParameter(e+i);
-		} */
+			String a = "erp_date";
+			erp_date += request.getParameter(a+(i)) + "\r\n";
+			String b = "erp_user";
+			erp_user += request.getParameter(b+(i)) + "\r\n";
+			String c = "erp_stext";
+			erp_stext += request.getParameter(c+(i)) + "\r\n";
+			String d = "erp_authority";
+			erp_authority += request.getParameter(d+(i)) + "\r\n";
+			String e = "erp_division";
+			erp_division += request.getParameter(e+(i)) + "\r\n";
+		} 
 		
 	%>
 	<a> <%= trACnt %></a><br>	
 	<a> <%= trCnt %></a><br>	
 	<a> <%= trNCnt %></a><br>	
+	<a> <%= erp_date %></a><br>
 	
 		<form id="post_item" method="post" action="mainActionComplete.jsp">
 			<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
@@ -232,6 +232,12 @@
 						<td><textarea class="textarea" id="getbbsncontent" name="getbbsncontent" readonly><%= getbbsncontent %></textarea></td>
 						<td><textarea class="textarea" id="getbbsnstart" name="getbbsnstart" readonly><%= getbbsnstart %></textarea></td>
 						<td><textarea class="textarea" id="getbbsntarget" name="getbbsntarget" readonly><%= getbbsntarget %></textarea></td>
+						
+						<td><textarea class="textarea" id="erp_date" name="erp_date" readonly><%= erp_date %></textarea></td>
+						<td><textarea class="textarea" id="erp_user" name="erp_user" readonly><%= erp_user %></textarea></td>
+						<td><textarea class="textarea" id="erp_stext" name="erp_stext" readonly><%= erp_stext %></textarea></td>
+						<td><textarea class="textarea" id="erp_authority" name="erp_authority" readonly><%= erp_authority %></textarea></td>
+						<td><textarea class="textarea" id="erp_division" name="erp_division" readonly><%= erp_division %></textarea></td>
 						<!-- <button id="save" onclick="handleButtonOnclick()"> + </button> -->
 					</tr>
 				</tbody>

@@ -150,6 +150,23 @@ public class BbsDAO {
 			}
 			return -1; //데이터베이스 오류
 		}
+		
+		//게시글 번호 부여 메소드 (erp_id)
+				public int getNextErp() {
+					//현재 게시글을 내림차순으로 조회하여 가장 마지막 글의 번호를 구한다
+					String sql = "select erp_id from erp_bbs order by erp_id desc";
+					try {
+						PreparedStatement pstmt = conn.prepareStatement(sql);
+						rs = pstmt.executeQuery();
+						if(rs.next()) {
+							return rs.getInt(1) + 1;
+						}
+						return 1; //첫 번째 게시물인 경우
+					}catch (Exception e) {
+						e.printStackTrace();
+					}
+					return -1; //데이터베이스 오류
+				}
 	
 	//게시글 번호 부여 메소드 (Summary_admin)
 			public int getNextSumAdmin() {
@@ -1174,5 +1191,61 @@ public class BbsDAO {
 			}
 			
 			
+			
+		//erp_bbs 작성 (erpManager만 담당함 -> '계정관리 - 35번')
+		public int erpWrite(String erp_date, String erp_user, String erp_stext, String erp_authority, String erp_division, String erpManger, String bbsDeadline, int bbsID) {
+			String sql = "insert into erp_bbs values(?,?,?,?,?,?,?,?,?)";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setInt(1, getNextErp()); //erp_id
+				pstmt.setString(2, erp_date); 
+				pstmt.setString(3, erp_user);
+				pstmt.setString(4, erp_stext); 
+				pstmt.setString(5, erp_authority); 
+				pstmt.setString(6, erp_division); 
+				pstmt.setString(7, erpManger); //userName이 들어감
+				pstmt.setString(8, bbsDeadline);
+				pstmt.setInt(9, bbsID); 
+				return pstmt.executeUpdate();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return -1; //데이터베이스 오류
+		}
+			
+		//erp_bbs 작성을 위한 bbsID, bbsManager 구하기
+		//summary_admin sumad_id를 통해 내용 가져오기 
+		public ArrayList<String> getbbsID(String bbsDeadline, String userName){
+			String sql =  "select bbsID, userName, bbsDeadline from bbs where bbsDeadline=? and userName=?";
+					ArrayList<String> list = new ArrayList<String>();
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, bbsDeadline);
+				pstmt.setString(2, userName);
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
+					list.add(rs.getString(1)); //bbsID
+					list.add(rs.getString(2)); //bbsManger
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return list;
+		}
+		
+		//작성이 안된 상황을 고려해 bbsID를 통한 삭제 진행
+		//게시글 삭제 메소드
+		public int deleteErp(int bbsID) {
+			//실제 데이터 또한 삭제한다.
+			String sql = "delete from erp_bbs where bbsID = ?";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setInt(1, bbsID);
+				return pstmt.executeUpdate();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return -1; //데이터베이스 오류 
+		}
 }
 

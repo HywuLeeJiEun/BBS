@@ -480,7 +480,8 @@
 						<!-- 계정 관리 끝 -->
 							<div id="wrapper" style="width:100%; text-align: center;">
 								<!-- 저장 버튼 생성 -->
-								<button type="button" id="save" style="margin-bottom:50px" class="btn btn-primary pull-right" onClick="saveData()"> 저장 </button>									
+								<button type="button" id="save" style="margin-bottom:50px" class="btn btn-primary pull-right" onclick="saveData()"> 저장 </button>									
+								<button type="Submit" id="save_sub" style="margin-bottom:50px; display:none" class="btn btn-primary pull-right"> 저장 </button>	
 							</div>					
 				</form>
 			</div>
@@ -558,7 +559,7 @@
 				} else {
 					alert("업무 예정은 최대 30개를 넘을 수 없습니다.");
 				}
-		}
+		};
 	</script>
 	
 	<script>
@@ -614,7 +615,7 @@
 					alert("업무 예정은 최대 30개를 넘을 수 없습니다.");
 				}
 
-		}
+		};
 	</script>
 	
 	<script>
@@ -655,7 +656,7 @@
 	<script>
 	$('#modalbtn').click(function(){
 		$('#modalform').text();
-	})
+	});
 	</script>
 	
 	<!-- 모달 update를 위한 history 감지 -->
@@ -664,7 +665,7 @@
 		if(event.persisted || (window.performance && window.performance.navigation.type == 2)){ //history.back 감지
 			location.reload();
 		}
-	}
+	};
 	</script>
 	
 	
@@ -705,14 +706,33 @@
 		} else {
 			alert("계정관리 업무는 최대 5개까지 작성 가능합니다.");
 			}
-	}
+	};
 	</script>
 	
 	
 	<script>
 	// 데이터 보내기 (몇줄을 사용하는지!) <trCnt, trNCnt>
-	//function saveData() {
-	//$("#save").find('[type="submit"]').trigger('click') {
+   // $(document).on('click', "#id" ,function(){
+	//$("#save").on('click',function(){
+	function saveData() {
+		var trCnt = $('#bbsTable tr').length; // 기본이 5
+		var trNCnt = $('#bbsNTable tr').length; // 기본이 2
+		var trACnt = $('#accountTable tr').length;
+		var innerHtml = "";
+		innerHtml += '<tr style="display:none">';
+		innerHtml += '<td><textarea class="textarea" id="trCnt" name="trCnt" readonly>'+trCnt+'</textarea></td>';
+		innerHtml += '<td><textarea class="textarea" id="trNCnt" name="trNCnt" readonly>'+trNCnt+'</textarea></td>';
+		innerHtml += '<td><textarea class="textarea" id="trACnt" name="trACnt" readonly>'+trACnt+'</textarea></td>';
+		innerHtml += '</tr>';
+        $('#bbsNTable > tbody> tr:last').append(innerHtml);
+        
+        //document.getElementById('save_sub').click;
+        $("#save_sub").trigger("click");
+    }
+	</script>
+	
+	
+	<!-- 	//$("#save").find('[type="submit"]').trigger('click') {
 	//$("#save").on('mousedown',function(){
 	
 	//var form = $('#main')[0]; // DOM 객체인 form tag를 받아옴.
@@ -720,21 +740,9 @@
 	//form.addEventListner('submit',function(event) {
 		//event.preventDefault(); // 기본 동작인 submit 중단
 		
-		var trCnt = $('#bbsTable tr').length; // 기본이 5
-		var trNCnt = $('#bbsNTable tr').length; // 기본이 2
-		/* var trACnt = 0;
-			if($('#accountTable tr').length == undefined ||  $('#accountTable tr').length == null || $('#accountTable tr').length == "") {// 기본이 2
-				trACnt = -1;
-			} else {
-				trACnt = ($('#accountTable tr').length;
-			} */
-		var innerHtml = "";
-		innerHtml += '<td><textarea class="textarea" id="trCnt" name="trCnt" readonly>'+trCnt+'</textarea></td>';
-		innerHtml += '<td><textarea class="textarea" id="trNCnt" name="trNCnt" readonly>'+trNCnt+'</textarea></td>';
-		//innerHtml += '<td><textarea class="textarea" id="trACnt" name="trACnt" readonly>'+trACnt+'</textarea></td>';
-        $('#bbsNTable > tbody> tr:last').append(innerHtml);
-		$('#main').submit();
-		//form.submit();
-	}
-	</script>
+		
+		 // 강제 submit 버튼 클릭
+        //document.getElementById('save_sub').click;
+		//$('#main').submit();
+		//form.submit(); -->
 </body>

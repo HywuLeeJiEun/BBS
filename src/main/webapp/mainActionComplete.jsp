@@ -52,7 +52,8 @@
 		if(userDAO.getpluserunder(id) != null) { // 비어있지 않다면,
 			pluser = userDAO.getpluserunder(id);
 		}
-			
+		String name = userDAO.getName(id);
+		
 		// 담을 데이터 가져오기 (get이 없으면 배열, get 이 있다면 string)
 		String manager = request.getParameter("manager");
 		String title = request.getParameter("title");
@@ -108,10 +109,20 @@
 		bbsntarget = String.join("\r\n",getbbsntarget); 
 		
 		
+		// erp 디버깅 권한신청 처리현황 가져오기
+		String erp_date = request.getParameter("erp_date");
+		String erp_user = request.getParameter("erp_user");
+		String erp_stext = request.getParameter("erp_stext");
+		String erp_authority = request.getParameter("erp_authority");
+		String erp_division = request.getParameter("erp_division");
+		
+		
+		
 	    // 정상적으로 입력이 되었다면 글쓰기 로직을 수행한다
 		BbsDAO bbsDAO = new BbsDAO();
 		UserDAO user = new UserDAO();
-		String name = user.getName(id);
+		
+		
 		
 		String dl = bbsDAO.getDL(bbs.getBbsDeadline(), id);
 		if(dl != "") {
@@ -123,22 +134,53 @@
 		} else { 
 		
 			int result = bbsDAO.write(id, manager, title, name, getbbscontent, bbsstart, bbstarget, bbsend, getbbsncontent, bbsnstart, bbsntarget, bbsDeadline, pluser);
-		// 데이터베이스 오류인 경우
-		if(result == -1){
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('데이터베이스에 오류가 있습니다.')");
-			script.println("history.back()");
-			script.println("</script>");
-		// 글쓰기가 정상적으로 실행되면 알림창을 띄우고 게시판 메인으로 이동한다
-		}else {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('제출이 완료되었습니다.')");
-			script.println("location.href='bbs.jsp'");
-			script.println("</script>");
-			} 
-		} 
+			
+			if(erp_date != "" || erp_user != "") {
+			
+			// bbsDeadline을 활용해 bbsID, bbsManager를 구한다. (0 - id, 1 - userName)
+			ArrayList<String> list = bbsDAO.getbbsID(bbsDeadline, name);
+			int result_erp = bbsDAO.erpWrite(erp_date, erp_user, erp_stext, erp_authority, erp_division, list.get(1), bbsDeadline, Integer.parseInt(list.get(0)));
+				
+				if(result == -1 || result_erp == -1){
+					if(result == -1 && result_erp != -1) { //bbs작성에 문제가 발생한 경우, (즉, erp_bbs를 없애야 함!)
+						bbsDAO.deleteErp(Integer.parseInt(list.get(0)));
+					}
+					if(result_erp == -1 && result != -1) { //erp_bbs 작성에 문제가 발생한 경우, (즉, bbs를 없애야함!)
+						bbsDAO.delete(Integer.parseInt(list.get(0)));
+					}
+					
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("alert('데이터베이스에 오류가 있습니다.')");
+					script.println("history.back()");
+					script.println("</script>");
+				// 글쓰기가 정상적으로 실행되면 알림창을 띄우고 게시판 메인으로 이동한다
+				}else {
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("alert('제출이 완료되었습니다.')");
+					script.println("location.href='bbs.jsp'");
+					script.println("</script>");
+					} 		
+			} else {
+			//erp에 대한 정보가 없다면, bbs에만 작성하고 끝냄!
+			// 데이터베이스 오류인 경우
+			if(result == -1){
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('데이터베이스에 오류가 있습니다.')");
+				script.println("history.back()");
+				script.println("</script>");
+			// 글쓰기가 정상적으로 실행되면 알림창을 띄우고 게시판 메인으로 이동한다
+			}else {
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('제출이 완료되었습니다.')");
+				script.println("location.href='bbs.jsp'");
+				script.println("</script>");
+				} 
+			}
+		}   
 		
 	%>
 
@@ -149,6 +191,8 @@
 <%-- <a> <%= bbsstart %> </a>
 <a> <%= bbstarget %> </a>
 <a> <%= bbsend %> </a> --%>
-<a> <%= getbbscontent %></a>
+<a> <%= erp_date %></a><br>
+<a> <%= erp_user %></a><br>
+<a> <%= erp_stext %></a><br>
 </body>
 </html>
