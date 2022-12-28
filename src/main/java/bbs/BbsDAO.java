@@ -186,8 +186,8 @@ public class BbsDAO {
 	}
 	
 	//글쓰기 메소드
-	public int write(String id, String bbsManager,String bbsTitle, String name, String bbsContent, String bbsStart, String bbsTarget, String bbsEnd, String bbsNContent, String bbsNStart, String bbsNTarget, String bbsDeadline) {
-		String sql = "insert into bbs values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	public int write(String id, String bbsManager,String bbsTitle, String name, String bbsContent, String bbsStart, String bbsTarget, String bbsEnd, String bbsNContent, String bbsNStart, String bbsNTarget, String bbsDeadline, String pluser) {
+		String sql = "insert into bbs values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		String sign = "미승인";
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -208,6 +208,7 @@ public class BbsDAO {
 			pstmt.setString(15, bbsDeadline);
 			pstmt.setString(16,  name);
 			pstmt.setString(17, sign);
+			pstmt.setString(18, pluser);
 			return pstmt.executeUpdate();
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -294,6 +295,7 @@ public class BbsDAO {
 				bbs.setBbsDeadline(rs.getString(15));
 				bbs.setBbsUpdate(rs.getString(16));
 				bbs.setSign(rs.getString(17));
+				bbs.setPluser(rs.getString(18));
 				list.add(bbs);
 			}
 		}catch (Exception e) {
@@ -330,6 +332,7 @@ public class BbsDAO {
 				bbs.setBbsDeadline(rs.getString(15));
 				bbs.setBbsUpdate(rs.getString(16));
 				bbs.setSign(rs.getString(17));
+				bbs.setPluser(rs.getString(18));
 				list.add(bbs);
 			}
 		}catch (Exception e) {
@@ -381,6 +384,7 @@ public class BbsDAO {
 					bbs.setBbsDeadline(rs.getString(15));
 					bbs.setBbsUpdate(rs.getString(16));
 					bbs.setSign(rs.getString(17));
+					bbs.setPluser(rs.getString(18));
 					return bbs;
 				}
 			}catch (Exception e) {
@@ -475,6 +479,7 @@ public class BbsDAO {
 					bbs.setBbsDeadline(rs.getString(15));
 					bbs.setBbsUpdate(rs.getString(16));
 					bbs.setSign(rs.getString(17));
+					bbs.setPluser(rs.getString(18));
 		            list.add(bbs);
 		         }         
 		      } catch(Exception e) {
@@ -513,6 +518,7 @@ public class BbsDAO {
 							bbs.setBbsDeadline(rs.getString(15));
 							bbs.setBbsUpdate(rs.getString(16));
 							bbs.setSign(rs.getString(17));
+							bbs.setPluser(rs.getString(18));
 				            list.add(bbs);
 				         }         
 				      } catch(Exception e) {
@@ -551,6 +557,7 @@ public class BbsDAO {
 							bbs.setBbsDeadline(rs.getString(15));
 							bbs.setBbsUpdate(rs.getString(16));
 							bbs.setSign(rs.getString(17));
+							bbs.setPluser(rs.getString(18));
 				            list.add(bbs);
 				         }         
 				      } catch(Exception e) {
@@ -587,6 +594,9 @@ public class BbsDAO {
 							bbs.setBbsNTarget(rs.getString(13));
 							bbs.setBbsAvailable(rs.getInt(14));
 							bbs.setBbsDeadline(rs.getString(15));
+							bbs.setBbsUpdate(rs.getString(16));
+							bbs.setSign(rs.getString(17));
+							bbs.setPluser(rs.getString(18));
 				            list.add(bbs);
 				         }         
 				      } catch(Exception e) {
@@ -619,7 +629,7 @@ public class BbsDAO {
 		
 		/* 가장 최근에 생성된 bbs의 ID 조회 */
 	 public int getMaxbbs(String id) { 
-	 String sql ="select bbsID from (select * from bbs where userID=?) bbs order by bbsDate desc"; 
+	 String sql ="select bbsID from (select * from bbs where userID=?) bbs order by bbsDeadline desc"; 
 	 try { PreparedStatement pstmt = conn.prepareStatement(sql);
 	 	pstmt.setString(1, id); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입 
 	 	rs =pstmt.executeQuery(); 
@@ -767,6 +777,7 @@ public class BbsDAO {
 					bbs.setBbsAvailable(rs.getInt(14));
 					bbs.setBbsDeadline(rs.getString(15));
 					bbs.setSign(rs.getString(16));
+					bbs.setPluser(rs.getString(18));
 					return bbs;
 				}
 			}catch (Exception e) {
@@ -1102,13 +1113,29 @@ public class BbsDAO {
 			}
 			
 			
-			//bbsDeadline을 통한 sum_id 검색
+			//pl에 따라 bbsDeadline을 통한 sum_id 검색
 			public String getSumid_Deadline(String bbsDeadline, String pl) {
 				String sql = "select sum_id from summary where bbsDeadline = ? and pl=?";
 				try {
 					PreparedStatement pstmt = conn.prepareStatement(sql);
 					pstmt.setString(1, bbsDeadline);  
 					pstmt.setString(2, pl);  
+					rs = pstmt.executeQuery();
+					if(rs.next()) {
+						return rs.getString(1);
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return ""; //데이터베이스 오류
+			}
+			
+			//pl에 따른 sum_id 검색 (정렬을 bbsDeadline)
+			public String getSumidpl(String pl) {
+				String sql = "select sum_id from summary where pl=? order by bbsDeadline desc";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, pl);  
 					rs = pstmt.executeQuery();
 					if(rs.next()) {
 						return rs.getString(1);

@@ -195,7 +195,7 @@
 			script.println("</script>");
 		}
 		
-
+		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 	%>
 	
 		
@@ -235,7 +235,7 @@
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본<span class="caret"></span></a>
+								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
 								<li class="active"><a href="bbsRk.jsp">작성</a></li>
@@ -495,7 +495,7 @@
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="signOnReport.jsp?bbsID=<%= list.get(i).getBbsID() %>">
+						<a href="signOnReportRk.jsp?bbsID=<%= list.get(i).getBbsID() %>">
 							<%= list.get(i).getBbsTitle() %></a></td>
 						<td><%= list.get(i).getUserName() %></td>
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
@@ -536,8 +536,8 @@
 			<%
 				}
 			%>
-		
-			<a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>" style="width:5%" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성"> 작성</a>
+			<a href="ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> pptx</a>
+			<a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>" style="width:100px; margin-right:20px" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> Summary</a>
 		</div>
 	</div>
 	
@@ -657,5 +657,39 @@
 			
 		});
 	</script>	
+	
+	<script>
+	//$("#pptx").find('[type="button"]').trigger('click') {
+	$("#pptx").on('mousedown', function() {
+		//noSub -> 미제출자
+		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
+			var go;
+			go = confirm("미제출자가 있습니다. 출력 하시겠습니까?");
+			
+			if(go) { //출력 o
+				document.getElementById("pptx").click();
+			} else { //출력 x
+				
+			}
+		
+		}
+	});
+	
+	
+	$("#summary").on('mousedown', function() {
+		//noSub -> 미제출자
+		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
+			var go;
+			go = confirm("미제출자가 있습니다. 작성 페이지로 넘어가시겠습니까?");
+			
+			if(go) { //출력 o
+				document.getElementById("summary").click();
+			} else { //출력 x
+				
+			}
+		
+		}
+	});
+	</script>
 </body>
 </html>

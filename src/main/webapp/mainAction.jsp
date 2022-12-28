@@ -100,8 +100,8 @@
 			bbscontent.add(request.getParameter(a+((i-5)+5)));
 			//bbscontent.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
 			}
-			getbbscontent = String.join("&#10;&#10;",bbscontent); // 각 배열 요소마다 줄바꿈 하여 넣음.
-			getbbscontent = getbbscontent.replace("\r\n","&#10;"); // String 내부의 줄바꿈을 표현
+			getbbscontent = String.join("\r\n",bbscontent); // 각 배열 요소마다 줄바꿈 하여 넣음.
+			//getbbscontent = getbbscontent.replace("\r\n","/r/n"); // String 내부의 줄바꿈을 표현
 			
 			//금주 접수일 (date)
 			String b = "bbsStart";
@@ -115,7 +115,7 @@
 			bbsstart.add(finalstart);
 			//bbsstart.removeAll(Arrays.asList("",null));
 			getbbsstart = String.join("§",bbsstart);
-			getbbsstart = getbbsstart.replace("\r\n","&#10;");
+			//getbbsstart = getbbsstart.replace("\r\n","/r/n");
 			
 			//금주 완료 목표일 (null) (date)
 			String c = "bbsTarget";
@@ -129,7 +129,7 @@
 			}
 			//bbstarget.removeAll(Arrays.asList("",null));
 			getbbstarget = String.join("§",bbstarget);
-			getbbstarget = getbbstarget.replace("\r\n","&#10;"); 
+			//getbbstarget = getbbstarget.replace("\r\n","/r/n"); 
 			
 			//금주 진행율/완료일 (null)
 			String d = "bbsEnd";
@@ -140,7 +140,7 @@
 			}
 			//bbsend.removeAll(Arrays.asList("",null));
 			getbbsend = String.join("§",bbsend);
-			getbbsend = getbbsend.replace("\r\n","&#10;");
+			//getbbsend = getbbsend.replace("\r\n","/r/n");
 			
 			
 		}
@@ -160,8 +160,8 @@
 				bbsncontent.add(request.getParameter(e+((i-2)+2)));
 				//bbsncontent.removeAll(Arrays.asList("",null));
 			}
-			getbbsncontent = String.join("&#10;&#10;",bbsncontent);
-			getbbsncontent = getbbsncontent.replace("\r\n","&#10;");
+			getbbsncontent = String.join("\r\n",bbsncontent);
+			//getbbsncontent = getbbsncontent.replace("\r\n","/r/n");
 
 			
 			//차주 접수일 (date)
@@ -172,7 +172,7 @@
 			bbsnstart.add(finalnstart);
 			//bbsnstart.removeAll(Arrays.asList("",null));
 			getbbsnstart = String.join("§",bbsnstart);
-			getbbsnstart = getbbsnstart.replace("\r\n","&#10;"); 
+			//getbbsnstart = getbbsnstart.replace("\r\n","/r/n"); 
 			
 			
 			//차주 완료 목표일 (null) (date)
@@ -187,10 +187,37 @@
 			}
 			//bbsntarget.removeAll(Arrays.asList("",null));
 			getbbsntarget = String.join("§",bbsntarget);
-			getbbsntarget = getbbsntarget.replace("\r\n","&#10;"); 
+			//getbbsntarget = getbbsntarget.replace("\r\n","/r/n"); 
 		}
 		
+		
+		//만약, ERP 디버깅 데이터가  들어왔다면
+		String trACnt = request.getParameter("trACnt");
+		/* int trACnt = Integer.parseInt(request.getParameter("trACnt"));
+		String erp_date = "";
+		String erp_user = "";
+		String erp_stext = "";
+		String erp_authority ="";
+		String erp_division = "";
+		
+		for(int i=2; i < trACnt; i++) { 
+			String a = erp_date;
+			erp_date += request.getParameter(a+i) + "\r\n";
+			String b = erp_user;
+			erp_user += request.getParameter(b+i) + "\r\n";
+			String c = erp_stext;
+			erp_stext += request.getParameter(c+i);
+			String d = erp_authority;
+			erp_authority += request.getParameter(d+i);
+			String e = erp_division;
+			erp_division += request.getParameter(e+i);
+		} */
+		
 	%>
+	<a> <%= trACnt %></a><br>	
+	<a> <%= trCnt %></a><br>	
+	<a> <%= trNCnt %></a><br>	
+	
 		<form id="post_item" method="post" action="mainActionComplete.jsp">
 			<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 				<tbody id="tbody">
@@ -225,7 +252,7 @@
 		b.add(request.getParameter(a+((i-5)+5)));
 		b.removeAll(Arrays.asList("",null));
 		finalb = String.join("§",b);
-		//finalb = finalb.replace("\r\n","&#10;");
+		//finalb = finalb.replace("\r\n","/r/n");
 	}
 	%>
 	<textarea><%= finalb  %></textarea><br>
@@ -261,7 +288,7 @@
 		c.add(request.getParameter(d+((i-2)+2)));
 		c.removeAll(Arrays.asList("",null));
 		finald = String.join("§",c);
-		//finald = finald.replace("\r\n","&#10;");
+		//finald = finald.replace("\r\n","/r/n");
 	}
 	%>
 	<c:set var="ncontent" value="<%= finald %>"/>
@@ -298,7 +325,7 @@
 		
 		$('#bbsTable > tbody > tr:last').append(innerHtml);
 		$('#post_item').submit();
-	} 
+	}  
 	</script> 
 
 	 

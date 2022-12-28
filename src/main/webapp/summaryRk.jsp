@@ -1,3 +1,4 @@
+<%@page import="java.text.Format"%>
 <%@page import="net.sf.jasperreports.engine.type.CalculationEnum"%>
 <%@page import="java.time.LocalDateTime"%>
 <%@page import="java.util.Arrays"%>
@@ -130,7 +131,7 @@
 		 String pl = userDAO.getpl(id); 
 		//저장된 summary중, 가장 최근을 불러옴!
 		//String sum_id = Integer.toString(bbsDAO.getNextSum()-1);
-		String sum_id = bbsDAO.getSumid_Deadline(bbsDeadline, pl); //자신에게 맞는 sum_id를 가져옴!
+		String sum_id = bbsDAO.getSumidpl(pl); //자신에게 맞는 sum_id를 가져옴!
 		ArrayList<String> list = bbsDAO.getlistSum(sum_id, pl);
 		
 		if(pl.equals("") || pl == null) {
@@ -154,9 +155,9 @@
 		
 		String lastweek ="";
 		String nextweek ="";
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		if(!list.isEmpty() && list != null) {
 		//week에 date 표시
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		Date date = format.parse(list.get(9));
 		
 		Calendar cal3 = Calendar.getInstance();
@@ -169,6 +170,8 @@
 		nextweek = format.format(cal3.getTime());
 		}
 		int count = bbsDAO.getCountSum(pl)-1;
+		
+		String sign = "";
 		%>
 	
 
@@ -208,11 +211,10 @@
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본<span class="caret"></span></a>
+								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li ><a href="bbsRk.jsp">작성</a></li>
-								<%-- <li><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li> --%>
+								<li><a href="bbsRk.jsp">작성</a></li>
 								<li class="active"><a href="summaryRk.jsp">제출 목록</a></li>
 							</ul>
 							</li>
@@ -419,6 +421,22 @@
 	
 	<%
 	} else {
+		
+		//기간이 지나면 sign에 '마감' 표시를 함. 
+		String dl = (list.get(9));
+		Date time = new Date();
+		String timenow = format.format(time);
+		
+		Date dldate = format.parse(dl);
+		Date today = format.parse(timenow);
+		
+		if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
+			sign = list.get(11);
+		} else {
+			sign="마감";
+			// 데이터베이스에 마감처리 진행
+			int a = bbsDAO.sumSign(Integer.parseInt(sum_id));
+		}
 	%>
 	<!-- 목록 조회 table -->
 	<div class="container" id="jb-text" style="height:10%; width:10%; display:inline-flex; float:left; margin-left: 50%; display:none; position:absolute">
@@ -449,14 +467,14 @@
 							<td><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= list.get(9) %></textarea> </td>
 							<td><textarea id="pl" name="pl" style="display:none"><%= list.get(1) %></textarea> </td>
 							<td><textarea id="sum_id" name="sum_id" style="display:none"><%= sum_id %></textarea></td>
-							<td><textarea id="sign" name="sign" style="display:none"><%= list.get(11) %></textarea></td>
+							<td><textarea id="sign" name="sign" style="display:none"><%= sign %></textarea></td>
 							<td><textarea id="state_value" name="state_value" style="display:none"><%= list.get(5) %></textarea></td>
 							<td colspan="2" style="background-color:#D4D2FF; align:left;" >제출일 : <%= list.get(9) %></td>
 						</tr>
 						<tr>
 							<th colspan="2" style="background-color:#D4D2FF; align:left;" > &nbsp;금주 업무 실적</th>
 							<th colspan="3" style="align:left; border:none"></th>
-							<th colspan="1" style="txet:center" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" > &nbsp;승인 : <%= list.get(11) %></th>
+							<th colspan="1" style="txet:center" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" > &nbsp;승인 : <%= sign %></th>
 						</tr>
 						<tr>
 							<td></td>
@@ -539,10 +557,10 @@
 				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-right" type="button" style=" margin-left:40%; " data-toggle="tooltip" title="<%= nextweek %>" onclick="location.href='lastWeekRk.jsp?week=<%= week %>'"></button>
 			</div> --%>
 			<%
-			if(list.get(11).equals("미승인")) {
+			if(sign.equals("미승인")) {
 			%>
-				<button type="button" class="btn btn-danger pull-right" style="width:5%; margin-left:10px; text-align:center; align:center" onclick="location.href='bbsRkDelete.jsp?sum_id=<%= sum_id %>'">삭제</button> 
-				<button type="button" class="btn btn-info pull-right" style="width:5%; text-align:center; align:center" onclick="update()">수정</button> 
+				<button type="button" class="btn btn-danger pull-right" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="location.href='bbsRkDelete.jsp?sum_id=<%= sum_id %>'">삭제</button> 
+				<button type="submit" class="btn btn-info pull-right" style="width:50px; text-align:center; align:center" id="update" name="update">수정</button> 
 			<%
 			}
 			%>
@@ -667,7 +685,7 @@
 	
 	
 	<script>
-	function update() {
+	$("#update").find('[type="submit"]').trigger('click') {
 		if(document.getElementById("progress").value == '' || document.getElementById("progress").value == null) {
 			alert("금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
 		} else {

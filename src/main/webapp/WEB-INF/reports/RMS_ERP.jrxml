@@ -403,7 +403,7 @@ ORDER BY b.bbsDeadline DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}.intValue() + 10]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}.intValue() + 6]]></textFieldExpression>
 			</textField>
 			<image>
 				<reportElement x="0" y="5" width="90" height="36" uuid="530d6197-e455-4582-a62e-1675d31b775c"/>

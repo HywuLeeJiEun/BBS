@@ -100,6 +100,8 @@
 		String Staticemail = user.getEmail();
 		String[] email = Staticemail.split("@");
 		
+		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		
 	%>
 
 	<!-- 모달 영역! -->
@@ -264,7 +266,7 @@
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본<span class="caret"></span></a>
+								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
 								<li><a href="bbsRk.jsp">작성</a></li>

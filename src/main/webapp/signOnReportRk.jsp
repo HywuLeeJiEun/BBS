@@ -1,37 +1,32 @@
 <%@page import="user.User"%>
-<%@page import="java.time.format.DateTimeFormatter"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@page import="java.time.LocalDateTime"%>
-<%@page import="java.time.LocalDate"%>
-<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.util.Date"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.util.List"%>
-<%@page import="java.util.ArrayList"%>
 <%@page import="user.UserDAO"%>
-<%@page import="bbs.Bbs"%>
-<%@page import="java.io.PrintWriter"%>
+<%@page import="org.mariadb.jdbc.internal.failover.tools.SearchFilter"%>
+<%@page import="java.util.ArrayList"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+<%@ page import="java.io.PrintWriter" %>
 <%@ page import="bbs.Bbs" %>
 <%@ page import="bbs.BbsDAO" %>
-<% request.setCharacterEncoding("utf-8"); %>   
-
+<% request.setCharacterEncoding("utf-8"); %>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
-<link rel="stylesheet" href="css/index.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<link href="css/index.css" rel="stylesheet" type="text/css">
 <title>RMS</title>
+<link href="css/index.css" rel="stylesheet" type="text/css">
+
 </head>
+<body id="weekreport">
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 
 
-
-<body>
-	<%
+<%
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -89,46 +84,39 @@
 	
 		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
-				String workSet;
+		String workSet;
+		
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		List<String> works = new ArrayList<String>();
+		
+		if(code == null) {
+			workSet = "";
+		} else {
+			for(int i=0; i < code.size(); i++) {
+				
+				String number = code.get(i);
+				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+				String manager = userDAO.getManager(number);
+				works.add(manager); //즉, work 리스트에 모두 담겨 저장됨
+			}
 			
-				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-				List<String> works = new ArrayList<String>();
-				
-				if(code == null) {
-					workSet = "";
-				} else {
-					for(int i=0; i < code.size(); i++) {
-						
-						String number = code.get(i);
-						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-						String manager = userDAO.getManager(number);
-						works.add(manager); //즉, work 리스트에 모두 담겨 저장됨
-					}
-					
-					workSet = String.join("/",works);
+			workSet = String.join("/",works);
 
 
-				}
-				
-				String rk = userDAO.getRank((String)session.getAttribute("id"));
-	
-				
-				// 사용자 정보 담기
-				User user = userDAO.getUser(name);
-				String password = user.getPassword();
-				String rank = user.getRank();
-				//이메일  로직 처리
-				String Staticemail = user.getEmail();
-				String[] email = Staticemail.split("@");
-				
-				String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		}
+		
+		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		
+		// 사용자 정보 담기
+		User user = userDAO.getUser(name);
+		String password = user.getPassword();
+		String rank = user.getRank();
+		//이메일  로직 처리
+		String Staticemail = user.getEmail();
+		String[] email = Staticemail.split("@");
 	%>
 	
-	<c:set var="bbsID" value="<%= bbsID %>" />
-	<input type="hidden" id="bbsId" value="<c:out value='${bbsID}' />">
 	
-	
-    <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -153,11 +141,9 @@
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
-							<% if(!rk.equals("실장")) { %>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li class="active"><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li>
-							<% } %>
+							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
+							<li class="active"><a href="signOn.jsp">승인(제출)</a></li>
 						</ul>
 					</li>
 						<%
@@ -166,27 +152,11 @@
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false"><%= pl %><span class="caret"></span></a>
+								aria-expanded="false">요약본<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
-						
 							<ul class="dropdown-menu">
 								<li><a href="bbsRk.jsp">작성</a></li>
 								<li><a href="summaryRk.jsp">제출 목록</a></li>
-							</ul>
-						<%
-						 }
-						%>
-							</li>
-						<%
-							if(rk.equals("실장") || rk.equals("관리자")) {
-						%>
-							<li class="dropdown">
-							<a href="#" class="dropdown-toggle"
-								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
-							<!-- 드랍다운 아이템 영역 -->	
-							<ul class="dropdown-menu">
-								<li><a href="bbsRkAdmin.jsp">조회</a></li>
 							</ul>
 							</li>
 						<%
@@ -205,7 +175,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
 					%>
 						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
@@ -354,146 +324,173 @@
 	  </div>
 	</div>
 	
-		<div class="container">
-			<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
-				<thead>
-					<tr>
-						<th colspan="5" style=" text-align: center; color:blue "></th>
-					</tr>
-				</thead>
-			</table>
-		</div>
-		
-		<div class="container">
-			<div class="row">
-				<form method="post" action="updateAction.jsp?bbsID=<%= bbsID %>">
-					<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
-						<thead>
-							<tr>
-								<%
-								if(id.equals(bbs.getUserID()) || rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-									if(dldate.after(today)){
-										if(bbs.getSign().equals("미승인")) {
-								%>
-								<th colspan="5" style=" text-align: center; color:blue ">주간보고를 수정하고 있습니다.</th>
-								<%
-										}
-									}
-								}
-								%>
-							</tr>
-						</thead>
-					</table>
-					
-					<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
-						<thead>
-							<tr>
-								<th colspan="5" style="background-color: #eeeeee; text-align: center;">baynex 주간보고 작성</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-									<td colspan="1"> 주간보고 명세서 </td>
-									<td align="center" colspan="2"><input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50" value="<%= bbs.getBbsTitle().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\n", "<br>") %>"></td>
-									<td colspan="1"> 보고 제출일 </td>
-									<td align="center" colspan="1"><input type="date" required class="form-control" readonly placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value="<%= bbs.getBbsDeadline() %>"></td>
-							<tr>
-							
-								
-								<tr>
-									<th colspan="5" style="background-color: #D4D2FF;" align="center">금주 업무 실적</th>
-								</tr>
-								<tr style="background-color: #FFC57B;">
-										<th width="6%">|  담당자</th>
-										<th width="33%">| &nbsp; 업무내용</th>
-										<th width="1%">| &nbsp; 접수일</th>
-										<th width="1%">| &nbsp; 완료목표일</th>
-										<th width="1%">| &nbsp; 진행율/완료일</th>
-								</tr>
-								<tr align="center" style="background-color: white">	
-										<!-- (구분/담당자는 처음 작성하는 사람을 위하여 유지) 추후 userName과 연결 -->
-									 <td><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:180px; width:100%; border:none;" placeholder="구분/담당자" maxlength="50" readonly ><%=bbs.getBbsManager() %></textarea></td>
-									 <td><textarea class="textarea" required style="height:180px;width:100%; border:none;" placeholder="업무내용" name="bbsContent"><%= bbs.getBbsContent() %></textarea></td>
-									 <td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="접수일" name="bbsStart" id="bbsStart"><%= bbs.getBbsStart() %></textarea></td>
-									 <td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="완료목표일" name="bbsTarget" id="bbsTarget"><%= bbs.getBbsTarget() %></textarea></td>	
-									 <td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="진행율/완료일" name="bbsEnd"><%= bbs.getBbsEnd() %></textarea></td>									
-								</tr>	
-								<tr align="center">	
-										<!-- (구분/담당자는 처음 작성하는 사람을 위하여 유지) 추후 userName과 연결 -->
-									 <td><input type=text readonly  style="height:5px; width:100%; border:none;"  maxlength="50"></td>
-									 <td><input type=text readonly style="height:5px;width:100%; border:none;" ></td>
-									 <td><input type=text readonly style="height:5px; width:100%; border:none;"  ></td>
-									 <td><input type=text readonly style="height:5px; width:100%; border:none;"  ></td>	
-									 <td><input type=text readonly style="height:5px; width:100px; border:none;" ></td>									
-								</tr>
-								
-								
-								<tr>
-									<th colspan="5" style="background-color: #D4D2FF;" align="center">차주 업무 계획</th>
-								</tr>
-								<tr style="background-color: #FFC57B;">
-									<th width="6%">|  담당자</th>
-									<th width="33%">| &nbsp; 업무내용</th>
-									<th width="1%">| &nbsp; 접수일</th>
-									<th width="1%">| &nbsp; 완료목표일</th>
-								</tr>
-								<tr align="center" style="background-color: white">	
-									 <td><textarea class="textarea" style="height:180px; width:100%; border:none;" placeholder="구분/담당자" maxlength="50" readonly ><%=bbs.getBbsManager() %></textarea></td>
-									 <td><textarea class="textarea" required style="height:180px;width:100%; border:none;" placeholder="업무내용" name="bbsNContent" ><%= bbs.getBbsNContent() %></textarea></td>
-									 <%-- <td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="접수일" name="bbsNStart" id="bbsNStart" oninput="this.value = this.value
-													.replace(/[^0-9./.\s.-]/g, '')
-													.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsNStart() %></textarea></td> --%>
-									<td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="접수일" name="bbsNStart" id="bbsNStart"><%= bbs.getBbsNStart() %></textarea></td>
-									 <td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="완료목표일" name="bbsNTarget" id="bbsNTarget"><%= bbs.getBbsNTarget() %></textarea></td>										
-								</tr>
-								<tr align="center">	
-										 <td><input class="textarea" id="content_add" style="height:5px;width:150px;border:none;" readonly ></td>
-										 <td><input class="textarea" id="content_add" style="height:5px;width:100%;border:none;" readonly ></td>
-										 <td><input class="textarea" style="height:5px; width:100px;border:none;" class="form-control"  readonly></td>
-										 <td><input class="textarea" style="height:5px; width:100px;border:none;" id="target_add" class="form-control" readonly></td>	
-										 <td><input class="textarea" style="height:5px; width:100px;border:none;" id="target_add" class="form-control" readonly></td>
-									</tr>	
-									<tr>
-									 <td colspan="5" >
-										<%
-										if(id.equals(bbs.getUserID()) || rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-											if(dldate.after(today)){
-												if(bbs.getSign().equals("미승인")) {
-										%>
-											<a onclick="return confirm('해당 게시글을 삭제하시겠습니까?')"
-											href="deleteAction.jsp?bbsID=<%= bbsID %>" class="btn btn-danger pull-left">삭제</a>
-											
-											<input type="submit" id="update" style="margin-bottom:5px" class="btn btn-success pull-right" value="수정"> 
-										<%
-												}
-											}
-										}
-										%>
-									</td>	
-								</tr>
-					</tbody>
-				</table>
-			</form>
-		</div>
-	</div>
 	
+	
+	
+<div class="container-fluid" style="margin-left:15%">
+<table id="JR_PAGE_ANCHOR_0_1" role="none" class="jrPage" data-jr-height="595" style="empty-cells: show; width: 70%; border-collapse: collapse; background-color: white; top:5%; ">
+<tr role="none" valign="top" style="height:0">
+<td style="width:70px"></td>
+<td style="width:3px"></td>
+<td style="width:1px"></td>
+<td style="width:46px"></td>
+<td style="width:238px"></td>
+<td style="width:1px"></td>
+<td style="width:50px"></td>
+<td style="width:50px"></td>
+<td style="width:19px"></td>
+<td style="width:31px"></td>
+<td style="width:4px"></td>
+<td style="width:47px"></td>
+<td style="width:1px"></td>
+<td style="width:223px"></td>
+<td style="width:50px"></td>
+<td style="width:46px"></td>
+<td style="width:4px"></td>
+<td style="width:1px"></td>
+<td style="width:16px"></td>
+</tr>
+<tr valign="top" style="height:23px">
+<td colspan="24">
+</td>
+</tr>
+<tr valign="top" style="height:30px">
+<td>
+</td>
+<td colspan="14" style="text-indent: 0px; text-align: left;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 24px; line-height: 2; font-weight: bold;"><%= bbs.getBbsTitle() %></span></td>
+<td colspan="10">
+</td>
+</tr>
+<tr valign="top" style="height:5px">
+<td>
+</td>
+<td colspan="15" style="border-top: 1px solid #000000; ">
+</td>
+<td colspan="3">
+</td>
+</tr>
+<tr valign="top" style="height:9px">
+<td colspan="19">
+</td>
+</tr>
+<tr valign="top" style="height:30px">
+<td colspan="3">
+</td>
+<td colspan="7" style="background-color: #C7CDFD; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 20px; line-height: 1.3300781; font-weight: bold;">금주 업무 실적</span></td>
+<td>
+</td>
+<td colspan="7" style="background-color: #C7CDFD; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 20px; line-height: 1.3300781; font-weight: bold;">차주 업무 계획</span></td>
+<td>
+</td>
+</tr>
+<tr valign="top" style="height:3px">
+<td colspan="19">
+</td>
+</tr>
 
+<tr valign="top" style="height:37px">
+<td colspan="2">
+</td>
+<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">구분/<br/>담당자</span></td>
+<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">업무 내용</span></td>
+<td style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">접수일</span></td>
+<td style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">완료<br/>목표일</span></td>
+<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">진행율<br/>완료일</span></td>
+<td>
+</td>
+<td style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">구분/<br/>담당자</span></td>
+<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">업무 내용</span></td>
+<td style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">접수일</span></td>
+<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">완료<br/>목표일</span></td>
+<td colspan="2">
+</td>
+</tr>
+
+<!-- for문을 통해 출력 -->
+
+<tr valign="top" align="center">
+	<td colspan="2">
+	</td>
+   	 <td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" readonly id="bbsManager" name="bbsManager" style="resize:none; height:180px; width:100%; border:none; overflow:auto; vertical-align:top; text-align: center;" placeholder="구분/담당자"  readonly><%= bbs.getBbsManager() %></textarea></td>
+	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
+	<textarea class="textarea" readonly id="bbsContent" required style="resize:none; height:180px;width:100%; border:none;  " placeholder="업무내용" name="bbsContent"><%= bbs.getBbsContent() %></textarea></td>
+	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" readonly id="bbsStart" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsStart"  oninput="this.value = this.value
+												.replace(/[^0-9./.\s.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
+												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsStart() %></textarea></td>
+	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" readonly id="bbsTarget" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="완료목표일" name="bbsTarget" oninput="this.value = this.value
+												.replace(/[^0-9./.\s.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
+												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsTarget() %></textarea></td>
+	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" readonly id="bbsEnd" required style="resize:none; height:180px; width:100%; border:none; text-align: center;"  placeholder="진행율/완료일" name="bbsEnd" oninput="this.value = this.value
+												.replace(/[^0-9./.\s.%.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
+												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsEnd() %></textarea></td>
+	<td>
+	</td>
+	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea"  readonly style="resize:none; height:180px; width:100%; border:none; overflow:auto; text-align: center;" placeholder="구분/담당자"   readonly><%= bbs.getBbsManager() %></textarea></td>
+	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
+	<textarea class="textarea" readonly required id="bbsNContent" style="resize:none; height:180px;width:100%; border:none; " placeholder="업무내용" name="bbsNContent"><%= bbs.getBbsNContent() %></textarea></td>
+	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" readonly required id="bbsNStart" style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsNStart"  oninput="this.value = this.value
+												.replace(/[^0-9./.\s.-]/g, '')
+												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsNStart() %></textarea></td>
+	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
+	<textarea class="textarea" readonly required id="bbsNTarget" style="resize:none; height:180px; width:100%; border:none; text-align: center; " placeholder="완료목표일" name="bbsNTarget" oninput="this.value = this.value
+												.replace(/[^0-9./.\s.-]/g, '')
+												.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsNTarget() %></textarea></td>
+	<td colspan="2">
 	
-	<!-- 부트스트랩 참조 영역 -->
+	</td>
+</tr>
+<tr  style="height:80px">
+	<td colspan="15" style="margin-right:50px;">
+		<a href="bbsRk.jsp" style="margin-left:130px;" class="btn btn-primary pull-right">목록</a>
+	</td>
+	<td>
+		<button style="margin-left:20px;" class="btn btn-success pull-right" id="<%= bbs.getBbsID() %>" onclick="signOn_click(this.id);"> 승인 </button>
+	</td>
+	<td>
+		<%-- <a class="btn btn-success pull-right" href="ppt.jsp?deadLine=<%= list.get(0).getBbsDeadline() %>">PPTX</a> --%>
+	</td>
+</tr>
+<tr valign="top" style="height:30px">
+<td>
+</td>
+</tr>
+</table>
+</div>
+
+<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>
-	<script>
+ 	<script>
 		// 자동 높이 확장 (textarea)
-		$("textarea").on('input keyup input focusin focusout blur change mousemove', function() {
+		$("textarea").on('input keyup keydown focusin focusout blur mousemove', function() {
 			var offset = this.offsetHeight - this.clientHeight;
 			var resizeTextarea = function(el) {
 				$(el).css('height','auto').css('height',el.scrollHeight + offset);
 			};
-			$(this).on('keyup input focusin focusout blur change mousemove', function() {resizeTextarea(this); });
+			$(this).on('keyup input keydown focusin focusout blur mousemove', Document ,function() {resizeTextarea(this); });
+			
 		});
-	</script>
+	</script> 
 	
-	<!-- <script>
+	<script>
 		//textarea 접수일 ... 유효성 검사
 		$(document.getElementById("bbsStart")).on('input', function() {
 			// ### 접수일 처리
@@ -730,7 +727,159 @@
 	
 			}
 		});
-	</script> -->
+	</script>
+	
+	<script>
+	// 금주 업무 실적 추가 script
+	function textAdd() {
+		var target = document.getElementById("jobs");
+		var option = target.options[target.selectedIndex].text;
+		var cadd = document.getElementById('content_add').value;
+		var sadd = document.getElementById('start_add').value;
+		var words = sadd.split("-");
+		var tadd = document.getElementById('target_add').value;
+		var word = tadd.split("-");
+		
+		// 줄바꿈 확인 개수
+		var lb_cadd = cadd.split("\n").length -1;
+		
+		if(option === "담당 업무 선택") {
+			alert("(금주) 담당 업무 선택이 완료되지 않았습니다.");
+			return false;
+		}
+		if($("#content_add").val() == "") {
+			alert("(금주) 업무 내용이 입력되지 않았습니다.");
+			$("#content_add").focus();
+			return false;
+		} 
+		var eadd = document.getElementById('end_add').value;
+		if($("#end_add").val() == "") {
+			alert("(금주) 진행율이 입력되지 않았습니다.");
+			$("#end_add").focus();
+			return false;
+		}
+		document.getElementById('bbsEnd').value += eadd + '\n';
+		for(var i=0; i < lb_cadd; i++) {
+			document.getElementById('bbsEnd').value += '\n';
+		}
+		
+		if(option === "무관") {
+			document.getElementById('bbsContent').value += '-' + ' ' + cadd + '\n';
+		} else {
+		document.getElementById('bbsContent').value += '-' + '[' + option + ']'+ ' ' + cadd + '\n';
+		}
+		
+
+		if(words == "") {
+				alert('(금주) 접수일 미입력으로 ---로 표시됩니다.');
+				document.getElementById('bbsStart').value += '---' + '\n';
+				for(var i=0; i < lb_cadd; i++) {
+					document.getElementById('bbsStart').value += '\n';
+				}
+		} else {
+			document.getElementById('bbsStart').value += words[1] + '/' + words[2] + '\n';
+			for(var i=0; i < lb_cadd; i++) {
+				document.getElementById('bbsStart').value += '\n';
+			}
+		}
+
+		if(word == "") {
+				alert("(금주) 목표일 미입력으로 ---로 표시됩니다.");
+				document.getElementById('bbsTarget').value += '---' + '\n';
+				for(var i=0; i < lb_cadd; i++) {
+					document.getElementById('bbsTarget').value += '\n';
+				}
+		} else {
+			document.getElementById('bbsTarget').value += words[1] + '/' + words[2] + '\n';
+			for(var i=0; i < lb_cadd; i++) {
+				document.getElementById('bbsTarget').value += '\n';
+			}
+		}
+		
+		var sdown = $("textarea").prop('scrollHeight');
+		$("textarea").scrollTop(sdown);
+	};
+	</script>
+	<script>
+	function textRe() {
+		document.getElementById("jobs").value="담당 업무 선택";
+		document.getElementById('content_add').value="";
+		document.getElementById('start_add').value="";
+		document.getElementById('target_add').value="";
+		document.getElementById('end_add').value="";
+	}
+	</script>
+	
+	<script>
+	// 차주 업무 계획 추가 script
+	function textNAdd() {
+		var target = document.getElementById("njobs");
+		var option = target.options[target.selectedIndex].text;
+		var cadd = document.getElementById('ncontent_add').value;
+		var sadd = document.getElementById('nstart_add').value;
+		var words = sadd.split("-");
+		var tadd = document.getElementById('ntarget_add').value;
+		var word = tadd.split("-");
+		
+		// 줄바꿈 확인 개수
+		var lb_cadd = cadd.split("\n").length -1;
+		
+		if(option === "담당 업무 선택") {
+			alert("(차주) 담당 업무 선택이 완료되지 않았습니다.");
+			return false;
+		}
+		if($("#ncontent_add").val() == "") {
+			alert("(차주) 업무 내용이 입력되지 않았습니다.");
+			$("#ncontent_add").focus();
+			return false;
+		} 
+		
+		if(option === "무관") {
+			document.getElementById('bbsNContent').value += '-' + ' ' + cadd + '\n';
+		} else {
+		document.getElementById('bbsNContent').value += '-' + '[' + option + ']'+ ' ' + cadd + '\n';
+		}
+		
+
+		if(words == "") {
+				alert('(차주) 접수일 미입력으로 ---로 표시됩니다.');
+				document.getElementById('bbsNStart').value += '---' + '\n';
+				for(var i=0; i < lb_cadd; i++) {
+					document.getElementById('bbsNStart').value += '\n';
+				}
+		} else {
+			document.getElementById('bbsNStart').value += words[1] + '/' + words[2] + '\n';
+			for(var i=0; i < lb_cadd; i++) {
+				document.getElementById('bbsNStart').value += '\n';
+			}
+		}
+
+		if(word == "") {
+				alert("(차주) 목표일 미입력으로 ---로 표시됩니다.");
+				document.getElementById('bbsNTarget').value += '---' + '\n';
+				for(var i=0; i < lb_cadd; i++) {
+					document.getElementById('bbsNTarget').value += '\n';
+				}
+		} else {
+			document.getElementById('bbsNTarget').value += words[1] + '/' + words[2] + '\n';
+			for(var i=0; i < lb_cadd; i++) {
+				document.getElementById('bbsNTarget').value += '\n';
+			}
+		}
+		
+		var sdown = $("textarea").prop('scrollHeight');
+		$("textarea").scrollTop(sdown);
+	};
+	</script>
+
+
+	<script>
+	function signOn_click(clicked_id) {
+		var trCnt = $('#bbsTable tr').length; 
+		//bbsID를 가져와 작업을 진행.
+		location.href="signOnAction.jsp?bbsID="+clicked_id+"&trCnt="+trCnt;
+	}
+	</script>
 	
 	
 	<!-- modal 내, password 보이기(안보이기) 기능 -->
@@ -775,4 +924,6 @@
 	}
 	</script>
 	
+	
 </body>
+</html>

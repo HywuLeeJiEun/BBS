@@ -18,6 +18,7 @@ public class Bbs {
 	private String bbsDeadline;
 	private String bbsUpdate;
 	private String sign;
+	private String pluser;
 	
 	
 	
@@ -122,6 +123,12 @@ public class Bbs {
 	}
 	public void setSign(String sign) {
 		this.sign = sign;
+	}
+	public String getPluser() {
+		return pluser;
+	}
+	public void setPluser(String pluser) {
+		this.pluser = pluser;
 	}
 	
 	

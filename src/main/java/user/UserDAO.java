@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import bbs.Bbs;
 
 
 public class UserDAO { //DAO : data access object
@@ -285,7 +284,8 @@ public class UserDAO { //DAO : data access object
 			
 			//pluser 테이블의 web 구분
 			public ArrayList<String> getpluser(String work){
-				String sql =  "select * from pluser where work=?";
+				//String sql =  "select * from pluser where work=?";
+				String sql =  "select pluser, id, name from user where pluser=? order by name asc";
 						ArrayList<String> list = new ArrayList<String>();
 				try {
 					PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -313,6 +313,22 @@ public class UserDAO { //DAO : data access object
 					rs = pstmt.executeQuery();
 					while(rs.next()) {
 						return rs.getString(2);
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return "";
+			}
+			
+			//해당 id의 pluser
+			public String getpluserunder(String id){
+				String sql =  "select pluser from user where id=?";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setString(1, id);
+					rs = pstmt.executeQuery();
+					while(rs.next()) {
+						return rs.getString(1);
 					}
 				}catch (Exception e) {
 					e.printStackTrace();

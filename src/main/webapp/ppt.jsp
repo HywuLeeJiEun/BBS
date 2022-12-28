@@ -1,3 +1,4 @@
+<%@page import="user.UserDAO"%>
 <%@page import="java.io.OutputStream"%>
 <%@page import="net.sf.jasperreports.swing.JRViewer"%>
 <%@page import="javax.swing.JFrame"%>
@@ -34,8 +35,18 @@
 <body>
 
 <%
-	String bbsDeadline = request.getParameter("deadLine");
-	String templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_WEB.jrxml";
+
+	String bbsDeadline = request.getParameter("bbsDeadline");
+	String pluser = request.getParameter("pluser"); // 해당되는 pluser가 나옴(web, erp)
+	String templatePath = null;
+	String newfile = null;
+	if(pluser.equals("WEB")) {
+		templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_WEB.jrxml";
+		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\web_sample.pptx";
+	} else if (pluser.equals("ERP")) {
+		templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_ERP.jrxml";
+		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\erp_sample.pptx";
+	}
 	//String templatePath = "D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
 	//String templatePath = "D:\\workspace\\sample\\sample_bbs.jrxml";
 	//String templatePath2 = "D:\\workspace\\sample\\sample_bbs.jasper";
@@ -57,6 +68,7 @@
 	
 	 paramMap.put("deadLine",bbsDeadline);	  
 	 paramMap.put("logo",logo);
+	 paramMap.put("pluser",pluser);
 	
 	 // (3)데이타소스 생성
 	 Class.forName("org.mariadb.jdbc.Driver");
@@ -68,10 +80,11 @@
 	 // (5) Ppt로 출력
 	 //JasperExportManager.exportReportToPdfFile(print, destPath);	
 	
+	 
 	 JRPptxExporter pptxExporter = new JRPptxExporter();
 	 pptxExporter.setExporterInput(new SimpleExporterInput(print));
 	 //pptxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(new File("D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\주간보고_sample.pptx")));
-	 pptxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(new File("C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\주간보고_sample.pptx")));
+	 pptxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(new File(newfile)));
 	 
 	 // frame으로 출력
 	 /* JFrame frame = new JFrame("Report");
@@ -87,7 +100,12 @@
 	
 	}
 	
-	String fileName = "주간보고_sample.pptx";
+	String fileName = null;
+	if(pluser.equals("WEB")) {
+		fileName = "web_sample.pptx";
+	} else if(pluser.equals("ERP")) {
+		fileName = "erp_sample.pptx";
+	}
 	String downLoadFile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\" + fileName;
 	
 	File file = new File(downLoadFile);
@@ -110,8 +128,10 @@
 		os.write(b,0,length);
 	}
 	
-	os.flush(); 
+	os.flush();  
 %>
+
+
 
 </body>
 </html>

@@ -19,10 +19,10 @@
 <meta charset="UTF-8">
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
-<link rel="stylesheet" href="css/index.css">
 <!-- // 폰트어썸 이미지 사용하기 -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <title>RMS</title>
+<link href="css/index.css" rel="stylesheet" type="text/css">
 </head>
 
 
@@ -76,12 +76,14 @@
 		String Staticemail = user.getEmail();
 		String[] email = Staticemail.split("@");
 		
+		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		
 	%>
 
 	<c:set var="works" value="<%= works %>" />
 	<input type="hidden" id="work" value="<c:out value='${works}'/>">
 	
-     <!-- ************ 상단 네비게이션바 영역 ************* -->
+    <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -105,14 +107,53 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li><a href="bbs.jsp">조회</a></li>
+							<li><a href="bbsAdmin.jsp">조회</a></li>
 							<li class="active"><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
+							<li><a href="signOn.jsp">승인(제출)</a></li> 
 						</ul>
 					</li>
+						<%
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+						%>
+						<%
+						 if (pl.equals("WEB") || pl.equals("ERP")) {
+						%>
+											
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle"
+									data-toggle="dropdown" role="button" aria-haspopup="true"
+									aria-expanded="false"><%= pl %><span class="caret"></span></a>
+								<!-- 드랍다운 아이템 영역 -->	
+								<ul class="dropdown-menu">
+									<li><a href="bbsRk.jsp">작성</a></li>
+									<li><a href="summaryRk.jsp">제출 목록</a></li>
+								</ul>
+							</li>
+						<%
+						 }
+						%>
+						<%
+							}
+						%>
+						<%
+							if(rk.equals("실장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="bbsRkAdmin.jsp">조회</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
 				</ul>
 			
+		
 			
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
@@ -124,9 +165,9 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
 					%>
-						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
@@ -317,7 +358,7 @@
 									<tr>
 										 <td>
 										 	<div style="float:left">
-											 <select name="jobs5" id="jobs5" style="height:45px;">
+											 <select name="jobs5" id="jobs5" style="height:45px; width:105px">
 													 <option> [시스템] 선택 </option>
 													 <%
 													 for(int count=0; count < works.size(); count++) {
@@ -330,12 +371,12 @@
 												 </select>
 											 </div>
 											 <div style="float:left">
-											 <textarea class="textarea" id="bbsContent" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsContent5"></textarea>
+											 <textarea class="textarea" id="bbsContent" required style="height:45px;width:220%; border:none; " placeholder="업무내용" name="bbsContent5"></textarea>
 											 </div>
 										 </td>
 										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart5" ></td>
 										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget5" ></td>		
-										 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none;"  placeholder="진행율/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd5" ></textarea></td>
+										 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none;"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd5" ></textarea></td>
 												</tr>
 									</tbody>
 								</table>
@@ -362,7 +403,7 @@
 							<tr>
 								 <td>
 								 	<div style="float:left">
-									 <select name="jobs2" id="jobs2" style="height:45px;">
+									 <select name="jobs2" id="jobs2" style="height:45px; width:105px" >
 											 <option> [시스템] 선택 </option>
 											 <%
 											 for(int count=0; count < works.size(); count++) {
@@ -375,7 +416,7 @@
 										 </select>
 									 </div>
 									 <div style="float:left">
-									 <textarea class="textarea" id="bbsNContent2" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsNContent2"></textarea>
+									 <textarea class="textarea" id="bbsNContent2" required style="height:45px;width:220%; border:none; " placeholder="업무내용" name="bbsNContent2"></textarea>
 									 </div>
 								 </td>
 								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart2" ></td>
@@ -386,7 +427,7 @@
 							<div id="wrapper" style="width:100%; text-align: center;">
 								<button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" onclick="addNRow()" class="btn btn-primary"> + </button>
 								<!-- 저장 버튼 생성 -->
-								<button type="button" id="save" style="margin-bottom:50px" class="btn btn-primary pull-right" onclick="saveData()"> 저장 </button>									
+								<button type="submit" id="save" style="margin-bottom:50px" class="btn btn-primary pull-right"> 저장 </button>									
 							</div>					
 				</form>
 			</div>
@@ -440,18 +481,18 @@
 	            innerHtml += '<tr>';
 	            innerHtml += '    <td>';
             	innerHtml += '<div style="float:left">';
-	            innerHtml += '     <select name="jobs'+Number(trCnt)+'" id="jobs'+Number(trCnt)+'" style="height:45px;">';
+	            innerHtml += '     <select name="jobs'+Number(trCnt)+'" id="jobs'+Number(trCnt)+'" style="height:45px; width:105px">';
 	            innerHtml += '			<option> [시스템] 선택 </option>';
 	            innerHtml += strworks; 
 	            innerHtml += '  <option> 기타 </option>';
 	            innerHtml += ' </select>';
 	            innerHtml += ' </div>';
 	            innerHtml += '  <div style="float:left">';
-	            innerHtml += ' <textarea class="textarea" id="bbsContent'+Number(trCnt)+'" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsContent'+Number(trCnt)+'"></textarea>';
+	            innerHtml += ' <textarea class="textarea" id="bbsContent'+Number(trCnt)+'" required style="height:45px;width:220%; border:none; " placeholder="업무내용" name="bbsContent'+Number(trCnt)+'"></textarea>';
 	            innerHtml += '  </div> </td>';
 	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart'+Number(trCnt)+'" class="form-control" placeholder="접수일" name="bbsStart'+Number(trCnt)+'" ></td>';
 	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+Number(trCnt)+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsTarget'+Number(trCnt)+'" ></td>';
-	            innerHtml += '  <td><textarea class="textarea" id="bbsEnd'+Number(trCnt)+'" style="height:45px; width:100%; border:none;"  data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다."  placeholder="진행율/완료일" name="bbsEnd'+Number(trCnt)+'" ></textarea></td>'; 
+	            innerHtml += '  <td><textarea class="textarea" id="bbsEnd'+Number(trCnt)+'" style="height:45px; width:100%; border:none;"  data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다."  placeholder="진행율&#13;&#10;/완료일" name="bbsEnd'+Number(trCnt)+'" ></textarea></td>'; 
 	            innerHtml += '    <td>';
 	            innerHtml += '<button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button>';
 	            innerHtml += '    </td>';
@@ -495,14 +536,14 @@
 	            innerHtml += '<tr>';
 	            innerHtml += '    <td>';
             	innerHtml += '<div style="float:left">';
-	            innerHtml += '     <select name="jobs'+Number(trNCnt)+'" id="jobs'+Number(trNCnt)+'" style="height:45px;">';
+	            innerHtml += '     <select name="jobs'+Number(trNCnt)+'" id="jobs'+Number(trNCnt)+'" style="height:45px; width:105px">';
 	            innerHtml += '			<option> [시스템] 선택 </option>';
 	            innerHtml += strworks; 
 	            innerHtml += '  <option> 기타 </option>';
 	            innerHtml += ' </select>';
 	            innerHtml += ' </div>';
 	            innerHtml += '  <div style="float:left">';
-	            innerHtml += ' <textarea class="textarea" id="bbsNContent'+Number(trNCnt)+'" required style="height:45px;width:230%; border:none; " placeholder="업무내용" name="bbsNContent'+Number(trNCnt)+'"></textarea>';
+	            innerHtml += ' <textarea class="textarea" id="bbsNContent'+Number(trNCnt)+'" required style="height:45px;width:220%; border:none; " placeholder="업무내용" name="bbsNContent'+Number(trNCnt)+'"></textarea>';
 	            innerHtml += '  </div> </td>';
 	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNStart'+Number(trNCnt)+'" class="form-control" placeholder="접수일" name="bbsNStart'+Number(trNCnt)+'" ></td>';
 	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget'+Number(trNCnt)+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsNTarget'+Number(trNCnt)+'" ></td>';
@@ -571,14 +612,15 @@
 	
 	<script>
 	// 데이터 보내기 (몇줄을 사용하는지!) <trCnt, trNCnt>
-	function saveData() {
+	//function saveData() {
+	$("#save").find('[type="submit"]').trigger('click') {
 		var trCnt = $('#bbsTable tr').length; // 기본이 5
 		var trNCnt = $('#bbsNTable tr').length; // 기본이 2
 		var innerHtml = "";
 		innerHtml += '<td><textarea class="textarea" id="trCnt" name="trCnt" readonly>'+trCnt+'</textarea></td>';
 		innerHtml += '<td><textarea class="textarea" id="trNCnt" name="trNCnt" readonly>'+trNCnt+'</textarea></td>';
         $('#bbsNTable > tbody> tr:last').append(innerHtml);
-		$('#main').submit();
+		//$('#main').submit();
 	}
 	</script>
 </body>

@@ -98,9 +98,10 @@
 		String userName = "userName";
 		ArrayList<Bbs> list = bbsDAO.getNoneSignSearch(pageNumber, userName, name);
 		
+		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 	%>
 	
-	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	<!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -115,7 +116,6 @@
 			<a class="navbar-brand" href="bbs.jsp">Report Management System</a>
 		</div>
 		
-			
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav navbar-left">
@@ -125,29 +125,82 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li ><a href="bbs.jsp">조회</a></li>
+							<li class="active"><a href="bbsAdmin.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li class="active"><a href="signOn.jsp">승인(제출)</a></li>
+							<li><a href="signOn.jsp">승인(제출)</a></li> 
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+						%>
+						<%
+						 if (pl.equals("WEB") || pl.equals("ERP")) {
+						%>
+											
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle"
+									data-toggle="dropdown" role="button" aria-haspopup="true"
+									aria-expanded="false"><%= pl %><span class="caret"></span></a>
+								<!-- 드랍다운 아이템 영역 -->	
+								<ul class="dropdown-menu">
+									<li><a href="bbsRk.jsp">작성</a></li>
+									<li><a href="summaryRk.jsp">제출 목록</a></li>
+								</ul>
+							</li>
+						<%
+						 }
+						%>
+						<%
+							}
+						%>
+						<%
+							if(rk.equals("실장") || rk.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본<span class="caret"></span></a>
+								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp">작성</a></li>
-								<li><a href="summaryRk.jsp">제출 목록</a></li>
+								<li><a href="bbsRkAdmin.jsp">조회</a></li>
 							</ul>
 							</li>
 						<%
 							}
 						%>
 				</ul>
+			
+		
+			
+			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
+			<ul class="nav navbar-nav navbar-right">
+				<li><a data-toggle="modal" href="#UserUpdateModal" style="color:#2E2E2E"><%= name %>(님)</a></li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle"
+						data-toggle="dropdown" role="button" aria-haspopup="true"
+						aria-expanded="false">관리<span class="caret"></span></a>
+					<!-- 드랍다운 아이템 영역 -->	
+					<ul class="dropdown-menu">
+					<%
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
+					%>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
+						<li><a href="workChange.jsp">담당업무 변경</a></li>
+						<li><a href="logoutAction.jsp">로그아웃</a></li>
+					<%
+					} else {
+					%>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a>
+						
+						</li>
+						<li><a href="logoutAction.jsp">로그아웃</a></li>
+					<%
+					}
+					%>
+					</ul>
+				</li>
+			</ul>
 		</div>
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
@@ -283,9 +336,8 @@
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('모든 보고가 승인(또는 마감)처리 되었습니다.')");
-		//script.println("location.href='bbs.jsp'");
+		script.println("location.href='bbs.jsp'");
 		script.println("history.back()");
-		//script.println("window.location=document.referrer");
 		script.println("</script>");
 	%>
 	<div class="container">
@@ -299,7 +351,7 @@
 
 			</thead>
 		</table>
-		<button style="margin:5px" class="btn btn-info pull-right" onclick="location.href='bbs.jsp'">검색</button>
+		<button style="margin:5px" class="btn btn-primary pull-right" onclick="location.href='bbs.jsp'">목록</button>
 	</div>
 	
 	<% 

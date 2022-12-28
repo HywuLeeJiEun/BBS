@@ -132,8 +132,8 @@
 		
 		String str = "미승인 - 관리자의 미승인 상태<br>";
 		str += "승인 - 관리자가 확정한 상태<br>";
-		str += "마감 - 기한이 지나 승인된 상태";
-		
+		str += "마감 - 기한이 지나 승인된 상태<br>";
+		str += "보류 - 저장되지 않은 상태";
 		
 		// summary 둘러보기를 위한 week 표시
 		int week = 0; 
@@ -157,29 +157,21 @@
 		nextweek = format.format(cal3.getTime());
 		
 		int count = bbsDAO.getCountSumAddmin()-1;
-
+		
+		
+		// summary_admin에 해당 날짜에 대한 기록이 저장되었는지 확인!
+		String sumad_id = bbsDAO.getSumAdminid(bbsDeadline);
+		ArrayList<String> sumad = bbsDAO.getlistSumad(sumad_id);
 		
 		// 승인 상태를 확인하기 위한 sign 불러오기 
-		String sign = "";
-		String esign = "";
-		if(!erp.isEmpty() && erp != null) {
-			esign = erp.get(11);
-			sign = esign;
-		}
-		String wsign = "";
-		if(!web.isEmpty() && web != null) {
-			wsign = web.get(11);
-			sign = wsign;
-		}
+		String sign = "[보류]";
 		
+		//sign이 저장된 경우,
+		if(sumad.size() != 0) {
+			sign = sumad.get(17);
+		} 
 		
-		//만약, 둘다 sign이 비어있다면,
-		if(esign.equals("") && wsign.equals("")) {
-			sign ="---";
-		}
-	
 		%>
-
 
 	 <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
@@ -798,6 +790,10 @@
 	
 	<script>
 	function update() {
+		if(document.getElementById("econtent") == null || document.getElementById("wcontent") == null) { //ERP, WEB 내용이 없는 경우, 
+			alert('불러올 PL 요약본이 없습니다. 담당 pl에게 문의 바랍니다.');
+
+		}
 		if(document.getElementById("eprogress").value == '' || document.getElementById("eprogress").value == null) {
 			alert("ERP - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
 		} else if (document.getElementById("wprogress").value == '' || document.getElementById("wprogress").value == null) { 

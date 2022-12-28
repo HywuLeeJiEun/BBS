@@ -9,6 +9,8 @@ public class User {
 	private String email; //사원메일
 	private String manager; //담당업무
 	private String authority; //권한
+	private String pl; // part Leader
+	private String pluser; // part Leader에 해당되는 user
 	
 	public String getId() {
 		return id;
@@ -51,6 +53,18 @@ public class User {
 	}
 	public void setAuthority(String authority) {
 		this.authority = authority;
+	}
+	public String getPl() {
+		return pl;
+	}
+	public void setPl(String pl) {
+		this.pl = pl;
+	}
+	public String getPluser() {
+		return pluser;
+	}
+	public void setPluser(String pluser) {
+		this.pluser = pluser;
 	}
 	
 	

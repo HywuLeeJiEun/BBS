@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//src/main/webapp/WEB-INF/reports/RMS_ERP.jrxml=UTF-8
 encoding//src/main/webapp/WEB-INF/reports/RMS_WEB.jrxml=UTF-8
 encoding//src/main/webapp/WEB-INF/reports/SummaryAD.jrxml=UTF-8
 encoding/<project>=UTF-8

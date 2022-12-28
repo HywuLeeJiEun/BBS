@@ -35,6 +35,7 @@
 		String NStart = null;
 		String NTarget = null;
 		
+		
 		if(session.getAttribute("id") != null){
 			id = (String)session.getAttribute("id");
 		}
@@ -46,7 +47,12 @@
 			script.println("location.href='login.jsp'");
 			script.println("</script>");
 		}
-		
+		UserDAO userDAO = new UserDAO();
+		String pluser = null;
+		if(userDAO.getpluserunder(id) != null) { // 비어있지 않다면,
+			pluser = userDAO.getpluserunder(id);
+		}
+			
 		// 담을 데이터 가져오기 (get이 없으면 배열, get 이 있다면 string)
 		String manager = request.getParameter("manager");
 		String title = request.getParameter("title");
@@ -77,29 +83,29 @@
 		
 	//금주 업무 실적 줄바꿈
 	for(int i=0; i < numarray.length; i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
-		 for(int j=0; j < Integer.parseInt(numarray[i]); j++) { //줄바꿈의 개수만큼
-				getbbsstart[i] += "&#10;"; // 줄바꿈 추가
-				getbbstarget[i] += "&#10;"; // 줄바꿈 추가
-				getbbsend[i] += "&#10;"; // 줄바꿈 추가
+		 for(int j=0; j < Integer.parseInt(numarray[i])-1; j++) { //줄바꿈의 개수만큼
+				getbbsstart[i] += "\r\n"; // 줄바꿈 추가
+				getbbstarget[i] += "\r\n"; // 줄바꿈 추가
+				getbbsend[i] += "\r\n"; // 줄바꿈 추가
 			}
 			
 		}
 		
 		//차주 업무 계획 줄바꿈
 		for(int i=0; i < nnumarray.length; i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
-			for(int j=0; j < Integer.parseInt(nnumarray[i]); j++) { //줄바꿈의 개수만큼
-				getbbsnstart[i] += "&#10;"; // 줄바꿈 추가
-				getbbsntarget[i] += "&#10;"; // 줄바꿈 추가
+			for(int j=0; j < Integer.parseInt(nnumarray[i])-1; j++) { //줄바꿈의 개수만큼
+				getbbsnstart[i] += "\r\n"; // 줄바꿈 추가
+				getbbsntarget[i] += "\r\n"; // 줄바꿈 추가
 			} 
 		} 
 
 		// 모두 String으로 변환
-		bbsstart = String.join("&#10;",getbbsstart);
-		bbstarget = String.join("&#10;",getbbstarget);
-		bbsend = String.join("&#10;",getbbsend);
+		bbsstart = String.join("\r\n",getbbsstart);
+		bbstarget = String.join("\r\n",getbbstarget);
+		bbsend = String.join("\r\n",getbbsend);
 		
-		bbsnstart = String.join("&#10;",getbbsnstart);
-		bbsntarget = String.join("&#10;",getbbsntarget); 
+		bbsnstart = String.join("\r\n",getbbsnstart);
+		bbsntarget = String.join("\r\n",getbbsntarget); 
 		
 		
 	    // 정상적으로 입력이 되었다면 글쓰기 로직을 수행한다
@@ -116,7 +122,7 @@
 			script.println("</script>");
 		} else { 
 		
-			int result = bbsDAO.write(id, manager, title, name, getbbscontent, bbsstart, bbstarget, bbsend, getbbsncontent, bbsnstart, bbsntarget, bbsDeadline);
+			int result = bbsDAO.write(id, manager, title, name, getbbscontent, bbsstart, bbstarget, bbsend, getbbsncontent, bbsnstart, bbsntarget, bbsDeadline, pluser);
 		// 데이터베이스 오류인 경우
 		if(result == -1){
 			PrintWriter script = response.getWriter();

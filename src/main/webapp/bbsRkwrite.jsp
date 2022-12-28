@@ -102,17 +102,17 @@
 			con += list.get(i).getBbsContent()+"\r\n"; //하나의 content
 		}
 		// content 자르기
-		String[] content = con.split("\r\n|&#10;"); // - ~~~, ~~~,  - ~~ ...
+		String[] content = con.split("\r\n"); // - ~~~, ~~~,  - ~~ ...
 		// 맨앞 -를 다른 문자로 치환하기
 		String rp = "";
 		for(int i=0; i<content.length; i++) {
 			if(content[i].substring(0).indexOf("-") > -1){ //맨 앞이 -라면,
 				String a = content[i].replaceAll("\r\n","");
-				a = a.replaceAll("&#10;","");
+				a = a.replaceAll("\r\n","");
 				rp += a.replaceFirst("-","§") + "\r\n";
 			} else {
 				String a = content[i].replaceAll("\r\n","");
-				rp += a.replaceAll("&#10;","") +"\r\n"; // 해당 rp에 § 저장된다! 
+				rp += a.replaceAll("\r\n","") +"\r\n"; // 해당 rp에 § 저장된다! 
 			}
 		}  
 		String[] ccontent = rp.split("§");
@@ -125,7 +125,7 @@
 		//end 합치기
 		String en ="";
 		for(int i=0; i<list.size(); i++) { 
-			en += list.get(i).getBbsEnd().replace("&#10;","§");
+			en += list.get(i).getBbsEnd().replace("\r\n","§");
 		}
 		// end 자르기
 		String[] end = en.split("§");
@@ -150,11 +150,11 @@
 		for(int i=0; i< ncontent.length; i++) {
 			if(ncontent[i].substring(0).indexOf("-") > -1){ //맨 앞이 -라면,
 				String a = ncontent[i].replaceAll("\r\n","");
-				a = a.replaceAll("&#10;","");
+				a = a.replaceAll("\r\n","");
 				nrp += a.replaceFirst("-","§") + "\r\n";
 			} else {
 				String a = ncontent[i].replaceAll("\r\n","");
-				nrp += a.replaceAll("&#10;","") +"\r\n"; // 해당 rp에 § 저장된다! 
+				nrp += a.replaceAll("\r\n","") +"\r\n"; // 해당 rp에 § 저장된다! 
 			}
 		}  
 		String[] nccontent = nrp.split("§");
@@ -167,7 +167,7 @@
 		//NTarget 합치기
 		String nen ="";
 		for(int i=0; i<list.size(); i++) { 
-			nen += list.get(i).getBbsNTarget().replace("&#10;","§");
+			nen += list.get(i).getBbsNTarget().replace("\r\n","§");
 		}
 		// end 자르기
 		String[] ntarget = nen.split("§");

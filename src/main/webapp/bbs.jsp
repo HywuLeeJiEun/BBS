@@ -22,6 +22,7 @@
 <head>
 <!-- // 폰트어썸 이미지 사용하기 -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="css/index.css">
 <meta charset="UTF-8">
 <!-- 화면 최적화 -->
 <!-- <meta name="viewport" content="width-device-width", initial-scale="1"> -->
@@ -92,10 +93,12 @@
 		BbsDAO bbsDAO = new BbsDAO();
 		//ArrayList<Bbs> listbbs = bbsDAO.getDeadLineList(); 
 		
+		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		
 	%>
 	
 		
-	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	  <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -119,23 +122,45 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbs.jsp">조회</a></li>
+							<li class="active"><a href="bbsAdmin.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li>
+							<li><a href="signOn.jsp">승인(제출)</a></li> 
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+						%>
+						<%
+						 if (pl.equals("WEB") || pl.equals("ERP")) {
+						%>
+											
+							<li class="dropdown">
+								<a href="#" class="dropdown-toggle"
+									data-toggle="dropdown" role="button" aria-haspopup="true"
+									aria-expanded="false"><%= pl %><span class="caret"></span></a>
+								<!-- 드랍다운 아이템 영역 -->	
+								<ul class="dropdown-menu">
+									<li><a href="bbsRk.jsp">작성</a></li>
+									<li><a href="summaryRk.jsp">제출 목록</a></li>
+								</ul>
+							</li>
+						<%
+						 }
+						%>
+						<%
+							}
+						%>
+						<%
+							if(rk.equals("실장") || rk.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본<span class="caret"></span></a>
+								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp">작성</a></li>
-								<li><a href="summaryRk.jsp">제출 목록</a></li>
+								<li><a href="bbsRkAdmin.jsp">조회</a></li>
 							</ul>
 							</li>
 						<%
@@ -155,9 +180,9 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
 					%>
-						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
@@ -385,8 +410,7 @@
 				<tbody>
 					<%
 						String userName = "userName";
-						ArrayList<Bbs> list = bbsDAO.getRkSearch(pageNumber, userName, name);
-						
+						ArrayList<Bbs> list = bbsDAO.getSearch(pageNumber, name, userName, name);
 						for(int i = 0; i < list.size(); i++){
 							
 							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
@@ -417,9 +441,11 @@
 						<td>
 						<%
 						String sign = null;
-						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
+						if(dldate.after(today) && list.get(i).getSign().equals("승인")) { //현재 날짜가 마감일을 아직 넘지 않으면,
 							sign = list.get(i).getSign();
-						} else {
+						} else if(dldate.after(today) && list.get(i).getSign().equals("미승인")) {
+							sign = list.get(i).getSign();
+						}else { // 미승인, 마감 상태일 경우엔 하단 진행.
 							sign="마감";
 							// 데이터베이스에 마감처리 진행
 							int a = bbsDAO.getSignDeadLine(list.get(i).getBbsID());
