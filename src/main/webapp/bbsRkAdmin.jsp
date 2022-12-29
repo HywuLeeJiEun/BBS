@@ -114,7 +114,7 @@
 			day = dateFmt.format(cal2.getTime());
 		 }
 		 
-		 String bbsDeadline = mon;
+		 String bbsDeadline = mon; //Deadline은 '월'요일까지 포함된, 가장 가까운 월요일
 		
 
 		// 최종 관리자로서, Pl(파트리더)가 작성한 요약본을 불러옴! 
@@ -163,6 +163,11 @@
 		String sumad_id = bbsDAO.getSumAdminid(bbsDeadline);
 		ArrayList<String> sumad = bbsDAO.getlistSumad(sumad_id);
 		
+		//만약 sumad_id가 존재한다면, 다음으로 넘길때 같은 페이지가 나오지 않도록 하기
+		if(sumad_id != null && !sumad_id.isEmpty()) {
+			week += 1;
+		}
+		
 		// 승인 상태를 확인하기 위한 sign 불러오기 
 		String sign = "[보류]";
 		
@@ -171,7 +176,18 @@
 			sign = sumad.get(17);
 		} 
 		
+		
+		//erp_bbs가 존재하는지 확인하기
+		ArrayList<String> erp_bbs = bbsDAO.geterpid(bbsDeadline);
+		
+		String erpbbs_id = "-1";
+		if(erp_bbs.get(0) != null) {
+			erpbbs_id = erp_bbs.get(0); //erp_id 정보 넣기
+		}
 		%>
+<!-- erp가 존재하는 경우, 확인하기 -->
+<textarea class="textarea" id="workSet" name="workSet" style="display:none"><%= erpbbs_id %></textarea>
+
 
 	 <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
@@ -234,7 +250,7 @@
 								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li  class="active"><a href="bbsRkAdmin.jsp">작성 및 조회</a></li>
+								<li  class="active"><a href="bbsRkAdmin.jsp">작성</a></li>
 							</ul>
 							</li>
 						<%
@@ -611,10 +627,56 @@
 						%>
 					</tbody>
 				</table>
+				
+				<%
+				if(erp_bbs.size() != 0 && !erp.isEmpty()) {
+					String[] erp_date = erp_bbs.get(1).split("\r\n");
+					String[] erp_user = erp_bbs.get(2).split("\r\n");
+					String[] erp_stext = erp_bbs.get(3).split("\r\n");
+					String[] erp_authority = erp_bbs.get(4).split("\r\n");
+					String[] erp_division = erp_bbs.get(5).split("\r\n");
+				%>
+				<!-- '계정 관리가 있을 경우, 생성' -->
+				<table class="table" id="accountTable" style="text-align: center; cellpadding:50px; display:none;" >
+					<tbody id="tbody">
+					<tr>
+						<th colspan="2" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+					</tr>
+					<tr style="background-color: #FF9933; border: 1px solid">
+						<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date</th>
+						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
+						<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
+						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
+						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
+					</tr>
+						<%
+						for (int i=0; i < erp_date.length; i++) {
+						%>
+					<tr>
+						<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
+						  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_date.length %></textarea>
+						  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_date[i] %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+						  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp_user[i] %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+						  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp_stext[i] %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+						  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_authority[i] %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+						  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_division[i] %></textarea></td>
+					</tr>
+					<%
+						}
+					%>
+					</tbody>
+				</table>
+				<%
+				}
+				%>
 			</div>
 			<div style="display:inline-block">
 			<%
-			if (count != week){
+			if (count != week || bbsDAO.getSumAdminid(bbsDeadline).equals("")){
 			%>
 				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-left" type="button" style=" margin-left:45%; " data-toggle="tooltip" title="<%= lastweek %>" onclick="location.href='lastWeekbbsRkAdmin.jsp?week=<%= week + 1 %>'"></button>
 			<%
@@ -633,12 +695,13 @@
 				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center" onclick="update()">작성</button> 
 		<% } %>
 		<% if(sign.equals("승인") || sign.equals("마감")) {  //승인이나 마감 상태시에만 pptx로 출력 가능!%>
-				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center" onclick="print()">pptx</button> 
+				<button type="button" class="btn btn-success pull-right" style="width:50px; text-align:center; align:center" onclick="print()">pptx</button> 
 		<% } %> 
 		</div>
 	</form>
 	</div>
 	<br><br><br>	
+
 	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -787,12 +850,25 @@
 	});
 	</script>
 	
+	<script>
+	//'erp_bbs'에 데이터가 있다면,
+	$(document).ready(function() {
+		var workSet = document.getElementById("workSet").value;
+		if(workSet != -1) { // -1이 아니라면,
+			// accountTable 보이도록 설정
+			document.getElementById("accountTable").style.display="block";
+			document.getElementById("wrapper_account").style.display="block";
+		}
+	});
+	</script>
 	
 	<script>
 	function update() {
-		if(document.getElementById("econtent") == null || document.getElementById("wcontent") == null) { //ERP, WEB 내용이 없는 경우, 
-			alert('불러올 PL 요약본이 없습니다. 담당 pl에게 문의 바랍니다.');
-
+		if(document.getElementById("econtent") == null) { //ERP, WEB 내용이 없는 경우, 
+			alert('불러올 ERP 요약본이 없습니다. 담당 파트리더에게 문의 바랍니다.');
+		}
+		if(document.getElementById("wcontent") == null) { //ERP, WEB 내용이 없는 경우, 
+			alert('불러올 WEB 요약본이 없습니다. 담당 파트리더에게 문의 바랍니다.');
 		}
 		if(document.getElementById("eprogress").value == '' || document.getElementById("eprogress").value == null) {
 			alert("ERP - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");

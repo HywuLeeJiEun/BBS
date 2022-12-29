@@ -114,6 +114,11 @@
 		//이메일  로직 처리
 		String Staticemail = user.getEmail();
 		String[] email = Staticemail.split("@");
+		
+		//erp 자료 가져오기
+		ArrayList<String> list = bbsDAO.geterpbbs(bbsID);
+		
+		String pl = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
 	%>
 	
 	
@@ -152,7 +157,7 @@
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본<span class="caret"></span></a>
+								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
 								<li><a href="bbsRk.jsp">작성</a></li>
@@ -457,23 +462,78 @@
 	
 	</td>
 </tr>
+<%
+	if(list.size() == 0) {
+%>
 <tr  style="height:80px">
-	<td colspan="15" style="margin-right:50px;">
-		<a href="bbsRk.jsp" style="margin-left:130px;" class="btn btn-primary pull-right">목록</a>
-	</td>
-	<td>
-		<button style="margin-left:20px;" class="btn btn-success pull-right" id="<%= bbs.getBbsID() %>" onclick="signOn_click(this.id);"> 승인 </button>
-	</td>
-	<td>
-		<%-- <a class="btn btn-success pull-right" href="ppt.jsp?deadLine=<%= list.get(0).getBbsDeadline() %>">PPTX</a> --%>
+	<td colspan="16" style="margin-right:50px;">
+		<a href="bbsRk.jsp" style="margin-left:200px;" class="btn btn-primary pull-right">목록</a>
 	</td>
 </tr>
 <tr valign="top" style="height:30px">
 <td>
 </td>
 </tr>
+<%
+	}
+%>
 </table>
 </div>
+
+
+<%
+	if(list.size() != 0) { //erp가 비어있지 않다면, 하단 출력
+		String[] erp_date = list.get(1).split("\r\n");
+		String[] erp_user = list.get(2).split("\r\n");
+		String[] erp_stext = list.get(3).split("\r\n");
+		String[] erp_authority = list.get(4).split("\r\n");
+		String[] erp_division = list.get(5).split("\r\n");
+	%>
+<div class="container" style="margin-top:80px;">
+<table style="margin-right:50%">
+<!-- erp_bbs에 자료가 있는 경우 하단 출력! -->
+	<tr>
+		<th colspan="2" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+	</tr>
+	<tr style="background-color: #FF9933; border: 1px solid">
+		<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"><%= list.get(0) %></textarea></th>
+		<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
+		<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
+		<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
+		<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
+	</tr>
+	<%
+	for (int i=0; i < erp_date.length; i++) {
+	%>
+	<tr>
+		<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
+		  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_date.length %></textarea>
+		  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_date[i] %></textarea></td>
+	  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+		  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp_user[i] %></textarea></td>
+	  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+		  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp_stext[i] %></textarea></td>
+	  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+		  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_authority[i] %></textarea></td>
+	  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+		  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_division[i] %></textarea></td>
+	  	
+	</tr>
+	<%
+		}
+	%>
+	<tr  style="height:80px">
+	<td colspan="5" style="margin-right:50px;">
+		<a href="bbsRk.jsp" class="btn btn-primary pull-right">목록</a>
+	</td>
+	</tr>
+	<tr valign="top" style="height:30px">
+	<%
+	}
+	%>
+</table>
+</div>
+
 
 <!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>

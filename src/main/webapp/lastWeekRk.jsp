@@ -165,6 +165,9 @@
 		//다음주,
 		String nextweek = format.format(cal3.getTime());
 		
+		
+		//erp_bbs가 있는지 확인 
+		ArrayList<String> erp = bbsDAO.geterpid(list.get(9));
 		%>
 	
 
@@ -538,6 +541,52 @@
 						</tr>
 					</tbody>
 				</table>
+				<!-- erp_bbs가 존재한다면, (bbsDeadline에 해당하는) -->
+			<!-- erp_bbs에 자료가 있는 경우 하단 출력! -->
+				<%
+						if(erp.size() != 0 && pl.equals("ERP")) { //erp가 비어있지 않다면, 하단 출력 (ERP 담당자에게만)
+							String[] erp_date = erp.get(1).split("\r\n");
+							String[] erp_user = erp.get(2).split("\r\n");
+							String[] erp_stext = erp.get(3).split("\r\n");
+							String[] erp_authority = erp.get(4).split("\r\n");
+							String[] erp_division = erp.get(5).split("\r\n");
+						%>
+				<table style="margin-bottom:50px;">
+					<tbody>
+						<tr>
+							<th colspan="2" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+						</tr>
+						<tr style="background-color: #FF9933; border: 1px solid">
+							<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"><%= list.get(0) %></textarea></th>
+							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
+							<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
+							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
+							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
+						</tr>
+						<%
+						for (int i=0; i < erp_date.length; i++) {
+						%>
+						<tr>
+							<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
+							  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_date.length %></textarea>
+							  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_date[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp_user[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp_stext[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_authority[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_division[i] %></textarea></td>
+						</tr>
+						<%
+						}
+						%>
+					</tbody>
+				</table>
+				<%
+					}
+				%>	
 			</div>
 			<div style="display:inline-block">
 			<%

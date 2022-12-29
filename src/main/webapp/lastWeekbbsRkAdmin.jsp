@@ -143,6 +143,7 @@
 		String pl = userDAO.getpl(id);
 		//String MaxbbsDeadline = bbsDAO.getDeadLineListSum();
 		//summary_admin 관련 수집 (sumad_id)
+		
 		String sumad_id = Integer.toString(bbsDAO.getNMaxSumad(week-1));
 		ArrayList<String> sumad = bbsDAO.getlistSumad(sumad_id);
 		
@@ -187,7 +188,26 @@
 			int a = bbsDAO.sumadSign(Integer.parseInt(sumad_id));
 		
 		}
+		
+		
+		//erp_bbs가 존재하는지 확인하기
+		ArrayList<String> erp_bbs = bbsDAO.geterpid(sumad.get(18));
+		
+		String erpbbs_id = "-1";
+		if(erp_bbs.size() != 0) {
+			erpbbs_id = erp_bbs.get(0); //erp_id 정보 넣기
+		}
+		
+		
+		// summary_admin에 해당 날짜에 대한 기록이 저장되었는지 확인!
+		String Maxsumad_id = bbsDAO.getSumAdminid(bbsDeadline);	
+		//만약 sumad_id가 존재한다면, 이후로 돌아올때 해당 페이지를 보이지 않도록 하기!
+		if(Maxsumad_id != null && !Maxsumad_id.isEmpty()) {
+			//week -= 1;
+		}
 		%>
+<!-- erp가 존재하는 경우, 확인하기 -->
+<textarea class="textarea" id="workSet" name="workSet" style="display:none"><%= erpbbs_id %></textarea>
 
 
 	<!-- ************ 상단 네비게이션바 영역 ************* -->
@@ -431,7 +451,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인(제출) 및 마감 처리시, 수정/삭제가 불가합니다." > 요약본(Summary) 최종 수정 </th>
+					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인(제출) 및 마감 처리시, 수정/삭제가 불가합니다." > 요약본(Summary) 최종 확인 </th>
 				</tr>
 			</thead>
 		</table>
@@ -628,6 +648,53 @@
 						%>
 					</tbody>
 				</table>
+				
+				
+				<%
+				if(erp_bbs.size() != 0) {
+					String[] erp_date = erp_bbs.get(1).split("\r\n");
+					String[] erp_user = erp_bbs.get(2).split("\r\n");
+					String[] erp_stext = erp_bbs.get(3).split("\r\n");
+					String[] erp_authority = erp_bbs.get(4).split("\r\n");
+					String[] erp_division = erp_bbs.get(5).split("\r\n");
+				%>
+				<!-- '계정 관리가 있을 경우, 생성' -->
+				<table class="table" id="accountTable" style="text-align: center; cellpadding:50px; display:none;" >
+					<tbody id="tbody">
+					<tr>
+						<th colspan="2" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+					</tr>
+					<tr style="background-color: #FF9933; border: 1px solid">
+						<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date</th>
+						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
+						<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
+						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
+						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
+					</tr>
+						<%
+						for (int i=0; i < erp_date.length; i++) {
+						%>
+					<tr>
+						<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
+						  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_date.length %></textarea>
+						  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_date[i] %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+						  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp_user[i] %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+						  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp_stext[i] %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+						  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_authority[i] %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+						  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_division[i] %></textarea></td>
+					</tr>
+					<%
+						}
+					%>
+					</tbody>
+				</table>
+				<%
+				}
+				%>
 			</div>
 			<div style="display:inline-block">
 			<%
@@ -810,6 +877,17 @@
 	});
 	</script>
 	
+	<script>
+	//'erp_bbs'에 데이터가 있다면,
+	$(document).ready(function() {
+		var workSet = document.getElementById("workSet").value;
+		if(workSet != -1) { // -1이 아니라면,
+			// accountTable 보이도록 설정
+			document.getElementById("accountTable").style.display="block";
+			document.getElementById("wrapper_account").style.display="block";
+		}
+	});
+	</script>
 	
 	<script>
 	function update() {

@@ -122,8 +122,10 @@
 				String[] email = Staticemail.split("@");
 				
 				String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+				
+				//erp 자료 가져오기
+				ArrayList<String> list = bbsDAO.geterpbbs(bbsID);
 	%>
-	
 	<c:set var="bbsID" value="<%= bbsID %>" />
 	<input type="hidden" id="bbsId" value="<c:out value='${bbsID}' />">
 	
@@ -452,7 +454,10 @@
 										 <td><input class="textarea" style="height:5px; width:100px;border:none;" class="form-control"  readonly></td>
 										 <td><input class="textarea" style="height:5px; width:100px;border:none;" id="target_add" class="form-control" readonly></td>	
 										 <td><input class="textarea" style="height:5px; width:100px;border:none;" id="target_add" class="form-control" readonly></td>
-									</tr>	
+									</tr>
+									<%
+									if(list.size() == 0) {
+									%>	
 									<tr>
 									 <td colspan="5" >
 										<%
@@ -471,8 +476,73 @@
 										%>
 									</td>	
 								</tr>
+								<% } %>
 					</tbody>
 				</table>
+				
+				<!-- erp_bbs에 자료가 있는 경우 하단 출력! -->
+				<%
+						if(list.size() != 0) { //erp가 비어있지 않다면, 하단 출력
+							String[] erp_date = list.get(1).split("\r\n");
+							String[] erp_user = list.get(2).split("\r\n");
+							String[] erp_stext = list.get(3).split("\r\n");
+							String[] erp_authority = list.get(4).split("\r\n");
+							String[] erp_division = list.get(5).split("\r\n");
+						%>
+				<table>
+					<tbody>
+						<tr>
+							<th colspan="2" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+						</tr>
+						<tr style="background-color: #FF9933; border: 1px solid">
+							<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"><%= list.get(0) %></textarea></th>
+							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
+							<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
+							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
+							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
+						</tr>
+						<%
+						for (int i=0; i < erp_date.length; i++) {
+						%>
+						<tr>
+							<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
+							  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_date.length %></textarea>
+							  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_date[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp_user[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp_stext[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_authority[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_division[i] %></textarea></td>
+						</tr>
+						<%
+						}
+						%>
+						<tr style="margin-top:20%;">
+							 <td colspan="5" style="margin-top:100px" >
+								<%
+								if(id.equals(bbs.getUserID()) || rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+									if(dldate.after(today)){
+										if(bbs.getSign().equals("미승인")) {
+								%>
+									<a onclick="return confirm('해당 게시글을 삭제하시겠습니까?')"
+									href="deleteAction.jsp?bbsID=<%= bbsID %>" class="btn btn-danger pull-left" style="margin-bottom:100px; margin-top:30px">삭제</a>
+									
+									<input type="submit" id="update" style="margin-bottom:100px; margin-top:30px" class="btn btn-success pull-right" value="수정"> 
+								<%
+										}
+									}
+								}
+								%>
+							</td>	
+						</tr>
+					</tbody>
+				</table>
+				<%
+					}
+				%>
 			</form>
 		</div>
 	</div>

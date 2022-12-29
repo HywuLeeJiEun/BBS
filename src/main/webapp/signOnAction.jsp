@@ -1,3 +1,4 @@
+<%@page import="bbs.Bbs"%>
 <%@page import="java.io.PrintWriter"%>
 <%@page import="bbs.BbsDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -28,9 +29,18 @@
 		}
 		
 		
-		
 		BbsDAO bbs = new BbsDAO();
-		bbs.SignAction(bbsID);
+		Bbs bbslist = new BbsDAO().getBbs(bbsID);
+		
+		String bbsContent = bbslist.getBbsContent() + "\r\n";
+		String bbsStart = bbslist.getBbsStart() + "\r\n";
+		String bbsTarget = bbslist.getBbsTarget() + "\r\n";
+		String bbsEnd = bbslist.getBbsEnd() + "\r\n";
+		String bbsNContent = bbslist.getBbsNContent() + "\r\n";
+		String bbsNStart = bbslist.getBbsNStart() + "\r\n";
+		String bbsNTarget = bbslist.getBbsNTarget() + "\r\n";
+		
+		bbs.SignAction(bbsContent, bbsStart, bbsTarget, bbsEnd, bbsNContent, bbsNStart, bbsNTarget, bbsID);
 		
 		PrintWriter script = response.getWriter();
 		script.println("<script>");

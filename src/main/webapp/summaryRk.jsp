@@ -172,9 +172,21 @@
 		int count = bbsDAO.getCountSum(pl)-1;
 		
 		String sign = "";
+		
+		//erp_bbs가 있는지 확인 
+		String deadline = "";
+		if(!list.isEmpty() && list != null) {
+			deadline = list.get(9);
+		} else {
+			deadline = bbsDeadline;
+		}
+		ArrayList<String> erp = bbsDAO.geterpid(deadline);
+		
+		//summary_admin에 만약 저장되었다면, (내용이 있다면)
+		String sumad_id = bbsDAO.getSumAdminid(bbsDeadline);
+		ArrayList<String> sumad = bbsDAO.getlistSumad(sumad_id);
 		%>
 	
-
 	 <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
@@ -541,8 +553,58 @@
 							<!-- 비고 -->
 							<td style=" border: 1px solid"><textarea name="nnote" id="nnote" style="resize: none; width:100%; height:100px"><%= list.get(10) %></textarea></td>
 						</tr>
+						<tr>
+							<td></td>
+						</tr>
 					</tbody>
 				</table>
+				
+			<!-- erp_bbs가 존재한다면, (bbsDeadline에 해당하는) -->
+			<!-- erp_bbs에 자료가 있는 경우 하단 출력! -->
+				<%
+						if(erp.size() != 0 && pl.equals("ERP")) { //erp가 비어있지 않다면, 하단 출력 (ERP 담당자에게만)
+							String[] erp_date = erp.get(1).split("\r\n");
+							String[] erp_user = erp.get(2).split("\r\n");
+							String[] erp_stext = erp.get(3).split("\r\n");
+							String[] erp_authority = erp.get(4).split("\r\n");
+							String[] erp_division = erp.get(5).split("\r\n");
+						%>
+				<table style="margin-bottom:50px;">
+					<tbody>
+						<tr>
+							<th colspan="2" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+						</tr>
+						<tr style="background-color: #FF9933; border: 1px solid">
+							<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"><%= list.get(0) %></textarea></th>
+							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
+							<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
+							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
+							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
+						</tr>
+						<%
+						for (int i=0; i < erp_date.length; i++) {
+						%>
+						<tr>
+							<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
+							  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_date.length %></textarea>
+							  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>" readonly><%= erp_date[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>" readonly><%= erp_user[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>" readonly><%= erp_stext[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>" readonly><%= erp_authority[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>" readonly><%= erp_division[i] %></textarea></td>
+						</tr>
+						<%
+						}
+						%>
+					</tbody>
+				</table>
+				<%
+					}
+				%>	
 			</div>
 			<div style="display:inline-block">
 			<%
@@ -558,9 +620,11 @@
 			</div> --%>
 			<%
 			if(sign.equals("미승인")) {
+				if(sumad.size() == 0) {
 			%>
-				<button type="button" class="btn btn-danger pull-right" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="location.href='bbsRkDelete.jsp?sum_id=<%= sum_id %>'">삭제</button> 
-				<button type="submit" class="btn btn-info pull-right" style="width:50px; text-align:center; align:center" id="update" name="update">수정</button> 
+				<button type="button" class="btn btn-danger pull-right" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="location.href='bbsRkDelete.jsp?sum_id=<%= sum_id %>'" class="form-control" data-toggle="tooltip" data-placement="bottom" title="관리자가 요약본을 저장할 경우, 삭제가 불가합니다.">삭제</button> 
+			<% } %>
+				<button type="button" class="btn btn-info pull-right" style="width:50px; text-align:center; align:center" id="update" name="update" onclick="update()">수정</button> 
 			<%
 			}
 			%>
@@ -571,7 +635,6 @@
 <%
 	}
 %>
-	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>
@@ -685,19 +748,21 @@
 	
 	
 	<script>
-	$("#update").find('[type="submit"]').trigger('click') {
+	//$("#update").find('[type="submit"]').trigger('click') {
+	//function update() {
+	$("#update").on('click', function () {
 		if(document.getElementById("progress").value == '' || document.getElementById("progress").value == null) {
 			alert("금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
 		} else {
 			if(con.style.backgroundColor == '' || con.style.backgroundColor == null) {
 				alert("금주 업무 실적의 '상태'가 선택되지 않았습니다.");
 			} else {
-			var innerHtml = '<td><textarea class="textarea" id="color" name="color" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
+			var innerHtml = '<tr><td><textarea class="textarea" id="color" name="color" style="display:none">'+con.style.backgroundColor+'</textarea></td></tr>';
 			$('#Table > tbody > tr:last').append(innerHtml);
 			$('#bbsRk').submit();
 			}
 		}
-	}
+	});
 	</script>
 	
 </body>

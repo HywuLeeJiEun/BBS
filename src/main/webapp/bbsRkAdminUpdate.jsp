@@ -82,6 +82,7 @@
 	String sumad_id = bbsDAO.getSumAdminid(bbsDeadline);
 	
 	if(sumad_id.equals("")) { //데이터가 없기 때문에 저장!  (insert)
+		sign = "미승인";
 		num = bbsDAO.SummaryAdminWrite(econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline);
 	} else { //데이터가 이미 있으므로 수정! (update)
 		num = bbsDAO.SummaryAdminUpdate(Integer.parseInt(sumad_id), econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline);

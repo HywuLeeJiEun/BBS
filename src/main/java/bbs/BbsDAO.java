@@ -901,12 +901,19 @@ public class BbsDAO {
 			}
 			
 			
-			// bbs의 Sign을 승인으로 변경함! (승인(제출)버튼 클릭시!)
-			public int SignAction(int bbsID) {
-				String sql = " update bbs set sign='승인' where bbsId=?";
+			// bbs의 Sign을 승인으로 변경함! (승인(제출)버튼 클릭시!) => + 승인시, 마지막에 줄바꿈을 추가함(원활한 분리를 위함)
+			public int SignAction(String bbsContent, String bbsStart, String bbsTarget, String bbsEnd, String bbsNContent, String bbsNStart, String bbsNTarget, int bbsID) {
+				String sql = " update bbs set  bbsContent=?, bbsStart=?, bbsTarget=?, bbsEnd=?, bbsNContent=?, bbsNStart=?, bbsNTarget=?, sign='승인' where bbsId=?";
 				 try {
 					PreparedStatement pstmt = conn.prepareStatement(sql);
-					pstmt.setInt(1, bbsID); // bbsId 삽입
+					pstmt.setString(1, bbsContent);
+					pstmt.setString(2, bbsStart);
+					pstmt.setString(3, bbsTarget);
+					pstmt.setString(4, bbsEnd);
+					pstmt.setString(5, bbsNContent);
+					pstmt.setString(6, bbsNStart);
+					pstmt.setString(7, bbsNTarget);
+					pstmt.setInt(8, bbsID); // bbsId 삽입
 					return pstmt.executeUpdate();
 				}catch (Exception e) {
 					e.printStackTrace();
@@ -1233,9 +1240,95 @@ public class BbsDAO {
 			return list;
 		}
 		
+		// erp_id를 bbsDeadline으로 가져오기
+		public ArrayList<String> geterpid(String bbsDeadline){
+			String sql =  "select * from erp_bbs where bbsDeadline=?";
+					ArrayList<String> list = new ArrayList<String>();
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, bbsDeadline);
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
+					list.add(rs.getString(1));
+					list.add(rs.getString(2)); 
+					list.add(rs.getString(3));
+					list.add(rs.getString(4));
+					list.add(rs.getString(5));
+					list.add(rs.getString(6));
+					list.add(rs.getString(7));
+					list.add(rs.getString(8));
+					list.add(rs.getString(9));
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return list;
+		}
+		
 		//작성이 안된 상황을 고려해 bbsID를 통한 삭제 진행
 		//게시글 삭제 메소드
 		public int deleteErp(int bbsID) {
+			//실제 데이터 또한 삭제한다.
+			String sql = "delete from erp_bbs where bbsID = ?";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setInt(1, bbsID);
+				return pstmt.executeUpdate();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return -1; //데이터베이스 오류 
+		}
+		
+		
+	
+		//Update 및 조회에 활용될 erp_bbs 내용 가져오기
+		public ArrayList<String> geterpbbs(int bbsID){
+			String sql =  "select * from erp_bbs where bbsID=?";
+					ArrayList<String> list = new ArrayList<String>();
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setInt(1, bbsID);
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
+					list.add(rs.getString(1)); //erp_id
+					list.add(rs.getString(2)); //erp_date
+					list.add(rs.getString(3)); //erp_user
+					list.add(rs.getString(4)); //erp_stext
+					list.add(rs.getString(5)); //erp_authority
+					list.add(rs.getString(6)); //erp_division
+					list.add(rs.getString(7)); //erpManager
+					list.add(rs.getString(8)); //bbsDeadline
+					list.add(rs.getString(9)); //bbsID
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return list;
+		}
+		
+	
+		//erp_bbs 게시글 수정 메소드
+		public int erp_update(String erp_date, String erp_user, String erp_stext, String erp_authority, String erp_division, int erp_id) {
+			String sql = "update erp_bbs set erp_date=?, erp_user=?, erp_stext=?, erp_authority=?, erp_division=? where erp_id=?";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, erp_date);
+				pstmt.setString(2, erp_user);
+				pstmt.setString(3, erp_stext);
+				pstmt.setString(4, erp_authority);
+				pstmt.setString(5, erp_division);
+				pstmt.setInt(6, erp_id);
+				return pstmt.executeUpdate();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return -1; //데이터베이스 오류
+		}
+		
+		
+		//erp_bbs 게시글 삭제 메소드
+		public int delete_erp(int bbsID) {
 			//실제 데이터 또한 삭제한다.
 			String sql = "delete from erp_bbs where bbsID = ?";
 			try {

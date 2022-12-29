@@ -59,7 +59,7 @@
 		state = "진행중";
 	} else {
 		state = "미완료(문제)";
-	}
+	} 
 	String note = request.getParameter("note");
 	String bbsNContent = request.getParameter("ncontent");
 	String bbsNTarget = request.getParameter("ntarget");
@@ -87,8 +87,8 @@
 	}  
 	%>
 	
-	<textarea><%= bbsDeadline %></textarea><br> 
-	
+	<textarea><%= statecolor %></textarea><br> 
+	<textarea><%= sign %></textarea><br> 
 	
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>

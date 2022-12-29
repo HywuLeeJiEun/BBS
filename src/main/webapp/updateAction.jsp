@@ -72,7 +72,37 @@
 		Bbs bbs = new BbsDAO().getBbs(bbsID);
 		String name = new BbsDAO().name(id);
 		
-		if(!id.equals(bbs.getUserID()) && !rk.equals("부장") && !rk.equals("차장") && !rk.equals("관리자")) {
+		
+		//ERP가 있다면, update 진행
+		//erp data 하나의 string으로 만들기
+		String erp_date ="";
+		String erp_user ="";
+		String erp_stext = "";
+		String erp_authority ="";
+		String erp_division = "";
+		int erp_size = 0; 
+		if(request.getParameter("erp_size") != null) {
+			erp_size = Integer.parseInt(request.getParameter("erp_size"));
+		}
+		int erp_id = 0;
+		if(request.getParameter("erp_id") != null) {
+			erp_id = Integer.parseInt(request.getParameter("erp_id"));
+		}
+		for(int i=0; i< erp_size; i++) {
+			String a = "erp_date";
+			erp_date += request.getParameter(a+i) + "\r\n";
+			String b = "erp_user";
+			erp_user += request.getParameter(b+i) + "\r\n";
+			String c = "erp_stext";
+			erp_stext += request.getParameter(c+i) + "\r\n";
+			String d = "erp_authority";
+			erp_authority += request.getParameter(d+i) + "\r\n";
+			String e = "erp_division";
+			erp_division += request.getParameter(e+i) + "\r\n";
+			
+		}
+		
+		  if(!id.equals(bbs.getUserID()) && !rk.equals("부장") && !rk.equals("차장") && !rk.equals("관리자")) {
 			PrintWriter script = response.getWriter(); 
 			script.println("<script>");
 			script.println("alert('수정 권한이 없습니다. 사용자를 확인해주십시오.')");
@@ -93,25 +123,51 @@
 				java.sql.Timestamp date = bbsDAO.getDateNow();
 				
 				int result = bbsDAO.update(bbsID, request.getParameter("bbsManager"), request.getParameter("bbsTitle"), request.getParameter("bbsContent"), request.getParameter("bbsStart"), request.getParameter("bbsTarget"), request.getParameter("bbsEnd"), request.getParameter("bbsNContent"), request.getParameter("bbsNStart"), request.getParameter("bbsNTarget"), date, name);
-				// 데이터베이스 오류인 경우
-				if(result == -1){
-					PrintWriter script = response.getWriter();
-					script.println("<script>");
-					script.println("alert('글 수정하기에 실패했습니다')");
-					script.println("history.back()");
-					script.println("</script>");
-				// 글 수정이 정상적으로 실행되면 알림창을 띄우고 게시판 메인으로 이동한다
-				}else {
-					// Update 제한을 풀어둠!! (수정이 완료되면)
-					PrintWriter script = response.getWriter();
-					script.println("<script>");
-					script.println("alert('보고가 정상적으로 수정되었습니다.')");
-					script.println("location.href='bbs.jsp'");
-					script.println("</script>");
+				
+				if((erp_date != "" || erp_user != "") && result != -1) { // 즉, bbs 수정에 성공하고 erp_bbs 데이터가 비어있지 않다면,
+					int result_erp = bbsDAO.erp_update(erp_date, erp_user, erp_stext, erp_authority, erp_division, erp_id);
+					if(result_erp == -1) {
+						PrintWriter script = response.getWriter();
+						script.println("<script>");
+						script.println("alert('erp 디버깅 권한신청 처리현황 저장에 실패하였습니다.')");
+						script.println("history.back()");
+						script.println("</script>");
+					} else {
+						// Update 제한을 풀어둠!! (수정이 완료되면)
+						PrintWriter script = response.getWriter();
+						script.println("<script>");
+						script.println("alert('보고가 정상적으로 수정되었습니다.')");
+						script.println("location.href='bbs.jsp'");
+						script.println("</script>");
+					}
+				} else {
+					// 데이터베이스 오류인 경우
+					if(result == -1){
+						PrintWriter script = response.getWriter();
+						script.println("<script>");
+						script.println("alert('글 수정하기에 실패했습니다')");
+						script.println("history.back()");
+						script.println("</script>");
+					// 글 수정이 정상적으로 실행되면 알림창을 띄우고 게시판 메인으로 이동한다
+					}else {
+						// Update 제한을 풀어둠!! (수정이 완료되면)
+						PrintWriter script = response.getWriter();
+						script.println("<script>");
+						script.println("alert('보고가 정상적으로 수정되었습니다.')");
+						script.println("location.href='bbs.jsp'");
+						script.println("</script>");
+					}
 				}
 			}
-		}
-	
+		} 
+
 	%>
+	<a><%= erp_id %></a><br>
+	<a><%= erp_size %></a><br>
+	<a><%= erp_date %></a><br>
+	<a><%= erp_user %></a><br>
+	<a><%= erp_stext %></a><br>
+	<a><%= erp_authority %></a><br>
+	<a><%= erp_division %></a><br>
 </body>
 </html>

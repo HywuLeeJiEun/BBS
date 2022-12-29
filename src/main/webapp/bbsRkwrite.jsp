@@ -217,7 +217,7 @@
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본<span class="caret"></span></a>
+								aria-expanded="false"><%= work %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
 								<li class="active"><a href="bbsRk.jsp">조회</a></li>
@@ -488,7 +488,8 @@
 	</div>
 	<br><br><br>
 	
-	
+	<a><%= ncontent.length %></a><br>
+	<a><%= ntarget.length %></a><br>
 	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>

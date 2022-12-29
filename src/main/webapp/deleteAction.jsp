@@ -77,11 +77,30 @@
 			// 글 삭제 로직을 수행한다
 			BbsDAO bbsDAO = new BbsDAO();
 			int result = bbsDAO.delete(bbsID);
+			
+			if(result != -1) {
+				int result_erp = bbsDAO.delete_erp(bbsID);
+				if(result_erp == -1) {
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("alert('erp 디버깅 권한신청에 대한 삭제가 정상적으로 이뤄지지 않았습니다. 관리자에게 문의바랍니다.')");
+					script.println("location.href='bbs.jsp'");
+					script.println("</script>");
+				}
+				else {
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("alert('정상적으로 보고가 제거 되었습니다.')");
+					script.println("location.href='bbs.jsp'");
+					script.println("</script>");
+				}
+			}
+			
 			// 데이터베이스 오류인 경우
 			if(result == -1){
 				PrintWriter script = response.getWriter();
 				script.println("<script>");
-				script.println("alert('데이터베이스 오류입니다. 관리자에게 문의하십시오.')");
+				script.println("alert('데이터베이스 오류입니다. 관리자에게 문의바랍니다.')");
 				script.println("history.back()");
 				script.println("</script>");
 			// 글 삭제가 정상적으로 실행되면 알림창을 띄우고 게시판 메인으로 이동한다
