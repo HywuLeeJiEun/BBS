@@ -59,7 +59,7 @@
 		script.println("history.back();'");
 		script.println("</script>");
 	} else {
-	
+		
 		int num = bbsDAO.deleteSum(sum_id);
 		
 		if(num==-1){

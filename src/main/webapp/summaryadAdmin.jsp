@@ -53,6 +53,12 @@
 			script.println("location.href='login.jsp'");
 			script.println("</script>");
 		}
+		if(!rk.equals("실장") && !rk.equals("관리자")) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("location.href='bbs.jsp'");
+			script.println("</script>");
+		}
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 				String workSet;
@@ -110,6 +116,18 @@
 		 
 		 String bbsDeadline = mon; //Deadline은 '월'요일까지 포함된, 가장 가까운 월요일
 		
+
+		// 최종 관리자로서, Pl(파트리더)가 작성한 요약본을 불러옴! 
+		// 가장 최근으로 작성된 bbsDeadline을 기준으로 -> web, erp를 모두 불러와야함! (작성되어 있지 않다면 이를 표시)
+		String pl = userDAO.getpl(id);
+		//String MaxbbsDeadline = bbsDAO.getDeadLineListSum();
+		//ERP 관련 수집
+		String erp_id = bbsDAO.getSumid(bbsDeadline, "ERP");
+		ArrayList<String> erp = bbsDAO.getlistSum(erp_id, "ERP");
+		
+		//WEB 관련 수집
+		String web_id = bbsDAO.getSumid(bbsDeadline, "WEB");
+		ArrayList<String> web = bbsDAO.getlistSum(web_id, "WEB");
 		
 		
 		String str = "미승인 - 관리자의 미승인 상태<br>";
@@ -141,8 +159,8 @@
 		int count = bbsDAO.getCountSumAddmin()-1;
 		
 		
-		// 넘어온 sumad_id 사용
-		String sumad_id = request.getParameter("sumad_id");
+		// summary_admin에 해당 날짜에 대한 기록이 저장되었는지 확인!
+		String sumad_id = bbsDAO.getSumAdminid(bbsDeadline);
 		ArrayList<String> sumad = bbsDAO.getlistSumad(sumad_id);
 		
 		//만약 sumad_id가 존재한다면, 다음으로 넘길때 같은 페이지가 나오지 않도록 하기
@@ -163,16 +181,24 @@
 		ArrayList<String> erp_bbs = bbsDAO.geterpid(bbsDeadline);
 		
 		String erpbbs_id = "-1";
-		if(erp_bbs.size() != 0) {
+		if(erp_bbs.size() != 0)  {
 			if(erp_bbs.get(0) != null) {
 				erpbbs_id = erp_bbs.get(0); //erp_id 정보 넣기
 			}
 		}
-		 String pl = userDAO.getpl(id); 
-		 
-		//bbsID를 통한 작성 기능 제공
-			ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
-			String bbsID = String.join(",",AllbbsID);
+		
+		
+		//summary_admin에 이미 저장이 되어 있다면, 생성 불가!
+		
+		if(sumad_id != null && !sumad_id.equals("")) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('해당 요일로 작성된 요약본이 있습니다.')");
+			//script.println("location.href='summaryRkUpdate.jsp?sum_id="+sum_id+"''");
+			//script.println("location.href='summaryRkUpdate.jsp?sum_id='");
+			script.println("location.href='summaryadRk.jsp'");
+			script.println("</script>");
+		}
 		%>
 <!-- erp가 존재하는 경우, 확인하기 -->
 <textarea class="textarea" id="workSet" name="workSet" style="display:none"><%= erpbbs_id %></textarea>
@@ -202,29 +228,30 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li><a href="bbs.jsp">조회</a></li>
-							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
-							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
+							<li class="active"><a href="bbsAdmin.jsp">조회</a></li>
+							<!-- <li><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
+							<li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+						%>
+						<%
+						 if (pl.equals("WEB") || pl.equals("ERP")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false"><%= pl %><span class="caret"></span></a>
+								aria-expanded="false">요약본<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
+						
 							<ul class="dropdown-menu">
-								<li ><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
-								<li><a href="summaryRk.jsp">조회</a></li>
-								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
-								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
-								<li  class="active" id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+								<li><a href="bbsRk.jsp">작성</a></li>
 							</ul>
+						<%
+						 }
+						%>
 							</li>
 						<%
 							}
@@ -239,7 +266,7 @@
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
 								<li><a href="summaryadRk.jsp">조회</a></li>
-								<li><a href="summaryadAdmin.jsp">작성</a></li>
+								<li class="active"><a href="summaryadAdmin.jsp">작성</a></li>
 								<li><a href="summaryadUpdateDelete.jsp">수정 및 승인</a></li>
 								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
@@ -261,7 +288,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("실장")||rk.equals("관리자")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
@@ -322,7 +349,7 @@
 		     			</div>
 		     			<div class="col-md-6 form-outline">
 		     				<label class="col-form-label"> Password </label>
-		     				<input type="password" maxlength="20" required readonly class="form-control" style="width:100%" id="password" name="password" value="<%= password %>">
+		     				<input type="password" maxlength="20" required class="form-control" style="width:100%" id="password" name="password" value="<%= password %>">
 		     			</div>
 		     			<div class="col-md-3">
 		     				<label class="col-form-label"> &nbsp; </label>
@@ -338,7 +365,7 @@
 		     			</div>
 		     			<div class="col-md-6 form-outline">
 		     				<label class="col-form-label">name </label>
-		     				<input type="text" maxlength="20" required readonly class="form-control" style="width:100%" id="name" name="name"  value="<%= name %>">
+		     				<input type="text" maxlength="20" required class="form-control" style="width:100%" id="name" name="name"  value="<%= name %>">
 		     			</div>
 		     			<div class="col-md-3">
 		     				<label class="col-form-label"> &nbsp; </label>
@@ -354,7 +381,7 @@
 		     			</div>
 		     			<div class="col-md-6 form-outline">
 		     				<label class="col-form-label">rank </label>
-		     				<input type="text" required readonly class="form-control" data-toggle="tooltip" data-placement="bottom" title="직급 변경은 관리자 권한이 필요합니다." readonly style="width:100%" id="rank" name="rank"  value="<%= rank %>">
+		     				<input type="text" required class="form-control" data-toggle="tooltip" data-placement="bottom" title="직급 변경은 관리자 권한이 필요합니다." readonly style="width:100%" id="rank" name="rank"  value="<%= rank %>">
 		     			</div>
 		     			<div class="col-md-3">
 		     				<label class="col-form-label"> &nbsp; </label>
@@ -370,7 +397,7 @@
 		     			</div>
 		     			<div class="col-md-4 form-outline">
 		     				<label class="col-form-label">email </label>
-		     				<input type="text" maxlength="30" required readonly class="form-control" style="width:100%" id="email" name="email"  value="<%= email[0] %>"> 
+		     				<input type="text" maxlength="30" required class="form-control" style="width:100%" id="email" name="email"  value="<%= email[0] %>"> 
 		     			</div>
 		     			<div class="col-md-3" align="left" style="top:5px; right:20px">
 		     				<label class="col-form-label" > &nbsp; </label>
@@ -386,7 +413,7 @@
 		     			</div>
 		     			<div class="col-md-6 form-outline">
 		     				<label class="col-form-label">duty </label>
-		     				<input type="text" required readonly class="form-control" readonly data-toggle="tooltip" data-placement="bottom" title="업무 변경은 관리자 권한이 필요합니다." style="width:100%" id="duty" name="duty" value="<%= workSet %>">
+		     				<input type="text" required class="form-control" readonly data-toggle="tooltip" data-placement="bottom" title="업무 변경은 관리자 권한이 필요합니다." style="width:100%" id="duty" name="duty" value="<%= workSet %>">
 		     			</div>
 		     			<div class="col-md-3">
 		     				<label class="col-form-label"> &nbsp; </label>
@@ -420,7 +447,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인(제출) 및 마감 처리시, 수정/삭제가 불가합니다." > 요약본(Summary) 최종 확인 </th>
+					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="제출된 PL 요약본을 토대로<br> 최종 요약본이 작성됩니다." > [ERP/WEB] 요약본 </th>
 				</tr>
 			</thead>
 		</table>
@@ -460,21 +487,18 @@
 		<div class="row">
 			<div class="container">
 				<!-- 금주 업무 실적 테이블 -->
-				<table class="table" style="text-align: center;">
+				<table id="Table" class="table" style="text-align: center;">
 					<thead>
 						<tr>			
 							<td style="background-color:#f9f9f9;" colspan="1" style="align:left;" >요약본</td>
-							<td style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title=""> [ERP/WEB] - summary (<%= sumad.get(18) %>)</td>
+							<td style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title=""> [ERP/WEB] - summary (<%= bbsDeadline %>)<textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= bbsDeadline %></textarea></td>
 							<td colspan="2"  style="background-color:#f9f9f9;"></td>
 							<td  style="background-color:#f9f9f9;" colspan="1" style="txet:center">승인</td>
-							<td  style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" ><%= sign %></td>
-						</tr>
-						<tr>
-							<td></td>
+							<td  style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" ><%= sign %><textarea id="sign" name="sign" style="display:none"><%= sign %></textarea></td>
 						</tr>
 						<tr>
 							<th colspan="6" style="background-color:#D4D2FF; align:left; border:none" > &nbsp;금주 업무 실적</th>
-						</tr>						
+						</tr>
 					</thead>
 					<tbody>
 						<tr style="background-color:#FFC57B; text-align: center; align:center; ">
@@ -485,35 +509,61 @@
 							<th width="5%" style="text-align: center; border: 1px solid">상태</th>
 							<th width="25%" style="text-align: center; border: 1px solid">비고</th>
 						</tr>
+						<%
+						if(!erp.isEmpty() && erp != null) {
+						%>
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid">ERP</td>
+							<td style="text-align: center; border: 1px solid"><%= erp.get(1) %><textarea id="estate_value" name="estate_value" style="display:none"><%= erp.get(5) %></textarea></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required readonly name="econtent" id="econtent" style="resize: none; width:100%; height:100px"><%= sumad.get(1) %></textarea></td>
+							<td style=" border: 1px solid"><textarea required name="econtent" id="econtent" style="resize: none; width:100%; height:100px"><%= erp.get(2) %></textarea></td>
 							<!-- 완료일 -->
-							<td style="text-align: center; border: 1px solid"><textarea required readonly name="eend" id="eend" style="resize: none; width:100%; height:100px"><%= sumad.get(2) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="eend" id="eend" style="resize: none; width:100%; height:100px"><%= erp.get(3) %></textarea></td>
 							<!-- 진행율 -->
-							<td style="text-align: center; border: 1px solid"><textarea required readonly name="eprogress" id="eprogress" style="resize: none; width:100%; height:100px"><%= sumad.get(3) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="eprogress" id="eprogress" style="resize: none; width:100%; height:100px"><%= erp.get(4) %></textarea></td>
 							<!-- 상태 -->
 							<td style="text-align: center; border: 1px solid;" id="estate"></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea  name="enote" id="enote" style="resize: none; width:100%; height:100px"><%= sumad.get(5) %></textarea></td>
+							<td style=" border: 1px solid"><textarea  name="enote" id="enote" style="resize: none; width:100%; height:100px"><%= erp.get(6) %></textarea><textarea id="esum_id" name="esum_id" style="display:none"><%= erp.get(0) %></textarea></td>
 						</tr>
-						
+						<%
+						} else {
+						%>
+						<tr>
+							<td style="text-align: center; border: 1px solid">ERP</td>
+							<td colspan=5 style=" border: 1px solid"><br>해당 제출일로 작성된 ERP 요약본이 없습니다. </td>
+						</tr>
+						<%
+						}
+						if(!web.isEmpty() && web != null) {
+						%>
 						<tr>
 							
 							<!-- 구분 -->
-							<td style="border: 1px solid; text-align: center; ">WEB</td>
+							<td style="border: 1px solid; text-align: center; "><textarea id="wstate_value" name="wstate_value" style="display:none"><%= web.get(5) %></textarea><%= web.get(1) %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required readonly name="wcontent" id="wcontent" style="resize: none; width:100%; height:100px"><%= sumad.get(9) %></textarea></td>
+							<td style=" border: 1px solid"><textarea required name="wcontent" id="wcontent" style="resize: none; width:100%; height:100px"><%= web.get(2) %></textarea></td>
 							<!-- 완료일 -->
-							<td style="text-align: center; border: 1px solid"><textarea required readonly name="wend" id="wend" style="resize: none; width:100%; height:100px"><%= sumad.get(10) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="wend" id="wend" style="resize: none; width:100%; height:100px"><%= web.get(3) %></textarea></td>
 							<!-- 진행율 -->
-							<td style="text-align: center; border: 1px solid"><textarea required readonly name="wprogress" id="wprogress" style="resize: none; width:100%; height:100px"><%= sumad.get(11) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="wprogress" id="wprogress" style="resize: none; width:100%; height:100px"><%= web.get(4) %></textarea><textarea id="wsum_id" name="wsum_id" style="display:none"><%= web.get(0) %></textarea></td>
 							<!-- 상태 -->
 							<td style="text-align: center; border: 1px solid;" id="wstate"></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea  name="wnote" id="wnote" style="resize: none; width:100%; height:100px" readonly><%= sumad.get(13) %></textarea></td>
+							<td style=" border: 1px solid"><textarea  name="wnote" id="wnote" style="resize: none; width:100%; height:100px"><%= web.get(6) %></textarea></td>
+						</tr>
+						<%
+						} else {
+						%>
+						<tr>
+							<td style="text-align: center; border: 1px solid">WEB</td>
+							<td colspan=5 style=" border: 1px solid"><br>해당 제출일로 작성된 WEB 요약본이 없습니다. <br></td>
+						</tr>
+						<%
+						}
+						%>
+						<tr>
+							<td></td>
 						</tr>
 					</tbody>
 				</table>
@@ -525,7 +575,7 @@
 							<td></td>
 						</tr>
 						<tr>
-							<th colspan="6" style="background-color:#FF9900; align:left; border:none" > &nbsp;차주 업무 계획</th>
+							<th colspan="4" style="background-color:#FF9900; align:left; border:none" > &nbsp;차주 업무 계획</th>
 						</tr>
 					</thead>
 					<tbody style="border: 1px solid">
@@ -535,32 +585,55 @@
 							<th width="10%" style="text-align: center; border: 1px solid">완료예정</th>
 							<th width="50%" style="text-align: center; border: 1px solid">비고</th>
 						</tr>
+						<%
+						if(!erp.isEmpty() && erp != null) {
+						%>
 						<tr>
 							<!-- 구분 -->
+							<td style="text-align: center; border: 1px solid"><textarea style="display:none"><%= erp.get(1) %></textarea><%= erp.get(1) %></td>
+							<!-- 업무 내용 -->
+							<td style=" border: 1px solid"><textarea required name="encontent" id="encontent" style="resize: none; width:100%; height:100px"><%= erp.get(7) %></textarea></td>
+							<!-- 완료예정 -->
+							<td style="text-align: center; border: 1px solid"><textarea required name="entarget" id="entarget" style="resize: none; width:100%; height:100px"><%= erp.get(8) %></textarea></td>
+							<!-- 비고 -->
+							<td style=" border: 1px solid"><textarea name="ennote" id="ennote" style="resize: none; width:100%; height:100px"><%= erp.get(10) %></textarea></td>
+						</tr>
+						<%
+						} else { 
+						%>
+						<tr>
 							<td style="text-align: center; border: 1px solid">ERP</td>
-							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required readonly name="encontent" id="encontent" style="resize: none; width:100%; height:100px"><%= sumad.get(6) %></textarea></td>
-							<!-- 완료예정 -->
-							<td style="text-align: center; border: 1px solid"><textarea required readonly name="entarget" id="entarget" style="resize: none; width:100%; height:100px"><%= sumad.get(7) %></textarea></td>
-							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea name="ennote" id="ennote" style="resize: none; width:100%; height:100px"><%= sumad.get(8) %></textarea></td>
+							<td colspan=3 style=" border: 1px solid"><br>해당 제출일로 작성된 ERP 요약본이 없습니다. </td>
 						</tr>
-						
+						<% 
+						}
+						if(!web.isEmpty() && web != null) {
+						%>
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid">WEB</td>
+							<td style="text-align: center; border: 1px solid"><textarea  style="display:none"><%= web.get(1) %></textarea><%=web.get(1) %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required readonly name="wncontent" id="wncontent" style="resize: none; width:100%; height:100px"><%= sumad.get(14) %></textarea></td>
+							<td style=" border: 1px solid"><textarea required name="wncontent" id="wncontent" style="resize: none; width:100%; height:100px"><%= web.get(7) %></textarea></td>
 							<!-- 완료예정 -->
-							<td style="text-align: center; border: 1px solid"><textarea required readonly name="wntarget" id="wntarget" style="resize: none; width:100%; height:100px"><%= sumad.get(15) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="wntarget" id="wntarget" style="resize: none; width:100%; height:100px"><%= web.get(8) %></textarea></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea name="wnnote" id="wnnote" style="resize: none; width:100%; height:100px" readonly><%= sumad.get(16) %></textarea></td>
+							<td style=" border: 1px solid"><textarea name="wnnote" id="wnnote" style="resize: none; width:100%; height:100px"><%= web.get(10) %></textarea></td>
 						</tr>
+						<%
+						} else {
+						%>
+						<tr>
+							<td style="text-align: center; border: 1px solid">WEB</td>
+							<td colspan=3 style=" border: 1px solid"><br>해당 제출일로 작성된 WEB 요약본이 없습니다. </td>
+						</tr>
+						<%
+						}
+						%>
 					</tbody>
 				</table>
 				
 				<%
-				if(erp_bbs.size() != 0) {
+				if(erp_bbs.size() != 0 && !erp.isEmpty()) {
 					String[] erp_date = erp_bbs.get(1).split("\r\n");
 					String[] erp_user = erp_bbs.get(2).split("\r\n");
 					String[] erp_stext = erp_bbs.get(3).split("\r\n");
@@ -570,12 +643,6 @@
 				<!-- '계정 관리가 있을 경우, 생성' -->
 				<table class="table" id="accountTable" style="text-align: center; cellpadding:50px; display:none;" >
 					<tbody id="tbody">
-					<tr style="border:none;">
-						<td style="border:none;"></td>
-					</tr>
-					<tr style="border:none;">
-						<td style="border:none;"></td>
-					</tr>
 					<tr>
 						<th colspan="5" style="background-color: #ccffcc; border:none" align="center">ERP 디버깅 권한 신청 처리 현황</th>
 					</tr>
@@ -611,19 +678,10 @@
 				}
 				%>
 			</div>
-		<div class="container" style="display:inline-block">
-			<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center;" onClick="location.href='summaryRkSign.jsp'">목록</button> 
-			<button type="button" class="btn btn-success pull-right" style="width:50px; text-align:center; align:center; margin-right:20px" onclick="print()" id="pptx">pptx</button> 
-		</div>
-		<table id="Table" class="table" style="text-align: center; display:none;">
-		<tbody>
-			<tr>
-				<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
-				  <textarea class="textarea" style="display:none" name="bbsDeadline"><%= sumad.get(18) %></textarea>
-				</td>
-			</tr>
-		</tbody>
-		</table>
+			<div class="container" style="display:inline-block"> 
+				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center" onclick="update()">작성</button> 
+			</div>
+			</div>
 	</form>
 	</div>
 	<br><br><br>	
@@ -692,7 +750,7 @@
 	<script>
 	// 상태 색상 지정
 	$(document).ready(function() {
-		var con = document.getElementById("eprogress").value; //완료, 진행중, 미완료(문제)
+		var con = document.getElementById("estate_value").value; //완료, 진행중, 미완료(문제)
 		var state = document.getElementById("estate");
 		if(con == "완료") {
 			state.style.backgroundColor = "#00ff00";
@@ -702,7 +760,7 @@
 			state.style.backgroundColor = "#ff0000";
 		}
 	
-		var wcon = document.getElementById("wprogress").value; //완료, 진행중, 미완료(문제)
+		var wcon = document.getElementById("wstate_value").value; //완료, 진행중, 미완료(문제)
 		var wstate = document.getElementById("wstate");
 		if(wcon == "완료") {
 			wstate.style.backgroundColor = "#00ff00";
@@ -711,6 +769,68 @@
 		} else {
 			wstate.style.backgroundColor = "#ff0000";
 		}
+	});
+	</script>
+	
+	<!-- e상태 선택을 위한 script -->
+	<script>
+	$("#estate").on('click', function() {
+		var con = document.getElementById("jb-text");
+		if(con.style.display=="none"){
+			con.style.display = 'block';
+		} else {
+			con.style.display = 'none';
+		}
+	});
+	$(document).on('click',function(e) {
+		var container = $("#estate");
+		if(!container.is(event.target) && !container.has(event.target).length) {
+			document.getElementById("jb-text").style.display = 'none';
+		}
+	});
+	
+	var con = document.getElementById("estate");
+	$("#ecomplete").on('click', function() {
+			con.style.backgroundColor = "#00ff00";
+	});
+	
+	$("#eproceeding").on('click', function() {
+		con.style.backgroundColor = "#ffff00";
+	});
+
+	$("#eincomplete").on('click', function() {
+		con.style.backgroundColor = "#ff0000";
+	});
+	</script>
+	
+	<!-- w상태 선택을 위한 script -->
+	<script>
+	$("#wstate").on('click', function() {
+		var con = document.getElementById("wjb-text");
+		if(con.style.display=="none"){
+			con.style.display = 'block';
+		} else {
+			con.style.display = 'none';
+		}
+	});
+	$(document).on('click',function(e) {
+		var container = $("#wstate");
+		if(!container.is(event.target) && !container.has(event.target).length) {
+			document.getElementById("wjb-text").style.display = 'none';
+		}
+	});
+	
+	var wcon = document.getElementById("wstate");
+	$("#wcomplete").on('click', function() {
+			wcon.style.backgroundColor = "#00ff00";
+	});
+	
+	$("#wproceeding").on('click', function() {
+		wcon.style.backgroundColor = "#ffff00";
+	});
+
+	$("#wincomplete").on('click', function() {
+		wcon.style.backgroundColor = "#ff0000";
 	});
 	</script>
 	
@@ -726,11 +846,43 @@
 	});
 	</script>
 	
-	
+	<script>
+	function update() {
+		if(document.getElementById("econtent") == null) { //ERP, WEB 내용이 없는 경우, 
+			alert('해당 날짜의 ERP 요약본이 없습니다. 담당 파트리더에게 문의 바랍니다.');
+		}
+		if(document.getElementById("wcontent") == null) { //ERP, WEB 내용이 없는 경우, 
+			alert('해당 날짜의 WEB 요약본이 없습니다. 담당 파트리더에게 문의 바랍니다.');
+		}
+		if(document.getElementById("eprogress").value == '' || document.getElementById("eprogress").value == null) {
+			alert("ERP - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
+		} else if (document.getElementById("wprogress").value == '' || document.getElementById("wprogress").value == null) { 
+			alert("WEB - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
+		}else {
+			var innerHtml = '<td><textarea class="textarea" id="ecolor" name="ecolor" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="wcolor" name="wcolor" style="display:none">'+wcon.style.backgroundColor+'</textarea></td>';
+			$('#Table > tbody > tr:last').append(innerHtml);
+			$('#bbsRk').submit();
+		}
+	}
+	</script>
 	
 	<script>
-	var con = document.getElementById("estate");
-	var wcon = document.getElementById("wstate");
+	function signOn() {
+		if(document.getElementById("eprogress").value == '' || document.getElementById("eprogress").value == null) {
+			alert("ERP - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
+		} else if (document.getElementById("wprogress").value == '' || document.getElementById("wprogress").value == null) { 
+			alert("WEB - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
+		}else {
+			var innerHtml = '<td><textarea class="textarea" id="ecolor" name="ecolor" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="wcolor" name="wcolor" style="display:none">'+wcon.style.backgroundColor+'</textarea></td>';
+			$('#Table > tbody > tr:last').append(innerHtml);
+			$('#bbsRk').attr("action","bbsRkAdminSign.jsp").submit();
+		}
+	}
+	</script>
+	
+	<script>
 	function print() {
 			var innerHtml = '<td><textarea class="textarea" id="ecolor" name="ecolor" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
 				innerHtml += '<td><textarea class="textarea" id="wcolor" name="wcolor" style="display:none">'+wcon.style.backgroundColor+'</textarea></td>';

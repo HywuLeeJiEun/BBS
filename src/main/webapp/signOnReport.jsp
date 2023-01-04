@@ -118,9 +118,17 @@
 		
 		//erp 자료 가져오기
 		ArrayList<String> list = bbsDAO.geterpbbs(bbsID);
+		
+		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		
+		//bbsID를 통한 작성 기능 제공
+		ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
+		String inbbsID = String.join(",",AllbbsID);
+	
 	%>
 	
 	
+	<!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -144,23 +152,46 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li><a href="bbs.jsp">조회</a></li>
+							<li ><a href="bbsAdmin.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li class="active"><a href="signOn.jsp">승인(제출)</a></li>
+							<li class="active"><a href="signOn.jsp">승인(제출)</a></li> 
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+						%>
+						<%
+						 if (pl.equals("WEB") || pl.equals("ERP")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본<span class="caret"></span></a>
+								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp">작성</a></li>
-								<li><a href="summaryRk.jsp">제출 목록</a></li>
+								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
+								<li ><a href="summaryRk.jsp">조회</a></li>
+								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=inbbsID%>">작성</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">승인/출력(pptx)</a></li>
+							</ul>
+							</li>
+						<%
+						 		}
+							}
+						%>
+						<%
+							if(rk.equals("실장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="bbsRkAdmin.jsp">조회</a></li>
 							</ul>
 							</li>
 						<%
@@ -168,6 +199,7 @@
 						%>
 				</ul>
 			
+		
 			
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
@@ -179,9 +211,9 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") ||rk.equals("실장")||rk.equals("관리자")) {
 					%>
-						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%

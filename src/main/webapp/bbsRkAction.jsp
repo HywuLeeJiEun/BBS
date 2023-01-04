@@ -64,9 +64,11 @@
 	String bbsNTarget = request.getParameter("ntarget");
 	String nnote = request.getParameter("nnote");
 	//String sign = "미승인";
+	java.sql.Timestamp SummaryDate = bbsDAO.getDateNow();
+	String SummaryUpdate = bbsDAO.getName(id); //user id의 이름을 가져와 업데이트한 사람으로 추가함.
 	
 	
-	int num = bbsDAO.SummaryWrite(pl, bbsContent, bbsEnd, progress, state, note, bbsNContent, bbsNTarget, bbsDeadline, nnote);
+	int num = bbsDAO.SummaryWrite(pl, bbsContent, bbsEnd, progress, state, note, bbsNContent, bbsNTarget, bbsDeadline, nnote, SummaryDate, SummaryUpdate);
 	
 	if(num==-1){
 		PrintWriter script = response.getWriter();

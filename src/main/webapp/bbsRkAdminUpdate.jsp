@@ -71,57 +71,55 @@
 	String wncontent = request.getParameter("wncontent");
 	String wntarget = request.getParameter("wntarget");
 	String wnnote = request.getParameter("wnnote");
+	java.sql.Timestamp SummaryDate = bbsDAO.getDateNow();
+	String summaryUpdate = bbsDAO.name(id);
 	
 	
-	
-	int erp = bbsDAO.updateSum(esum_id, econtent, eend, eprogress, estate, enote, encontent, entarget, bbsDeadline, ennote, sign);
-	int web = bbsDAO.updateSum(wsum_id, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, bbsDeadline, wnnote, sign);
+	int erp = bbsDAO.updateSum(esum_id, econtent, eend, eprogress, estate, enote, encontent, entarget, bbsDeadline, ennote, sign, SummaryDate, summaryUpdate);
+	int web = bbsDAO.updateSum(wsum_id, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, bbsDeadline, wnnote, sign, SummaryDate, summaryUpdate);
 	
 	int num= -1;
 	
 	String sumad_id = bbsDAO.getSumAdminid(bbsDeadline);
+	java.sql.Timestamp SumadDate = bbsDAO.getDateNow();
+	String sumadUpdate = bbsDAO.name(id);
 	
 	if(sumad_id.equals("")) { //데이터가 없기 때문에 저장!  (insert)
 		sign = "미승인";
-		num = bbsDAO.SummaryAdminWrite(econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline);
+		num = bbsDAO.SummaryAdminWrite(econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline, SumadDate, sumadUpdate);
+		if(num==-1){
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('데이터베이스 오류입니다. 관리자에게 문의 바랍니다.')");
+			script.println("history.back();");
+			script.println("</script>");
+		} else {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('정상적으로 요약본이 저장 되었습니다.')");
+			script.println("location.href='summaryadRk.jsp'");
+			script.println("</script>");
+		} 
 	} else { //데이터가 이미 있으므로 수정! (update)
-		num = bbsDAO.SummaryAdminUpdate(Integer.parseInt(sumad_id), econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline);
-	}
-	
-	if(num==-1){
-		PrintWriter script = response.getWriter();
-		script.println("<script>");
-		script.println("alert('데이터베이스 오류입니다. 관리자에게 문의 바랍니다.')");
-		script.println("history.back();");
-		script.println("</script>");
-	} else {
-		PrintWriter script = response.getWriter();
-		script.println("<script>");
-		script.println("alert('정상적으로 요약본(summary)이 저장 되었습니다.')");
-		script.println("location.href='bbsRkAdmin.jsp'");
-		script.println("</script>");
+		num = bbsDAO.SummaryAdminUpdate(Integer.parseInt(sumad_id), econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline, SumadDate);
+		if(num==-1){
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('데이터베이스 오류입니다. 관리자에게 문의 바랍니다.')");
+			script.println("history.back();");
+			script.println("</script>");
+		} else {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('정상적으로 요약본이 수정 되었습니다.')");
+			script.println("location.href='summaryadRk.jsp'");
+			script.println("</script>");
+		} 
 	} 
-	%>
-	<%-- <textarea> <%= estatecolor %></textarea><br> 
-	1<textarea> <%= bbsDeadline %></textarea><br> 
-	2<textarea> <%= sign %></textarea><br> 
-	3<textarea> <%= econtent %></textarea><br> 
-	4<textarea> <%= eend %></textarea><br> 
-	5<textarea> <%= eprogress  %></textarea><br> 
-	6<textarea> <%= estate  %></textarea><br>
-	7<textarea> <%= enote  %></textarea><br> 
-	8<textarea> <%=  encontent %></textarea><br> 
-	9<textarea> <%= entarget  %></textarea><br> 
-	10<textarea> <%= ennote  %></textarea><br> 
-	11<textarea> <%= wcontent  %></textarea><br> 
-	12<textarea> <%= wend  %></textarea><br> 
-	13<textarea> <%=  wprogress %></textarea><br> 
-	14<textarea> <%= wstate  %></textarea><br> 
-	15<textarea> <%=  wnote %></textarea><br> 
-	16<textarea> <%=  wncontent %></textarea><br> 
-	17<textarea> <%= wntarget  %></textarea><br> 
-	18<textarea> <%= wnnote  %></textarea><br>  --%>
 	
+	
+	%>
+	<textarea><%=  summaryUpdate %></textarea>
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="css/js/bootstrap.js"></script>
  	

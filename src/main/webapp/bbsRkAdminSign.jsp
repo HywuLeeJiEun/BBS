@@ -74,11 +74,13 @@
 	
 	//sumad_id 구하기
 	int sumad_id = Integer.parseInt(bbsDAO.getSumAdminid(bbsDeadline));
+	java.sql.Timestamp SumadDate = bbsDAO.getDateNow();
+	String sumadUpdate = bbsDAO.name(id);
 	
-	int erp = bbsDAO.updateSum(esum_id, econtent, eend, eprogress, estate, enote, encontent, entarget, bbsDeadline, ennote, sign);
-	int web = bbsDAO.updateSum(wsum_id, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, bbsDeadline, wnnote, sign);
+	int erp = bbsDAO.updateSum(esum_id, econtent, eend, eprogress, estate, enote, encontent, entarget, bbsDeadline, ennote, sign, SumadDate, sumadUpdate);
+	int web = bbsDAO.updateSum(wsum_id, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, bbsDeadline, wnnote, sign, SumadDate, sumadUpdate);
 	
-	int num = bbsDAO.SummaryAdminUpdate(sumad_id,econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline);
+	int num = bbsDAO.SummaryAdminUpdate(sumad_id,econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline, SumadDate);
 	
 	if(num==-1){
 		PrintWriter script = response.getWriter();
@@ -90,7 +92,7 @@
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('정상적으로 요약본(summary)이 저장 되었습니다.')");
-		script.println("location.href='bbsRkAdmin.jsp'");
+		script.println("location.href='summaryadRk.jsp'");
 		script.println("</script>");
 	} 
 	%>

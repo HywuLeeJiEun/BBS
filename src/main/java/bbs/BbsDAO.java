@@ -4,13 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+
+
+
 
 public class BbsDAO {
 
@@ -512,6 +509,8 @@ public class BbsDAO {
 				      try {
 				            if(searchText != null && !searchText.equals("") ){
 				                SQL +=" LIKE '%"+searchText.trim()+"%' order by a.bbsDeadline desc limit ?,10";
+				            } else { 
+				            	SQL +=" LIKE '%---%' order by a.bbsDeadline desc limit ?,10";
 				            }
 				            PreparedStatement pstmt=conn.prepareStatement(SQL);
 				            pstmt.setInt(1, (pageNumber-1) * 10);
@@ -537,7 +536,7 @@ public class BbsDAO {
 							bbs.setSign(rs.getString(17));
 							bbs.setPluser(rs.getString(18));
 				            list.add(bbs);
-				         }         
+				         }       
 				      } catch(Exception e) {
 				         e.printStackTrace();
 				      }
@@ -923,8 +922,8 @@ public class BbsDAO {
 
 						
 			//bbsRkAction -> summary 테이블에 데이터 삽입
-			public int SummaryWrite(String pl, String bbsContent, String bbsEnd, String progress, String state, String note, String bbsNContent, String bbsNTarget, String bbsDeadline, String nnote ) {
-				String sql = "insert into summary values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			public int SummaryWrite(String pl, String bbsContent, String bbsEnd, String progress, String state, String note, String bbsNContent, String bbsNTarget, String bbsDeadline, String nnote, java.sql.Timestamp summaryDate, String summaryUpdate ) {
+				String sql = "insert into summary values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				String sign = "미승인";
 				try {
 					PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -940,6 +939,8 @@ public class BbsDAO {
 					pstmt.setString(10, bbsDeadline); //bbsDeadline
 					pstmt.setString(11, nnote); //nnote
 					pstmt.setString(12, sign);
+					pstmt.setTimestamp(13, summaryDate);
+					pstmt.setString(14, summaryUpdate);
 					return pstmt.executeUpdate();
 				}catch (Exception e) {
 					e.printStackTrace();
@@ -970,12 +971,17 @@ public class BbsDAO {
 						list.add(rs.getString(10));
 						list.add(rs.getString(11));
 						list.add(rs.getString(12));
+						list.add(rs.getString(13));
+						list.add(rs.getString(14));
 					}
 				}catch (Exception e) {
 					e.printStackTrace();
 				}
 				return list;
 			}
+			
+			
+			
 			
 			
 			//summary_admin sumad_id를 통해 내용 가져오기 
@@ -1006,6 +1012,8 @@ public class BbsDAO {
 						list.add(rs.getString(17));
 						list.add(rs.getString(18));
 						list.add(rs.getString(19));
+						list.add(rs.getString(20));
+						list.add(rs.getString(21));
 					}
 				}catch (Exception e) {
 					e.printStackTrace();
@@ -1014,8 +1022,8 @@ public class BbsDAO {
 			}
 			
 			//게시글 수정 메소드
-			public int updateSum(int sum_id, String bbsContent, String bbsEnd, String progress, String state, String note, String bbsNContent, String bbsNTarget, String bbsDeadline, String nnote, String sign) {
-				String sql = "update summary set bbsContent = ?,  bbsEnd = ?, progress = ?, state = ?, note = ?, bbsNContent= ? ,bbsNTarget = ?, bbsDeadline = ?, nnote = ?, sign = ? where sum_id =?";
+			public int updateSum(int sum_id, String bbsContent, String bbsEnd, String progress, String state, String note, String bbsNContent, String bbsNTarget, String bbsDeadline, String nnote, String sign, java.sql.Timestamp summaryDate, String summaryUpdate) {
+				String sql = "update summary set bbsContent = ?,  bbsEnd = ?, progress = ?, state = ?, note = ?, bbsNContent= ? ,bbsNTarget = ?, bbsDeadline = ?, nnote = ?, sign = ?, summaryDate = ?, summaryUpdate = ? where sum_id =?";
 				try {
 					PreparedStatement pstmt = conn.prepareStatement(sql);
 					pstmt.setString(1, bbsContent);
@@ -1028,7 +1036,9 @@ public class BbsDAO {
 					pstmt.setString(8, bbsDeadline);
 					pstmt.setString(9, nnote);
 					pstmt.setString(10, sign);
-					pstmt.setInt(11, sum_id);
+					pstmt.setTimestamp(11, summaryDate);
+					pstmt.setString(12, summaryUpdate);
+					pstmt.setInt(13, sum_id);
 					return pstmt.executeUpdate();
 				}catch (Exception e) {
 					e.printStackTrace();
@@ -1055,8 +1065,8 @@ public class BbsDAO {
 			
 			
 			//bbsRkAction -> summary 테이블에 데이터 삽입
-			public int SummaryAdminWrite(String e_content, String e_end, String e_progress, String e_state, String e_note, String e_ncontent, String e_ntarget, String e_nnote, String w_content, String w_end, String w_progress, String w_state, String w_note, String w_ncontent, String w_ntarget, String w_nnote, String sign, String bbsDeadline) {
-				String sql = "insert into summary_admin values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+			public int SummaryAdminWrite(String e_content, String e_end, String e_progress, String e_state, String e_note, String e_ncontent, String e_ntarget, String e_nnote, String w_content, String w_end, String w_progress, String w_state, String w_note, String w_ncontent, String w_ntarget, String w_nnote, String sign, String bbsDeadline, java.sql.Timestamp sumadDate, String sumadUpdate) {
+				String sql = "insert into summary_admin values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 				try {
 					PreparedStatement pstmt = conn.prepareStatement(sql);
 					pstmt.setInt(1, getNextSumAdmin()); 
@@ -1078,6 +1088,8 @@ public class BbsDAO {
 					pstmt.setString(17, w_nnote);
 					pstmt.setString(18, sign);
 					pstmt.setString(19, bbsDeadline);
+					pstmt.setTimestamp(20, sumadDate);
+					pstmt.setString(21, sumadUpdate);
 					return pstmt.executeUpdate();
 				}catch (Exception e) {
 					e.printStackTrace();
@@ -1087,8 +1099,8 @@ public class BbsDAO {
 			
 			
 			//bbsRkAction -> summary 테이블에 데이터 삽입
-			public int SummaryAdminUpdate(int sumad_id,String e_content, String e_end, String e_progress, String e_state, String e_note, String e_ncontent, String e_ntarget, String e_nnote, String w_content, String w_end, String w_progress, String w_state, String w_note, String w_ncontent, String w_ntarget, String w_nnote, String sign, String bbsDeadline) {
-				String sql = "update summary_admin set e_content=?, e_end=?, e_progress=?, e_state=?, e_note=?, e_ncontent=?, e_ntarget=?, e_nnote=?, w_content=?, w_end=?, w_progress=?, w_state=?, w_note=?, w_ncontent=?, w_ntarget=?, w_nnote=?, sign=?, bbsDeadline=? where sumad_id = ?";
+			public int SummaryAdminUpdate(int sumad_id,String e_content, String e_end, String e_progress, String e_state, String e_note, String e_ncontent, String e_ntarget, String e_nnote, String w_content, String w_end, String w_progress, String w_state, String w_note, String w_ncontent, String w_ntarget, String w_nnote, String sign, String bbsDeadline, java.sql.Timestamp sumadDate) {
+				String sql = "update summary_admin set e_content=?, e_end=?, e_progress=?, e_state=?, e_note=?, e_ncontent=?, e_ntarget=?, e_nnote=?, w_content=?, w_end=?, w_progress=?, w_state=?, w_note=?, w_ncontent=?, w_ntarget=?, w_nnote=?, sign=?, bbsDeadline=?, sumadDate=? where sumad_id = ?";
 				try {
 					PreparedStatement pstmt = conn.prepareStatement(sql);
 					//pstmt.setInt(1, getNextSumAdmin()); 
@@ -1110,7 +1122,8 @@ public class BbsDAO {
 					pstmt.setString(16, w_nnote);
 					pstmt.setString(17, sign);
 					pstmt.setString(18, bbsDeadline);
-					pstmt.setInt(19, sumad_id);
+					pstmt.setTimestamp(19, sumadDate); //sumadDate
+					pstmt.setInt(20, sumad_id);
 					return pstmt.executeUpdate();
 				}catch (Exception e) {
 					e.printStackTrace();
@@ -1197,7 +1210,31 @@ public class BbsDAO {
 				 return -1;
 			}
 			
+			// Sign을 마감으로 변경함! ((제출 날짜가 지남!)) // summary_admin
+			public int sumadSignOn(int sumad_id) {
+				String sql = " update summary_admin set sign='승인' where sumad_id=?";
+				 try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, sumad_id); // bbsId 삽입
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				 return -1;
+			}
 			
+			// bbs의 Sign을 마감으로 변경함! ((제출 날짜가 지남!))
+			public int sumSignOn(int sum_id) {
+				String sql = " update summary set sign='승인' where sum_id=?";
+				 try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, sum_id); // bbsId 삽입
+					return pstmt.executeUpdate();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				 return -1;
+			}
 			
 		//erp_bbs 작성 (erpManager만 담당함 -> '계정관리 - 35번')
 		public int erpWrite(String erp_date, String erp_user, String erp_stext, String erp_authority, String erp_division, String erpManger, String bbsDeadline, int bbsID) {
@@ -1339,6 +1376,24 @@ public class BbsDAO {
 				e.printStackTrace();
 			}
 			return -1; //데이터베이스 오류 
+		}
+		
+		
+		//승인 상태인 bbsID를 가져오기 -> 네비바의 작성을 위함 
+		public ArrayList<String> signgetBbsID(String pluser){
+			String sql =  " select bbsID from bbs where pluser=? and  sign='승인'";
+					ArrayList<String> list = new ArrayList<String>();
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, pluser);
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
+					list.add(rs.getString(1)); //bbsID
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return list;
 		}
 }
 

@@ -68,9 +68,10 @@
 	if(sign == null || sign.equals("")) {
 		sign = "미승인";
 	}
+	java.sql.Timestamp SummaryDate = bbsDAO.getDateNow();
+	String SummaryUpdate = bbsDAO.getName(id); //user id의 이름을 가져와 업데이트한 사람으로 추가함.
 	
-	
-	int num = bbsDAO.updateSum(sum_id, bbsContent, bbsEnd, progress, state, note, bbsNContent, bbsNTarget, bbsDeadline, nnote, sign);
+	int num = bbsDAO.updateSum(sum_id, bbsContent, bbsEnd, progress, state, note, bbsNContent, bbsNTarget, bbsDeadline, nnote, sign, SummaryDate, SummaryUpdate);
 	
 	if(num==-1){
 		PrintWriter script = response.getWriter();
@@ -81,8 +82,8 @@
 	} else {
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
-		script.println("alert('정상적으로 요약본(summary)이 수정되었습니다.')");
-		script.println("location.href='summaryRk.jsp'");
+		script.println("alert('정상적으로 요약본이 수정되었습니다.')");
+		script.println("location.href='summaryUpdateDelete.jsp'");
 		script.println("</script>");
 	}  
 	%>

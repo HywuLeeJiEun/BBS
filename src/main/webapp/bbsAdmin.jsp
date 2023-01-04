@@ -99,7 +99,7 @@
 	%>
 	
 		
-	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	  <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -157,10 +157,13 @@
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
+								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRkAdmin.jsp">조회</a></li>
+								<li><a href="summaryadRk.jsp">조회</a></li>
+								<li><a href="summaryadAdmin.jsp">작성</a></li>
+								<li><a href="summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
 						<%
@@ -180,7 +183,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("실장")||rk.equals("관리자")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
@@ -334,12 +337,23 @@
 	<!-- ***********검색바 추가 ************* -->
 	<div class="container">
 		<div class="row">
+			<table class="pull-left" style="text-align: center; cellpadding:50px; width:60%" >
+			<thead>
+				<tr>
+					<th style=" text-align: left" data-toggle="tooltip" data-html="true" data-placement="bottom" title=""> 
+					<br><i class="glyphicon glyphicon-triangle-right" id="icon"  style="left:5px;"></i> 주간보고 목록 (WEB / ERP)
+				</th>
+				</tr>
+			</thead>
+			</table>
 			<form method="post" name="search" action="searchbbsRk.jsp">
 				<table class="pull-right">
 					<tr>
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
 								<option value="bbsDeadline">제출일</option>
 								<option value="bbsTitle">제목</option>
+								<option value="userName">작성자</option>
+								<option value="pluser">업무 파트</option>
 						</select></td>
 						<td><input type="text" class="form-control"
 							placeholder="검색어 입력" name="searchText" maxlength="100"></td>
@@ -364,7 +378,7 @@
 						<th style="background-color: #eeeeee; text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
-						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
+						<th style="background-color: #eeeeee; text-align: center;">업무 파트</th>
 						<th style="background-color: #eeeeee; text-align: center;">승인</th>
 					</tr>
 				</thead>
@@ -398,8 +412,8 @@
 						<td><%= list.get(i).getUserName() %></td>
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
 							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
-						<td><%= list.get(i).getBbsUpdate() %></td>
 						<!-- 승인/미승인/마감 표시 -->
+						<td><%= list.get(i).getPluser() %></td>
 						<td>
 						<%
 						String sign = null;

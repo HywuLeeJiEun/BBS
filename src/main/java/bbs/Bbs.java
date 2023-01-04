@@ -130,10 +130,5 @@ public class Bbs {
 	public void setPluser(String pluser) {
 		this.pluser = pluser;
 	}
-	
-	
-
-	
-	
-	
 }
+

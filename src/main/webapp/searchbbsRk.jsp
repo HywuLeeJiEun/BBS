@@ -71,8 +71,44 @@
 		//ArrayList<Bbs> listbbs = bbsDAO.getDeadLineList(); 
 		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		
+		//검색한 데이터 저장
+		String category = request.getParameter("searchField");
+		String str = request.getParameter("searchText");
+		
+		if(str == null || str.trim().isEmpty()) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('내용이 비어있습니다.')");
+			script.println("location.href='bbs.jsp'");
+			script.println("</script>");
+		}
+		
+		if(category.equals("bbsDeadline")) {
+			int len = str.length();
+			// 2글자 이상이며 -을 포함하지 않는다면, 
+			if(len > 2 && str.contains("-") == false) {
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('날짜 형식은 - 을 갖추어야 합니다.')");
+				script.println("location.href='bbs.jsp'");
+				script.println("</script>");
+			}
+		}
+		
+		
+		ArrayList<Bbs> list =  bbsDAO.getRkSearch(pageNumber , category, str);
+		
+			if (list.size() == 0 || list.isEmpty()) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('검색결과가 없습니다.')");
+			script.println("location.href='bbs.jsp'");
+			script.println("</script>");
+		} 
 	%>
-	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	
+	  <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -130,10 +166,13 @@
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
+								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRkAdmin.jsp">작성 및 조회</a></li>
+								<li><a href="summaryadRk.jsp">조회</a></li>
+								<li><a href="summaryadAdmin.jsp">작성</a></li>
+								<li><a href="summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
 						<%
@@ -153,7 +192,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("실장")||rk.equals("관리자")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
@@ -305,29 +344,10 @@
 		
 	<!-- ***********검색바 추가 ************* -->
 	<%
-		String category = request.getParameter("searchField");
-		String str = request.getParameter("searchText");
-		if(category == null) {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('검색 내용이 비어있습니다.')");
-			script.println("location.href='bbs.jsp'");
-			script.println("</script>");
-		}
 		
-		if(category.equals("bbsDeadline")) {
-			int len = str.length();
-			
-			// 2글자 이상이며 -을 포함하지 않는다면, 
-			if(len > 2 && str.contains("-") == false) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('날짜 형식은 - 을 갖추어야 합니다.')");
-				script.println("location.href='bbs.jsp'");
-				script.println("</script>");
-			}
-		}
 	%>
+
+
 	<div class="container">
 		<div class="row">
 			<form method="post" name="search" id="search" action="searchbbsRk.jsp">
@@ -337,19 +357,12 @@
 								<option value="bbsDeadline" <%= category.equals("bbsDeadline")?"selected":""%>>제출일</option>
 								<option value="bbsTitle" <%= category.equals("bbsTitle")?"selected":""%>>제목</option>
 								<option value="userName" <%= category.equals("userName")?"selected":""%>>작성자</option>
-
+								<option value="pluser" <%= category.equals("pluser")?"selected":""%>>업무 파트</option>
 						</select></td>
 						<td>
 							<input type="text" class="form-control"
-							placeholder="" name="searchText" maxlength="100" value="<%= request.getParameter("searchText") %>"></td>
+							placeholder="" name="searchText" maxlength="100" value="<%= str %>"></td>
 						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="searchbbsRk.jsp">검색</button></td>
-						<%
-						if (request.getParameter("searchField").equals("bbsDeadline")) { 
-						%>
-						<td><button type="submit" class="btn btn-warning pull-right" formaction="gathering.jsp" onclick="return submit2(this.form)">취합</button></td>
-						<%
-						}
-						%>
 					</tr>
 
 				</table>
@@ -370,33 +383,27 @@
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
+						<th style="background-color: #eeeeee; text-align: center;">업무 파트</th>
 						<th style="background-color: #eeeeee; text-align: center;">승인</th>
 					</tr>
 				</thead>
 				<tbody>
 					<%
-						ArrayList<Bbs> list =  bbsDAO.getRkSearch(pageNumber ,category,
-								request.getParameter("searchText"));
-						
-	 					if (list.size() == 0) {
-							PrintWriter script = response.getWriter();
-							script.println("<script>");
-							script.println("alert('검색결과가 없습니다.')");
-							script.println("location.href='bbs.jsp'");
-							script.println("</script>");
-						} 
 
 						for(int i = 0; i < list.size(); i++){
 					%>
 					<tr>
 						<td><%= list.get(i).getBbsDeadline() %></td>
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
-						<td><a href="update.jsp?bbsID=<%=list.get(i).getBbsID()%>"><%=list.get(i).getBbsTitle().replaceAll(" ", "&nbsp;").replaceAll("<", "&lt;")
-						.replaceAll(">", "&gt;").replaceAll("\n", "<br>")%></a></td>
+						<td style="text-align: left">
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<a href="update.jsp?bbsID=<%= list.get(i).getBbsID() %>">
+							<%= list.get(i).getBbsTitle() %></a></td>
 						<td><%= list.get(i).getUserName() %></td>
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
 							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>	
-						<td><%= list.get(i).getBbsUpdate() %></td>		
+						<td><%= list.get(i).getBbsUpdate() %></td>	
+						<td><%= list.get(i).getPluser() %></td>		
 						<td><%= list.get(i).getSign() %></td>	
 					</tr>
 					<%

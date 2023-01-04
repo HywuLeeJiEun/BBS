@@ -1,3 +1,4 @@
+<%@page import="bbs.BbsDAO"%>
 <%@page import="user.User"%>
 <%@page import="java.io.PrintWriter"%>
 <%@page import="java.time.LocalDate"%>
@@ -101,6 +102,11 @@
 		String[] email = Staticemail.split("@");
 		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		
+		//bbsID를 통한 작성 기능 제공
+		BbsDAO bbsDAO = new BbsDAO();
+		ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
+		String inbbsID = String.join(",",AllbbsID);
 		
 	%>
 
@@ -230,7 +236,7 @@
 	  </div>
 	</div>
 	
-         <!-- ************ 상단 네비게이션바 영역 ************* -->
+          <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -256,8 +262,8 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
@@ -269,8 +275,13 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp">작성</a></li>
-								<li><a href="summaryRk.jsp">제출 목록</a></li>
+								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
+								<li><a href="summaryRk.jsp">조회</a></li>
+								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=inbbsID%>">작성</a></li>
+								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
 							</ul>
 							</li>
 						<%
@@ -282,10 +293,13 @@
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
+								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRkAdmin.jsp">조회</a></li>
+								<li><a href="summaryadRk.jsp">조회</a></li>
+								<li><a href="summaryadAdmin.jsp">작성</a></li>
+								<li><a href="summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
 						<%
@@ -293,6 +307,7 @@
 						%>
 				</ul>
 			
+		
 			
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
@@ -304,10 +319,10 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
-						<li class="active"><a href="workChange.jsp">담당업무 변경</a></li>
+						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
 					} else {

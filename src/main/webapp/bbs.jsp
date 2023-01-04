@@ -95,10 +95,14 @@
 		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 		
+		
+		//bbsID를 통한 작성 기능 제공
+		ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
+		String bbsID = String.join(",",AllbbsID);
 	%>
 	
 		
-	  <!-- ************ 상단 네비게이션바 영역 ************* -->
+	   <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -122,32 +126,30 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbsAdmin.jsp">조회</a></li>
+							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li> 
+							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
 						%>
-						<%
-						 if (pl.equals("WEB") || pl.equals("ERP")) {
-						%>
-											
 							<li class="dropdown">
-								<a href="#" class="dropdown-toggle"
-									data-toggle="dropdown" role="button" aria-haspopup="true"
-									aria-expanded="false"><%= pl %><span class="caret"></span></a>
-								<!-- 드랍다운 아이템 영역 -->	
-								<ul class="dropdown-menu">
-									<li><a href="bbsRk.jsp">작성</a></li>
-									<li><a href="summaryRk.jsp">제출 목록</a></li>
-								</ul>
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false"><%= pl %><span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
+								<li><a href="summaryRk.jsp">조회</a></li>
+								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+							</ul>
 							</li>
-						<%
-						 }
-						%>
 						<%
 							}
 						%>
@@ -157,10 +159,13 @@
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
+								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRkAdmin.jsp">조회</a></li>
+								<li><a href="summaryadRk.jsp">조회</a></li>
+								<li><a href="summaryadAdmin.jsp">작성</a></li>
+								<li><a href="summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
 						<%
@@ -180,7 +185,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") ||rk.equals("실장")||rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
@@ -203,43 +208,6 @@
 	<!-- 네비게이션 영역 끝 -->
 	
 	
-	<%-- <!-- (요약본) 모달 영역! -->
-	   <div class="modal fade" id="bbsRkModal" role="dialog">
-		   <div class="modal-dialog">
-		    <div class="modal-content">
-		     <div class="modal-header">
-		      <button type="button" class="close" data-dismiss="modal">×</button>
-		      <h3 class="modal-title" align="center">조회 일자</h3>
-		     </div>
-		     <!-- 모달에 포함될 내용 -->
-		     <form method="post" action="bbsRk.jsp" id="modalform">
-		     <div class="modal-body">
-			     <div class="col-md-3" style="visibility:hidden">
-			    	<a> 조회하고자 하는 '제출일'을 선택하여 주십시오. </a> 
-     			</div>
-		     		<select>
-		     		<%
-		     			for (int i=0; i<listbbs.size(); i++) {
-		     		%>
-		     			<option value="<%= listbbs.get(i).getBbsDeadline() %>"><%= listbbs.get(i).getBbsDeadline() %></option>
-		     		<%
-		     			}
-		     		%>
-		     		</select>
-		     </div>
-		     <div class="modal-footer">
-			     <div class="col-md-3" style="visibility:hidden">
-     			</div>
-     			<div class="col-md-6">
-			     	<button type="submit" class="btn btn-primary pull-left form-control" id="modalbtn" >수정</button>
-		     	</div>
-		     	 <div class="col-md-3" style="visibility:hidden">
-	   			</div>	
-		    </div>
-		    </form>
-		   </div>
-	  </div>
-	</div> --%>
 	
 	
 	<!-- 모달 영역! -->
@@ -373,6 +341,15 @@
 	<!-- ***********검색바 추가 ************* -->
 	<div class="container">
 		<div class="row">
+			<table class="pull-left" style="text-align: center; cellpadding:50px; width:60%" >
+			<thead>
+				<tr>
+					<th style=" text-align: left" data-toggle="tooltip" data-html="true" data-placement="bottom" title=""> 
+					<br><i class="glyphicon glyphicon-triangle-right" id="icon"  style="left:5px;"></i> 주간보고 목록 (개인)
+				</th>
+				</tr>
+			</thead>
+			</table>
 			<form method="post" name="search" action="searchbbs.jsp">
 				<table class="pull-right">
 					<tr>

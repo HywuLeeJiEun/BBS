@@ -125,12 +125,15 @@
 				
 				//erp 자료 가져오기
 				ArrayList<String> list = bbsDAO.geterpbbs(bbsID);
+				
+				//bbsID를 통한 작성 기능 제공
+				ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
+				String inbbsID = String.join(",",AllbbsID);
 	%>
 	<c:set var="bbsID" value="<%= bbsID %>" />
 	<input type="hidden" id="bbsId" value="<c:out value='${bbsID}' />">
 	
-	
-    <!-- ************ 상단 네비게이션바 영역 ************* -->
+     <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -155,11 +158,9 @@
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
-							<% if(!rk.equals("실장")) { %>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li class="active"><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li>
-							<% } %>
+							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
@@ -170,25 +171,32 @@
 								data-toggle="dropdown" role="button" aria-haspopup="true"
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
-						
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp">작성</a></li>
-								<li><a href="summaryRk.jsp">제출 목록</a></li>
+								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
+								<li><a href="summaryRk.jsp">조회</a></li>
+								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
 							</ul>
-						<%
-						 }
-						%>
 							</li>
+						<%
+							}
+						%>
 						<%
 							if(rk.equals("실장") || rk.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본(Admin)<span class="caret"></span></a>
+								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRkAdmin.jsp">조회</a></li>
+								<li><a href="summaryadRk.jsp">조회</a></li>
+								<li><a href="summaryadAdmin.jsp">작성</a></li>
+								<li><a href="summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
 						<%
@@ -196,6 +204,7 @@
 						%>
 				</ul>
 			
+		
 			
 			<!-- 헤더 우측에 나타나는 드랍다운 영역 -->
 			<ul class="nav navbar-nav navbar-right">
@@ -207,9 +216,9 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
+					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
 					%>
-						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
@@ -390,7 +399,7 @@
 					<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 						<thead>
 							<tr>
-								<th colspan="5" style="background-color: #eeeeee; text-align: center;">baynex 주간보고 작성</th>
+								<th colspan="5" style="background-color: #eeeeee; text-align: center;">조회 및 수정</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -415,10 +424,10 @@
 								<tr align="center" style="background-color: white">	
 										<!-- (구분/담당자는 처음 작성하는 사람을 위하여 유지) 추후 userName과 연결 -->
 									 <td><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:180px; width:100%; border:none;" placeholder="구분/담당자" maxlength="50" readonly ><%=bbs.getBbsManager() %></textarea></td>
-									 <td><textarea class="textarea" required style="height:180px;width:100%; border:none;" placeholder="업무내용" name="bbsContent"><%= bbs.getBbsContent() %></textarea></td>
+									 <td><textarea class="textarea" required style="height:180px;width:100%; border:none;" placeholder="업무내용" name="bbsContent" id="bbsContent"><%= bbs.getBbsContent() %></textarea></td>
 									 <td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="접수일" name="bbsStart" id="bbsStart"><%= bbs.getBbsStart() %></textarea></td>
 									 <td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="완료목표일" name="bbsTarget" id="bbsTarget"><%= bbs.getBbsTarget() %></textarea></td>	
-									 <td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="진행율/완료일" name="bbsEnd"><%= bbs.getBbsEnd() %></textarea></td>									
+									 <td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="진행율/완료일" name="bbsEnd" id="bbsEnd"><%= bbs.getBbsEnd() %></textarea></td>									
 								</tr>	
 								<tr align="center">	
 										<!-- (구분/담당자는 처음 작성하는 사람을 위하여 유지) 추후 userName과 연결 -->
@@ -441,7 +450,7 @@
 								</tr>
 								<tr align="center" style="background-color: white">	
 									 <td><textarea class="textarea" style="height:180px; width:100%; border:none;" placeholder="구분/담당자" maxlength="50" readonly ><%=bbs.getBbsManager() %></textarea></td>
-									 <td><textarea class="textarea" required style="height:180px;width:100%; border:none;" placeholder="업무내용" name="bbsNContent" ><%= bbs.getBbsNContent() %></textarea></td>
+									 <td><textarea class="textarea" required style="height:180px;width:100%; border:none;" placeholder="업무내용" name="bbsNContent" id="bbsNContent"><%= bbs.getBbsNContent() %></textarea></td>
 									 <%-- <td><textarea class="textarea" required style="height:180px; width:100%; border:none;" placeholder="접수일" name="bbsNStart" id="bbsNStart" oninput="this.value = this.value
 													.replace(/[^0-9./.\s.-]/g, '')
 													.replace(/(\..*)\./g, '$1');"><%= bbs.getBbsNStart() %></textarea></td> --%>
@@ -450,10 +459,10 @@
 								</tr>
 								<tr align="center">	
 										 <td><input class="textarea" id="content_add" style="height:5px;width:150px;border:none;" readonly ></td>
-										 <td><input class="textarea" id="content_add" style="height:5px;width:100%;border:none;" readonly ></td>
+										 <td><input class="textarea" id="content_add2" style="height:5px;width:100%;border:none;" readonly ></td>
 										 <td><input class="textarea" style="height:5px; width:100px;border:none;" class="form-control"  readonly></td>
 										 <td><input class="textarea" style="height:5px; width:100px;border:none;" id="target_add" class="form-control" readonly></td>	
-										 <td><input class="textarea" style="height:5px; width:100px;border:none;" id="target_add" class="form-control" readonly></td>
+										 <td><input class="textarea" style="height:5px; width:100px;border:none;" id="target_add2" class="form-control" readonly></td>
 									</tr>
 									<%
 									if(list.size() == 0) {
@@ -468,7 +477,8 @@
 											<a onclick="return confirm('해당 게시글을 삭제하시겠습니까?')"
 											href="deleteAction.jsp?bbsID=<%= bbsID %>" class="btn btn-danger pull-left">삭제</a>
 											
-											<input type="submit" id="update" style="margin-bottom:5px" class="btn btn-success pull-right" value="수정"> 
+											<input type="button" id="update_sub" style="margin-bottom:5px;" class="btn btn-success pull-right" value="수정">
+											<input type="submit" id="update" style="margin-bottom:5px; display:none;" class="btn btn-success pull-right" value="수정"> 
 										<%
 												}
 											}
@@ -563,245 +573,6 @@
 		});
 	</script>
 	
-	<!-- <script>
-		//textarea 접수일 ... 유효성 검사
-		$(document.getElementById("bbsStart")).on('input', function() {
-			// ### 접수일 처리
-			var bbsst = document.getElementById("bbsStart").value;
-			var bbssta = bbsst.split("\n"); //줄바꿈으로 분리
-			
-				for(var i=0; i < bbssta.length; i++) { //bbssta = 10/21 같은 형태
-					if(bbssta[i].length > 5) {
-						alert("(접수일) 최대 5글자까지만 작성 가능합니다!");
-					}
-					if(bbssta[i].includes('/') == true) {
-						var a = bbssta[i].split("/");
-						var num1 = Number(a[0]);
-						var num2 = Number(a[1]);
-						if(num1 > 13 || num2 > 32) {
-							alert("(접수일) 유효한 월/일을 작성해주십시오.");
-							$("#bbsStart").focus();
-						}
-								
-					// 이부분이 문제 '-'의 개수세기가 원활하게 진행되지 않음!
-					} else if(bbssta[i].includes('-') == true){
-						var count = 0;
-						var searchChar = "-"; //찾고자하는 문자
-						var pos = bbssta[i].indexOf(searchChar); //pos는 0의 값
-						
-						while (pos != -1) {
-							count++;
-							pos = bbssta[i].indexOf(searchChar, pos + 1);
-						}
-						if(count > 3) {
-							alert("(접수일) 보류는 최대 3개까지만 표현합니다. (-)");
-							$("#bbsStart").focus();
-						} 		
-					} else {
-						 if(bbssta[i].length > 2) {
-							 alert("(접수일) 월/일 형태 또는 -로 작성되어야 합니다.");
-								$("#bbsStart").focus();
-						 }
-					}
-	
-			}
-		});
-	</script>
-	
-	<script>
-		//textarea 완료목표일 ... 유효성 검사
-		$(document.getElementById("bbsTarget")).on('input', function() {
-			// ### 접수일 처리
-			var bbsst = document.getElementById("bbsTarget").value;
-			var bbssta = bbsst.split("\n"); //줄바꿈으로 분리
-			
-				for(var i=0; i < bbssta.length; i++) { //bbssta = 10/21 같은 형태
-					if(bbssta[i].length > 5) {
-						alert("(목표일) 최대 5글자까지만 작성 가능합니다!");
-					}
-					if(bbssta[i].includes('/') == true) {
-						var a = bbssta[i].split("/");
-						var num1 = Number(a[0]);
-						var num2 = Number(a[1]);
-						if(num1 > 13 || num2 > 32) {
-							alert("(목표일) 유효한 월/일을 작성해주십시오.");
-							$("#bbsTarget").focus();
-						}
-								
-					// 이부분이 문제 '-'의 개수세기가 원활하게 진행되지 않음!
-					} else if(bbssta[i].includes('-') == true){
-						var count = 0;
-						var searchChar = "-"; //찾고자하는 문자
-						var pos = bbssta[i].indexOf(searchChar); //pos는 0의 값
-						
-						while (pos != -1) {
-							count++;
-							pos = bbssta[i].indexOf(searchChar, pos + 1);
-						}
-						if(count > 3) {
-							alert("(목표일) 보류는 최대 3개까지만 표현합니다. (-)");
-							$("#bbsTarget").focus();
-						} 		
-					} else {
-						 if(bbssta[i].length > 2) {
-							 alert("(목표일) 월/일 형태 또는 -로 작성되어야 합니다.");
-								$("#bbsTarget").focus();
-						 }
-					}
-	
-			}
-		});
-	</script>
-	
-	<script>
-		//textarea 진행율/완료일 ... 유효성 검사
-		$(document.getElementById("bbsEnd")).on('input', function() {
-			// ### 접수일 처리
-			var bbsst = document.getElementById("bbsEnd").value;
-			var bbssta = bbsst.split("\n"); //줄바꿈으로 분리
-			
-			for(var i=0; i < bbssta.length; i++) { //bbssta = 10/21, 100% 같은 형태
-				if(bbssta[i].length > 5) {
-					alert("(진행율) 최대 5글자까지만 작성 가능합니다!");
-					$("#bbsEnd").focus();
-				}
-				if(bbssta[i].includes('/') == true) {
-					var a = bbssta[i].split("/");
-					var num1 = Number(a[0]);
-					var num2 = Number(a[1]);
-					if(num1 > 13 || num2 > 32) {
-						alert("(진행율) 유효한 월/일을 작성해주십시오.");
-						$("#bbsEnd").focus();
-					}
-							
-				// 이부분이 문제 '-'의 개수세기가 원활하게 진행되지 않음!
-				} if(bbssta[i].includes('%') == true){ //%가 포함 되었는가?
-					var a = bbssta[i].split("%");
-					var one = Number(a[0]); 
-					var two = a[1]; //a[1]뒤에 문자가 오지 않도록 함!
-					var count = 0;
-					if(one > 100) {
-						alert("(진행율) 0% ~ 100% 이내여야 합니다.");
-						$("#bbsEnd").focus();
-					}
-					
-					if(two != "") {
-						alert("(진행율) %로 마무리 되어야 합니다. (ex> 100%)");
-						$("#bbsEnd").focus();
-					}
-					
-					var searchChar = "%"; //찾고자하는 문자
-					var pos = bbssta[i].indexOf(searchChar); //pos는 0의 값
-					while (pos != -1) {
-						count++;
-						pos = bbssta[i].indexOf(searchChar, pos + 1);
-					}
-					if(count > 1) {
-						alert("(진행율) %는 최대 1개까지만 표현 가능합니다. (%)");
-						$("#bbsEnd").focus();
-					}
-				} else {
-					if(bbssta[i].includes('/') == false && bbssta[i].includes('%') == false) {
-						if(bbssta[i].length > 3) {
-							 alert("(진행율) 월/일 형태 또는 % 형태로 작성되어야 합니다.");
-								$("#bbsEnd").focus();
-						 }
-					}
-				}
-			}
-		});
-	</script>
-	
-	<script>
-		//textarea (차주)접수일 ... 유효성 검사
-		$(document.getElementById("bbsNStart")).on('input', function() {
-			// ### 접수일 처리
-			var bbsst = document.getElementById("bbsNStart").value;
-			var bbssta = bbsst.split("\n"); //줄바꿈으로 분리
-			
-				for(var i=0; i < bbssta.length; i++) { //bbssta = 10/21 같은 형태
-					if(bbssta[i].length > 5) {
-						alert("(차주(접수일)) 최대 5글자까지만 작성 가능합니다!");
-					}
-					if(bbssta[i].includes('/') == true) {
-						var a = bbssta[i].split("/");
-						var num1 = Number(a[0]);
-						var num2 = Number(a[1]);
-						if(num1 > 13 || num2 > 32) {
-							alert("(차주(접수일)) 유효한 월/일을 작성해주십시오.");
-							$("#bbsNStart").focus();
-						}
-								
-					// 이부분이 문제 '-'의 개수세기가 원활하게 진행되지 않음!
-					} else if(bbssta[i].includes('-') == true){
-						var count = 0;
-						var searchChar = "-"; //찾고자하는 문자
-						var pos = bbssta[i].indexOf(searchChar); //pos는 0의 값
-						
-						while (pos != -1) {
-							count++;
-							pos = bbssta[i].indexOf(searchChar, pos + 1);
-						}
-						if(count > 3) {
-							alert("(차주(접수일)) 보류는 최대 3개까지만 표현합니다. (-)");
-							$("#bbsNStart").focus();
-						} 		
-					} else {
-						 if(bbssta[i].length > 2) {
-							 alert("(차주(접수일)) 월/일 형태 또는 -로 작성되어야 합니다.");
-								$("#bbsNStart").focus();
-						 }
-					}
-	
-			}
-		});
-	</script>
-	
-	<script>
-		//textarea (차주)완료목표일 ... 유효성 검사
-		$(document.getElementById("bbsNTarget")).on('input', function() {
-			// ### 접수일 처리
-			var bbsst = document.getElementById("bbsNTarget").value;
-			var bbssta = bbsst.split("\n"); //줄바꿈으로 분리
-			
-				for(var i=0; i < bbssta.length; i++) { //bbssta = 10/21 같은 형태
-					if(bbssta[i].length > 5) {
-						alert("(차주(목표일)) 최대 5글자까지만 작성 가능합니다!");
-					}
-					if(bbssta[i].includes('/') == true) {
-						var a = bbssta[i].split("/");
-						var num1 = Number(a[0]);
-						var num2 = Number(a[1]);
-						if(num1 > 13 || num2 > 32) {
-							alert("(차주(목표일)) 유효한 월/일을 작성해주십시오.");
-							$("#bbsNStart").focus();
-						}
-								
-					// 이부분이 문제 '-'의 개수세기가 원활하게 진행되지 않음!
-					} else if(bbssta[i].includes('-') == true){
-						var count = 0;
-						var searchChar = "-"; //찾고자하는 문자
-						var pos = bbssta[i].indexOf(searchChar); //pos는 0의 값
-						
-						while (pos != -1) {
-							count++;
-							pos = bbssta[i].indexOf(searchChar, pos + 1);
-						}
-						if(count > 3) {
-							alert("(차주(목표일)) 보류는 최대 3개까지만 표현합니다. (-)");
-							$("#bbsNTarget").focus();
-						} 		
-					} else {
-						 if(bbssta[i].length > 2) {
-							 alert("(차주(목표일)) 월/일 형태 또는 -로 작성되어야 합니다.");
-								$("#bbsNTarget").focus();
-						 }
-					}
-	
-			}
-		});
-	</script> -->
-	
 	
 	<!-- modal 내, password 보이기(안보이기) 기능 -->
 		<script>
@@ -817,32 +588,139 @@
 		            $('#password').attr('type','password');
 		        }
 		    });
+		    
+		    $('[data-toggle="tooltip"]').tooltip();
 		});
 	</script>
 	
-	
-	<!-- 모달 툴팁 -->
-	<script>
-		$(document).ready(function(){
-			$('[data-toggle="tooltip"]').tooltip();
-		});
-	</script>
 	
 	
 	<!-- 모달 submit -->
 	<script>
 	$('#modalbtn').click(function(){
 		$('#modalform').text();
-	})
+	});
 	</script>
 	
 	<!-- 모달 update를 위한 history 감지 -->
 	<script>
-	window.onpageshow = function(event){
+	window.addEventListener('DOMContentLoaded', function(event) {
 		if(event.persisted || (window.performance && window.performance.navigation.type == 2)){ //history.back 감지
 			location.reload();
 		}
+	});
+	</script>
+	
+	<script>
+	//Update - '-' 필수 포함하기, 접수일이 각 내용마다 1개씩 존재하도록 설정
+	window.addEventListener('DOMContentLoaded', function() {
+		document.getElementById("update_sub").onclick=updateSub;
+	});
+	
+	//수정 버튼을 클릭해 submit 하기
+	// https://embed.plnkr.co/mBfHaFGgDdJnl4Zz8KHL/preview
+	function updateSub() {
+		 var txtBox = document.getElementById("bbsContent");
+		 var lines = txtBox.value.split("\n");
+		 var ntxtBox = document.getElementById("bbsNContent");
+		 var nlines = ntxtBox.value.split("\n");
+
+		 // generate HTML version of text
+		 var resultString  = "0";
+		 for (var i = 0; i < lines.length; i++) {
+		   if(!lines[i] == "" && lines[i].indexOf('-') == -1) {
+		     resultString = -1;
+		     alert("업무 내용은 앞에 '-'가 포함되어야 합니다! (금주 업무 실적)");
+		     break;
+		   } else {
+		   resultString = "0";
+		   }
+		 }
+
+		 var nresultString  = "0";
+		 for (var i = 0; i < nlines.length; i++) {
+		   if(!nlines[i] == "" && nlines[i].indexOf('-') == -1) {
+		     nresultString = -1;
+		     alert("업무 내용은 앞에 '-'가 포함되어야 합니다! (차주 업무 실적)");
+		     break;
+		   } else {
+		   nresultString = "0";
+		   }
+		 }
+
+		if(resultString == "0" && nresultString == "0" && !txtBox.value == "" && !ntxtBox.value == ""){ 
+			//alert("조건 충족!"); //즉, 형태를 맞춘 경우 넘어감!
+			// + 완료일 개수 맞추기!
+			//정확한 확인을 위해 특수문자 변경
+			var rp = "";
+			var a = txtBox.value.replaceAll("\r\n","\n").split("\n");
+			for(var i=0; i < a.length; i++) {
+				if(a[i].indexOf('-') > -1) {
+					var y = a[i].replaceAll("\n","");
+					y = y.replaceAll("\n","");
+					rp += y.replace("-","§") + "\n";
+				}else {
+					var y = a[i].replaceAll("\n","");
+					rp += y.replaceAll("\n","") + "\n";
+				}
+			}
+				//txtBox.value.replace("-","§"); 
+			var consize = rp.replaceAll(",","").split("§"); //개수 (줄바꿈으로 세는것이 아닌, 특수문자로!)
+			var start = document.getElementById("bbsEnd").value.trim().split("\n");
+			var startsize = 0;
+			for(var i=0; i < start.length; i++) {
+				if(start[i] == null || start[i] == "") {
+					
+				} else {
+					startsize ++;
+				}
+			}
+			
+			// 차주
+			var nrp = "";
+			var na = ntxtBox.value.replaceAll("\r\n","\n").split("\n");
+			for(var i=0; i < na.length; i++) {
+				if(na[i].indexOf('-') > -1) {
+					var y = na[i].replaceAll("\n","");
+					y = y.replaceAll("\n","");
+					nrp += y.replace("-","§") + "\n";
+				}else {
+					var y = na[i].replaceAll("\n","");
+					nrp += y.replaceAll("\n","") + "\n";
+				}
+			}
+				//txtBox.value.replace("-","§"); 
+			var nconsize = nrp.replaceAll(",","").split("§"); //개수 (줄바꿈으로 세는것이 아닌, 특수문자로!)
+			var nstart = document.getElementById("bbsNTarget").value.trim().split("\n");
+			var nstartsize = 0;
+			for(var i=0; i < nstart.length; i++) {
+				if(nstart[i] == null || nstart[i] == "") {
+					
+				} else {
+					nstartsize ++;
+				}
+			}
+		
+			if(consize.length-1 != startsize) {
+				alert("업무내용 개수에 맞춰, 진행율/완료일을 작성하여 주십시오. (금주 업무 실적)");
+			} else if(nconsize.length-1 != nstartsize) {
+				alert("업무내용 개수에 맞춰, 완료 목표일을 작성하여 주십시오. (차주 업무 계획)");
+			} else {
+				 if(!confirm("주간보고가 수정됩니다. 수정하시겠습니까?")) {
+					
+				}else { //확인시,
+					document.getElementById("update").click();
+				} 
+			}
+			
+		}
+	
 	}
+	/* alert(consize.length - 1);
+	alert(startsize);
+	alert(nconsize.length - 1);
+	alert(nstartsize); */
 	</script>
 	
 </body>
+</html>

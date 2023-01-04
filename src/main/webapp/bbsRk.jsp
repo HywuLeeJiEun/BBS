@@ -185,16 +185,6 @@
 		//bbsID string으로 변환
 		String bbsID = String.join(",",bbsId);
 		
-		/// 이미 해당 날짜에 제추뢴 요약본이 있다면, 작성 불가!
-		String sum_id =  bbsDAO.getSumid(bbsDeadline, work);
-		if(sum_id != null && !sum_id.equals("")) {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('이미 작성된 요약본이 있습니다. 해당 내용으로 이동합니다. ')");
-			script.println("location.href='summaryRk.jsp'");
-			script.println("</script>");
-		}
-		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 	%>
 	
@@ -225,8 +215,8 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
@@ -238,9 +228,31 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li class="active"><a href="bbsRk.jsp">작성</a></li>
-<%-- 								<li><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li> --%>
-								<li><a href="summaryRk.jsp">제출 목록</a></li>
+								<li class="active"><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
+								<li><a href="summaryRk.jsp">조회</a></li>
+								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
+						<%
+							if(rk.equals("실장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">summary<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="summaryadRk.jsp">조회</a></li>
+								<li><a href="summaryadAdmin.jsp">작성</a></li>
+								<li><a href="summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
 						<%
@@ -260,7 +272,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
@@ -677,6 +689,21 @@
 	
 	
 	$("#summary").on('mousedown', function() {
+		//noSub -> 미제출자
+		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
+			var go;
+			go = confirm("미제출자가 있습니다. 작성 페이지로 넘어가시겠습니까?");
+			
+			if(go) { //출력 o
+				document.getElementById("summary").click();
+			} else { //출력 x
+				
+			}
+		
+		}
+	});
+	
+	$("#summary_nav").on('mousedown', function() {
 		//noSub -> 미제출자
 		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
 			var go;

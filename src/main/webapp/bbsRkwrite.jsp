@@ -44,6 +44,13 @@
 		
 		//bbsID 배열에 bbsid 담기!
 		String rq = request.getParameter("bbsID");
+		if(rq.equals("") && rq.isEmpty()) { //만약 bbsID가 넘어온 게 없다면!
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('요약본 작성이 가능한 주간보고가 없습니다.\\n승인 상태를 확인해주시길 바랍니다.')");
+			script.println("history.back()");
+			script.println("</script>");
+		}
 		String[] bbsID = rq.split(",");
 		
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
@@ -179,9 +186,63 @@
 		
 		String work = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
 		
+		
+		
+		//(월요일) 제출 날짜 확인
+		String mon = "";
+		String day ="";
+		
+		Calendar cal = Calendar.getInstance(); 
+		Calendar cal2 = Calendar.getInstance(); //오늘 날짜 구하기
+		SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
+		
+		cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+		//cal.add(Calendar.DATE, 7); //일주일 더하기
+		
+		
+		 // 비교하기 cal.compareTo(cal2) => 월요일이 작을 경우 -1, 같은 날짜 0, 월요일이 더 큰 경우 1 
+		 if(cal.compareTo(cal2) == -1) {
+			 //월요일이 해당 날짜보다 작다.
+			 cal.add(Calendar.DATE, 7);
+			 
+			 mon = dateFmt.format(cal.getTime());
+			day = dateFmt.format(cal2.getTime());
+		 } else { // 월요일이 해당 날짜보다 크거나, 같다 
+			 mon = dateFmt.format(cal.getTime());
+			day = dateFmt.format(cal2.getTime());
+		 }
+		 
+		 String bbsDeadline = mon;
+				 
+				 
+		// 이미 해당 날짜에 제출된 요약본이 있다면, 작성 불가!
+		String sum_id =  bbsDAO.getSumid(bbsDeadline, work);
+		if(sum_id != null && !sum_id.equals("")) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('해당 요일로 작성된 요약본이 있습니다.')");
+			//script.println("location.href='summaryRkUpdate.jsp?sum_id="+sum_id+"''");
+			//script.println("location.href='summaryRkUpdate.jsp?sum_id='");
+			script.println("location.href='summaryRk.jsp'");
+			script.println("</script>");
+		}
+	
+	
+		// 제출자 이름 뽑기
+		String subname = "";
+		for(int i=0; i < list.size(); i ++) {
+			if(i == list.size()-1) {
+				subname += list.get(i).getUserName();
+			} else {
+			subname += list.get(i).getUserName() + ",";
+			}		
+		}
+		
+		
 	%>
 	
-	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	
+	  <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -207,8 +268,8 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
@@ -220,8 +281,31 @@
 								aria-expanded="false"><%= work %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li class="active"><a href="bbsRk.jsp">조회</a></li>
-								<li><a href="summaryRk.jsp">제출 목록</a></li>
+								<li><a href="bbsRk.jsp"><%= work %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= work %> Summary</h5></li>
+								<li><a href="summaryRk.jsp">조회</a></li>
+								<li class="active" id="summary_nav"><a href="#">작성</a></li>
+								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
+						<%
+							if(rk.equals("실장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">summary<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="summaryadRk.jsp">조회</a></li>
+								<li><a href="summaryadAdmin.jsp">작성</a></li>
+								<li><a href="summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
 						<%
@@ -241,9 +325,9 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
 					%>
-						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
@@ -399,7 +483,8 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; color:black "> 요약본(Summary) - [<%= work  %>] 내용을 선택하여  주십시오.</th>
+					<th colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-html="true" data-placement="bottom" title="제출자: <%= subname %> <br> 제출 인원: <%= list.size() %> "> <%= work  %> 요약본 작성
+					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
 				</tr>
 			</thead>
 		</table>
@@ -414,24 +499,24 @@
 				<table id="Table" class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 					<thead>
 						<tr>
-							<th colspan="3"style="background-color:#D4D2FF; align:left"> &nbsp;금주 업무 실적 </th>
+							<th colspan="3"style="background-color:#D4D2FF; align:left; font-size:15px"> &nbsp;금주 업무 실적 </th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr style="background-color:#FFC57B;">
-							<th width="60%">|&nbsp;업무 내용</th>
-							<th width="20%">|&nbsp;완료일</th>
-							<th width="20%">|&nbsp;&nbsp;<input type="checkbox" style="zoom:2.0;" name="chk" value="selectall" data-toggle="tooltip" data-placement="bottom" title="전체 선택" onclick="selectAll(this)"></th>
+						<tr style="background-color:#FFC57B; border: 1px solid; border-top: 1px solid #ffffff">
+							<th width="55%" style="border: 1px solid #ffffff; font-size:13px; vertical-align:middle">업무 내용</th>
+							<th width="15%" style="border: 1px solid #ffffff; font-size:13px; vertical-align:middle">완료일</th>
+							<th width="25%" style="border: 1px solid #ffffff; font-size:13px" class="text-center"><input type="checkbox" style="zoom:2.0;" name="chk" value="selectall" onclick="selectAll(this)"></th>
 						</tr>
 						
 						<%
 						for(int i=0; i< comcontent.length; i++) { //content의 길이가 더 길 수 있음!
 						%>
 						<tr>
-							<td style="text-align: left;">
+							<td style="text-align: left; font-size:13px">
 								<textarea name="content<%=i%>" id="content<%=i%>" rows="2" style="resize: none; height:30px; width:300px;"><%= comcontent[i].replaceAll("(\n\r|\r\n|\n|\r)$","") %></textarea>
 							</td>
-							<td style="text-align: left;">
+							<td style="text-align: left; font-size:13px">
 								<textarea name="end<%=i%>" id="end<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= comend[i] %></textarea>
 								<textarea name="bbsDeadline" id="bbsDeadline" rows="1" style="resize: none; height:30px; width:60px; text-align: center; display:none"><%= list.get(0).getBbsDeadline() %></textarea>
 							</td>
@@ -451,24 +536,24 @@
 				<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 					<thead>
 						<tr>
-							<th colspan="3"style="background-color:#D4D2FF; align:left"> &nbsp;차주 업무 계획 </th>
+							<th colspan="3"style="background-color:#ff9900; align:left"> &nbsp;차주 업무 계획 </th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr style="background-color:#FFC57B;">
-							<th width="60%">|&nbsp;업무 내용</th>
-							<th width="20%" >|&nbsp;완료예정</th>
-							<th width="20%">|&nbsp;&nbsp;<input type="checkbox" name="
-" style="zoom:2.0;" value="selectall" data-toggle="tooltip" data-placement="bottom" title="전체 선택" onclick="nselectAll(this)"></th>
+						<tr style="background-color:#FFC57B; border: 1px solid; border-top: 1px solid #ffffff">
+							<th width="60%" style="border: 1px solid #ffffff; font-size:13px; vertical-align:middle">업무 내용</th>
+							<th width="20%" style="border: 1px solid #ffffff; font-size:13px; vertical-align:middle">완료예정</th>
+							<th width="20%" style="border: 1px solid #ffffff; font-size:13px" class="text-center"><input type="checkbox" name="
+" style="zoom:2.0;" value="selectall" onclick="nselectAll(this)"></th>
 						</tr>
 						<%
 						for(int i=0; i< ncomcontent.length; i++) { //content의 길이가 더 길 수 있음!
 						%>
 						<tr>
-							<td style="text-align: left;">
+							<td style="text-align: left; font-size:13px">
 								<textarea name="ncontent<%=i%>" id="ncontent<%=i%>" rows="2" style="resize: none; height:30px; width:300px;"><%= ncomcontent[i].replaceAll("(\n\r|\r\n|\n|\r)$","") %></textarea>
 							</td>
-							<td style="text-align: left;">
+							<td style="text-align: left; font-size:13px">
 								<textarea name="ntarget<%=i%>" id="ntarget<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= ncomtarget[i] %></textarea>
 							</td>
 							<td>
@@ -484,12 +569,10 @@
 			</div>
 			</div>
 		</form>
-		<a type="button" style="width:5%" class="btn btn-primary pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="선택된 내용으로 요약본 생성" id="save" >선택</a>
+		<a type="button" style="width:50px" class="btn btn-primary pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="선택된 내용으로 요약본 생성" id="save" >선택</a>
 	</div>
 	<br><br><br>
 	
-	<a><%= ncontent.length %></a><br>
-	<a><%= ntarget.length %></a><br>
 	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -606,6 +689,12 @@
 			//alert(chk_arr);
 			//alert(nchk_arr);
 			
+			if(chk_arr == null || chk_arr =="") {
+				alert('금주 업무 실적 중, 내용이 선택되지 않았습니다. \n1개 이상을 선택하여 주십시오.');
+			}else if(nchk_arr == null || nchk_arr =="") {
+				alert('차주 업무 계획 중, 내용이 선택되지 않았습니다. \n1개 이상을 선택하여 주십시오.');
+			} else {
+			
 			//데이터를 다른 페이지로 보냄!
 			// ((금주 업무 내용 / 완료일))
 			for(var i=0; i < chk_arr.length; i++) {
@@ -640,7 +729,8 @@
 			innerHtml += '<td><textarea class="textarea" id="ntarget" name="ntarget" readonly>'+ ntarget +'</textarea></td>';
 			
 			$('#Table > tbody > tr:last').append(innerHtml);
-			$('#Rkwrite').submit();
+			$('#Rkwrite').submit(); 
+			}
 		})
 	});
 	

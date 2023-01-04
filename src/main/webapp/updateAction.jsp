@@ -102,7 +102,8 @@
 			
 		}
 		
-		  if(!id.equals(bbs.getUserID()) && !rk.equals("부장") && !rk.equals("차장") && !rk.equals("관리자")) {
+		
+		    if(!id.equals(bbs.getUserID()) && !rk.equals("부장") && !rk.equals("차장") && !rk.equals("관리자")) {
 			PrintWriter script = response.getWriter(); 
 			script.println("<script>");
 			script.println("alert('수정 권한이 없습니다. 사용자를 확인해주십시오.')");
@@ -154,12 +155,12 @@
 						PrintWriter script = response.getWriter();
 						script.println("<script>");
 						script.println("alert('보고가 정상적으로 수정되었습니다.')");
-						script.println("location.href='bbs.jsp'");
+						script.println("location.href='bbsUpdateDelete.jsp'");
 						script.println("</script>");
 					}
 				}
 			}
-		} 
+		}  
 
 	%>
 	<a><%= erp_id %></a><br>

@@ -1,3 +1,8 @@
+<%@page import="sum.Sum"%>
+<%@page import="bbs.Bbs"%>
+<%@page import="sum.SumDAO"%>
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.Calendar"%>
 <%@page import="user.User"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.Arrays"%>
@@ -90,14 +95,69 @@
 	String[] bbsNContent = ncontent.split("§");
 	String[] bbsNTarget = ntarget.split("§"); */
 	content = content.replaceAll("§","\r\n");
-	end = end.replaceAll("§","\r\n");
+    end = end.replaceAll("§","\r\n");
 	ncontent = ncontent.replaceAll("§","\r\n");
 	ntarget = ntarget.replaceAll("§","\r\n");
 	bbsDeadline = bbsDeadline.replaceAll("§","\r\n");
 
+	
+	//(월요일) 제출 날짜 확인
+	String mon = "";
+	String day ="";
+	
+	Calendar cal = Calendar.getInstance(); 
+	Calendar cal2 = Calendar.getInstance(); //오늘 날짜 구하기
+	SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
+	
+	cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+	//cal.add(Calendar.DATE, 7); //일주일 더하기
+	
+	 // 비교하기 cal.compareTo(cal2) => 월요일이 작을 경우 -1, 같은 날짜 0, 월요일이 더 큰 경우 1 
+	 if(cal.compareTo(cal2) == -1) {
+		 //월요일이 해당 날짜보다 작다.
+		 cal.add(Calendar.DATE, 7);
+		 
+		 mon = dateFmt.format(cal.getTime());
+		day = dateFmt.format(cal2.getTime());
+	 } else { // 월요일이 해당 날짜보다 크거나, 같다 
+		 mon = dateFmt.format(cal.getTime());
+		day = dateFmt.format(cal2.getTime());
+	 }
+	 //확인할 월요일 날짜
+	 String monday = mon;
+
+	// 진행율 구하기 (정확히 구현하려면 - 상세 Data가 DB에 저장되어야 함.)
+	String a = "[보류],12/31,12/30";
+	String[] endlist = a.split(",");
+	//String[] endlist = end.split("\r\n"); 
+	for(int i=0; i<endlist.length; i++) {
+		if(endlist[i].contains("보류")) {
+			
+		} else { //보류가 아닌, 날짜 형태라면
+			//년도가 바뀔 가능성이 있는 달이라면, (12월 제출일 - 1월 완료 예정일인 경우 ...)
+			//1. endlist가 1월인지 확인 -> 1월인 경우, monday의 월을 확인 (12월인 경우 ...)
+			//2. monday의 년도 확인
+			//3. endlist에게 monday보다 1년 추가하여 텍스트 제공 
+			
+			//기본적으로 년도가 바뀌지 않는다면,
+			//1. endlist의 월 확인 (특수케이스 판별을 위함.)
+			//2. 
+		}
+	}
+	 
+	// 진행율 및 상태 작성을 위한 완료일 분석
+	if(end.contains("보류")) {
+		
+	}
+	
+	
+	//bbsID를 통한 작성 기능 제공
+	ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
+	String bbsID = String.join(",",AllbbsID);
 %>
 
-<!-- ************ 상단 네비게이션바 영역 ************* -->
+
+ <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -123,8 +183,8 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정 및 삭제</a></li>
+							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
@@ -136,8 +196,31 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li class="active"><a href="bbsRk.jsp">조회</a></li>
-								<li><a href="summaryRk.jsp">제출 목록</a></li>
+								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
+								<li><a href="summaryRk.jsp">조회</a></li>
+								<li  class="active" id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+							</ul>
+							</li>
+						<%
+							}
+						%>
+						<%
+							if(rk.equals("실장") || rk.equals("관리자")) {
+						%>
+							<li class="dropdown">
+							<a href="#" class="dropdown-toggle"
+								data-toggle="dropdown" role="button" aria-haspopup="true"
+								aria-expanded="false">summary<span class="caret"></span></a>
+							<!-- 드랍다운 아이템 영역 -->	
+							<ul class="dropdown-menu">
+								<li><a href="summaryadRk.jsp">조회</a></li>
+								<li><a href="summaryadAdmin.jsp">작성</a></li>
+								<li><a href="summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
 						<%
@@ -157,9 +240,9 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
 					%>
-						<li><a href="#UserUpdateModal">개인정보 수정</a></li>
+						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="workChange.jsp">담당업무 변경</a></li>
 						<li><a href="logoutAction.jsp">로그아웃</a></li>
 					<%
@@ -424,7 +507,7 @@
 			</div>
 		</div>
 	</form>
-	<button type="button" class="btn btn-primary pull-right" style="width:5%; text-align:center; align:center" onclick="save()">제출</button>
+	<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center" onclick="save()">제출</button>
 	</div>
 	
 
@@ -535,18 +618,36 @@
 	
 	<script>
 	function save() {
-		if(document.getElementById("progress").value == '' || document.getElementById("progress").value == null) {
-			alert("금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
+		if(document.getElementById("content").value == '' || document.getElementById("content").value == null) {
+			alert("금주 업무 실적의 '업무 내용'이 작성되지 않았습니다.");
 		} else {
-			if(con.style.backgroundColor == '' || con.style.backgroundColor == null) {
-				alert("금주 업무 실적의 '상태'가 선택되지 않았습니다.");
+			if(document.getElementById("end").value == '' || document.getElementById("end").value == null) {
+				alert("금주 업무 실적의 '완료일'이 작성되지 않았습니다.");
 			} else {
-			var innerHtml = '<td><textarea class="textarea" id="color" name="color" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
-			$('#Table > tbody > tr:last').append(innerHtml);
-			$('#bbsRk').submit();
+				if(document.getElementById("progress").value == '' || document.getElementById("progress").value == null) {
+					alert("금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
+				} else {
+					if(con.style.backgroundColor == '' || con.style.backgroundColor == null) {
+						alert("금주 업무 실적의 '상태'가 선택되지 않았습니다.");
+					} else {
+						//차주
+						if(document.getElementById("ncontent").value == '' || document.getElementById("ncontent").value == null) {
+							alert("차주 업무 계획의 '업무 내용'이 작성되지 않았습니다.");
+						} else {
+							if(document.getElementById("ntarget").value == '' || document.getElementById("ntarget").value == null) {
+								alert("차주 업무 계획의 '완료예정'이 작성되지 않았습니다.");
+							} else {
+								var innerHtml = '<td><textarea class="textarea" id="color" name="color" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
+								$('#Table > tbody > tr:last').append(innerHtml);
+								$('#bbsRk').submit();
+							}
+						}
+					}
+				}
 			}
 		}
 	}
 	</script>
+	
 </body>
 </html>
