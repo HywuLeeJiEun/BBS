@@ -134,6 +134,15 @@
 		//bbsID를 통한 작성 기능 제공
 		ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
 		String bbsID = String.join(",",AllbbsID);
+		
+		if(sumad.size() == 0 || sumad.isEmpty()) { //만약, 미승인 데이터가 없다면!
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('모든 요약본이 승인(또는 마감)처리 되었습니다.')");
+			//script.println("location.href='summaryadRk.jsp'");
+			script.println("history.back()");
+			script.println("</script>");
+		}
 	%>
 
 
@@ -397,7 +406,7 @@
 			script.println("<script>");
 			script.println("alert('모든 요약본이 승인(또는 마감)처리 되었습니다.')");
 			//script.println("location.href='summaryadRk.jsp'");
-			//script.println("history.back()");
+			script.println("history.back()");
 			script.println("</script>");
 		%>
 		<table class="table" style="text-align: center; cellpadding:50px;" >

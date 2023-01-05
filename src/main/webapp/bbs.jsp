@@ -453,7 +453,7 @@
 			%>
 			
 			<!-- 글쓰기 버튼 생성 -->
-			<a href="bbsUpdate.jsp" class="btn btn-info pull-right">작성</a>
+			<a href="bbsUpdate.jsp" class="btn btn-info pull-right" data-toggle="tooltip" data-html="true" data-placement="bottom" title="주간보고 작성">작성</a>
 		</div>
 	</div>
 	

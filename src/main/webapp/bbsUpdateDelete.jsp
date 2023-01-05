@@ -397,8 +397,8 @@
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
-						<th style="background-color: #eeeeee; text-align: center;">상태</th>
 						<th style="background-color: #eeeeee; text-align: center;">승인</th>
+						<th style="background-color: #eeeeee; text-align: center;">처리</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -431,7 +431,7 @@
 						<td><%= list.get(i).getBbsUpdate() %></td>
 						<!-- 승인/미승인/마감 표시 -->
 						<td><%= list.get(i).getSign() %></td>
-						<td data-toggle="tooltip" data-html="true" data-placement="right" title="관리자의 승인 이후, <br>상태가 변경됩니다.">
+						<td data-toggle="tooltip" data-html="true" data-placement="right" title="승인 시, <br>제출이 확정됩니다.">
 							<button class="btn btn-success" style="font-size:12px" onclick="location.href='signOnAction.jsp?bbsID=<%= list.get(i).getBbsID() %>&bbsDeadline=<%= list.get(i).getBbsDeadline() %>'"> 승인 </button>
 						</td>
 					</tr>
@@ -456,8 +456,7 @@
 				}
 			%>
 			
-			<!-- 글쓰기 버튼 생성 -->
-			<a href="bbs.jsp" class="btn btn-primary pull-right">목록</a>
+			<a href="bbs.jsp" class="btn btn-primary pull-right" data-toggle="tooltip" data-html="true" data-placement="bottom" title="주간보고 조회">목록</a>
 		</div>
 	</div>
 	<!-- 게시판 메인 페이지 영역 끝 -->
