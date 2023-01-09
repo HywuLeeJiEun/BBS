@@ -84,7 +84,7 @@
 		
 		
 	//금주 업무 실적 줄바꿈
-	for(int i=0; i < Integer.parseInt(num); i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
+	/* for(int i=0; i < Integer.parseInt(num); i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
 		 for(int j=0; j < Integer.parseInt(numlist[i])-1; j++) { //줄바꿈의 개수만큼
 				getbbsstart[i] += "\r\n"; // 줄바꿈 추가
 				getbbstarget[i] += "\r\n"; // 줄바꿈 추가
@@ -99,7 +99,7 @@
 				getbbsnstart[i] += "\r\n"; // 줄바꿈 추가
 				getbbsntarget[i] += "\r\n"; // 줄바꿈 추가
 			} 
-		} 
+		}  */
 
 		// 모두 String으로 변환
 		bbsstart = String.join("\r\n",getbbsstart);
@@ -163,7 +163,7 @@
 				script.println("location.href='bbsUpdateDelete.jsp'");
 				script.println("</script>");
 			}
-		}  
+		}
 		 
 	%>
 
@@ -174,16 +174,9 @@
 <%-- <a> <%= bbsstart %> </a>
 <a> <%= bbstarget %> </a>
 <a> <%= bbsend %> </a> --%>
-getbbscontent, bbsstart, bbstarget, bbsend, getbbsncontent, bbsnstart
-erp_date, erp_user, erp_stext, erp_authority, erp_division, erp_id
-<textarea> <%= erp_date %></textarea><br>
-<textarea> <%= erp_user %></textarea><br>
-<textarea><%= erp_stext %></textarea><br>
-<textarea><%= erp_authority %></textarea><br>
-<textarea> <%= getbbscontent %></textarea><br>
-<textarea> <%= bbsstart %></textarea><br>
-<textarea><%= bbstarget %></textarea><br>
-<textarea><%= getbbsncontent %></textarea><br>
+<a><%= getbbsstart.length %></a><br>
+<a><%= num %></a><br>
+<a><%= numli %></a><br>
 
 </body>
 </html>

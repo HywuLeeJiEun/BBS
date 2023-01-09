@@ -75,6 +75,10 @@
 		ArrayList<String> numli = new ArrayList<String>(Arrays.asList(numl.split("&")));
 		ArrayList<String> nnumli = new ArrayList<String>(Arrays.asList(nnuml.split("&")));
 		
+		//con, ncon -> bbsContent(con) <-
+		int con = Integer.parseInt(request.getParameter("con"));
+		int ncon = Integer.parseInt(request.getParameter("ncon"));
+		
 		// 몇번 반복하는지!
 		String trCnt = null;
 		if(request.getParameter("trCnt") != null){
@@ -92,7 +96,7 @@
 			trNCnt = "1";
 		}
 		
-		for(int i=0; i< Integer.parseInt(trCnt)+1; i++) { //trCnt 개수만큼 반복 
+		for(int i=0; i< Integer.parseInt(trCnt)+1+con; i++) { //trCnt 개수만큼 반복 
 			//금주 업무 내용 + select box
 			String a = "bbsContent";
 			String jobs = "jobs";
@@ -111,9 +115,9 @@
 			getbbscontent = String.join("\r\n",bbscontent); // 각 배열 요소마다 줄바꿈 하여 넣음.
 			//getbbscontent = getbbscontent.replace("\r\n","/r/n"); // String 내부의 줄바꿈을 표현
 			} else { // 0~num 개수안에서만 이뤄지므로, 해당 내용 제거
-				if(numli.size() < i) {
+				if(numli.size() < num) {
 					num -= 1; //개수를 하나 삭제함 
-					numli.remove(i);
+					numli.set(i, ""); //빈값으로 만들기
 				}
 			}
 			
@@ -172,7 +176,7 @@
 				}
 			}
 		
-		for(int i=0; i< Integer.parseInt(trNCnt)+1; i++) { //trNCnt 개수만큼 반복 
+		for(int i=0; i< Integer.parseInt(trNCnt)+1+ncon; i++) { //trNCnt 개수만큼 반복 
 			// << 차주 >> 
 			String jobs = "njobs";
 			//차주 업무 내용
@@ -192,9 +196,9 @@
 			getbbsncontent = String.join("\r\n",bbsncontent);
 			//getbbsncontent = getbbsncontent.replace("\r\n","/r/n");
 			}else { // 0~nnum 개수안에서만 이뤄지므로, 해당 내용 제거
-				if(nnumli.size() < i) {
+				if(nnumli.size() < nnum) {
 				nnum -= 1; //개수를 하나 삭제함 
-				nnumli.remove(i);
+				nnumli.set(i, ""); //빈값으로 만들기
 				}
 			}
 				
@@ -203,8 +207,8 @@
 			String datef = request.getParameter(f+i);
 			
 			String nstart ="";
-			if(nstart != null || nstart.isEmpty()) {
-			if(nstart.length() > 5) {
+			if(datef != null) {
+			if(datef.length() > 5) {
 			nstart= datef.substring(5);
 			String finalnstart = nstart.replace("-", "/");
 			bbsnstart.add(finalnstart);
@@ -224,7 +228,7 @@
 			}else {
 				String dateg = request.getParameter(g+i);
 				String ntarget ="";
-				if(ntarget.length() > 5) {
+				if(dateg.length() > 5) {
 					ntarget = dateg.substring(5);
 					String finalntarget = ntarget.replace("-", "/");
 					bbsntarget.add(finalntarget);
@@ -264,14 +268,17 @@
 		} 
 		
 		//nnumlist 저장
+		numli.removeAll(Arrays.asList("",null));
+		nnumli.removeAll(Arrays.asList("",null));
 		String numlist = String.join("&",numli);
 		String nnumlist = String.join("&",nnumli);
 		
 	%>
-	<a> <%= trACnt %></a><br>	
-	<a> <%= trCnt %></a><br>	
-	<a> <%= trNCnt %></a><br>	
-	<a> <%= erp_date %></a><br>
+	<a> <%= trNCnt %></a>
+	<a> <%= num %></a><br>	
+	<a> <%= numlist %></a><br>	
+	<a> <%= nnum %></a><br>	
+	<a> <%= nnumlist %></a><br>
 	
 		<form id="post_item" method="post" action="updateActionComplete.jsp">
 			<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
@@ -354,7 +361,7 @@
 	
 	function addRow() {
 		$('#post_item').submit();
-	}     
+	}    
 	</script> 
 
 	 
