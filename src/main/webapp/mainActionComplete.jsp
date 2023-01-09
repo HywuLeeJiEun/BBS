@@ -28,99 +28,99 @@
 <body>
 	<%
 	
-		// 현재 세션 상태를 체크한다
-		String id = null;
-		
-		String NContent = null;
-		String NStart = null;
-		String NTarget = null;
-		
-		
-		if(session.getAttribute("id") != null){
-			id = (String)session.getAttribute("id");
-		}
-		// 로그인을 한 사람만 글을 쓸 수 있도록 코드를 수정한다
-		if(id == null){
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('로그인이 되어 있지 않습니다. 로그인 후 사용해주시길 바랍니다.')");
-			script.println("location.href='login.jsp'");
-			script.println("</script>");
-		}
-		UserDAO userDAO = new UserDAO();
-		String pluser = null;
-		if(userDAO.getpluserunder(id) != null) { // 비어있지 않다면,
-			pluser = userDAO.getpluserunder(id);
-		}
-		String name = userDAO.getName(id);
-		
-		// 담을 데이터 가져오기 (get이 없으면 배열, get 이 있다면 string)
-		String manager = request.getParameter("manager");
-		String title = request.getParameter("title");
-		String bbsDeadline = request.getParameter("bbsDeadline");
-		String getbbscontent = request.getParameter("getbbscontent");
-		String bbsstart = request.getParameter("getbbsstart");
-		String bbstarget = request.getParameter("getbbstarget");
-		String bbsend = request.getParameter("getbbsend");
-		String getbbsncontent = request.getParameter("getbbsncontent");
-		String bbsnstart = request.getParameter("getbbsnstart");
-		String bbsntarget = request.getParameter("getbbsntarget");
-		// String으로 가져옴.
-		String numlist = request.getParameter("numlist");
-		String nnumlist = request.getParameter("nnumlist");
-		
-		
-		// 배열로 만들기
-		String[] numarray = numlist.split("§");
-		String[] nnumarray = nnumlist.split("§");
-		
-		String [] getbbsstart = bbsstart.split("§");
-		String [] getbbstarget = bbstarget.split("§");
-		String[] getbbsend = bbsend.split("§");
-		String[] getbbsnstart = bbsnstart.split("§");
-		String[] getbbsntarget = bbsntarget.split("§");
-		
-		
-		
-	//금주 업무 실적 줄바꿈
-	for(int i=0; i < numarray.length; i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
-		 for(int j=0; j < Integer.parseInt(numarray[i])-1; j++) { //줄바꿈의 개수만큼
-				getbbsstart[i] += "\r\n"; // 줄바꿈 추가
-				getbbstarget[i] += "\r\n"; // 줄바꿈 추가
-				getbbsend[i] += "\r\n"; // 줄바꿈 추가
-			}
+	// 현재 세션 상태를 체크한다
+			String id = null;
 			
+			String NContent = null;
+			String NStart = null;
+			String NTarget = null;
+			
+			
+			if(session.getAttribute("id") != null){
+				id = (String)session.getAttribute("id");
+			}
+			// 로그인을 한 사람만 글을 쓸 수 있도록 코드를 수정한다
+			if(id == null){
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('로그인이 되어 있지 않습니다. 로그인 후 사용해주시길 바랍니다.')");
+				script.println("location.href='login.jsp'");
+				script.println("</script>");
+			}
+			UserDAO userDAO = new UserDAO();
+			String pluser = null;
+			if(userDAO.getpluserunder(id) != null) { // 비어있지 않다면,
+				pluser = userDAO.getpluserunder(id);
+			}
+			String name = userDAO.getName(id);
+			
+			// 담을 데이터 가져오기 (get이 없으면 배열, get 이 있다면 string)
+			String manager = request.getParameter("manager");
+			String title = request.getParameter("title");
+			String bbsDeadline = request.getParameter("bbsDeadline");
+			String getbbscontent = request.getParameter("getbbscontent");
+			String bbsstart = request.getParameter("getbbsstart");
+			String bbstarget = request.getParameter("getbbstarget");
+			String bbsend = request.getParameter("getbbsend");
+			String getbbsncontent = request.getParameter("getbbsncontent");
+			String bbsnstart = request.getParameter("getbbsnstart");
+			String bbsntarget = request.getParameter("getbbsntarget");
+			// String으로 가져옴.
+			String num = request.getParameter("num");
+			String nnum = request.getParameter("nnum");
+			//numli가 없거나 0일 수 있음!
+			String numli = request.getParameter("numlist");
+			String nnumli = request.getParameter("nnumlist");
+			
+			
+			// 배열로 만들기
+			String[] numlist = numli.split("&");
+			String[] nnumlist = nnumli.split("&");
+			String [] getbbsstart = bbsstart.split("§");
+			String [] getbbstarget = bbstarget.split("§");
+			String[] getbbsend = bbsend.split("§");
+			String[] getbbsnstart = bbsnstart.split("§");
+			String[] getbbsntarget = bbsntarget.split("§");
+			
+			
+		//금주 업무 실적 줄바꿈
+		for(int i=0; i < Integer.parseInt(num); i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
+			for(int j=0; j < Integer.parseInt(numlist[i])-1; j++) { //줄바꿈의 개수만큼
+					getbbsstart[i] += "\r\n"; // 줄바꿈 추가
+					getbbstarget[i] += "\r\n"; // 줄바꿈 추가
+					getbbsend[i] += "\r\n"; // 줄바꿈 추가
+			}
 		}
-		
+			
 		//차주 업무 계획 줄바꿈
-		for(int i=0; i < nnumarray.length; i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
-			for(int j=0; j < Integer.parseInt(nnumarray[i])-1; j++) { //줄바꿈의 개수만큼
-				getbbsnstart[i] += "\r\n"; // 줄바꿈 추가
-				getbbsntarget[i] += "\r\n"; // 줄바꿈 추가
-			} 
-		} 
+		for(int i=0; i < Integer.parseInt(nnum); i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
+				for(int j=0; j < Integer.parseInt(nnumlist[i])-1; j++) { //줄바꿈의 개수만큼
+					getbbsnstart[i] += "\r\n"; // 줄바꿈 추가
+					getbbsntarget[i] += "\r\n"; // 줄바꿈 추가
+				}  
+		}
 
-		// 모두 String으로 변환
-		bbsstart = String.join("\r\n",getbbsstart);
-		bbstarget = String.join("\r\n",getbbstarget);
-		bbsend = String.join("\r\n",getbbsend);
-		
-		bbsnstart = String.join("\r\n",getbbsnstart);
-		bbsntarget = String.join("\r\n",getbbsntarget); 
-		
-		
-		// erp 디버깅 권한신청 처리현황 가져오기
-		String erp_date = request.getParameter("erp_date");
-		String erp_user = request.getParameter("erp_user");
-		String erp_stext = request.getParameter("erp_stext");
-		String erp_authority = request.getParameter("erp_authority");
-		String erp_division = request.getParameter("erp_division");
-		
-		
-		
-	    // 정상적으로 입력이 되었다면 글쓰기 로직을 수행한다
-		BbsDAO bbsDAO = new BbsDAO();
-		UserDAO user = new UserDAO();
+			// 모두 String으로 변환
+			bbsstart = String.join("\r\n",getbbsstart);
+			bbstarget = String.join("\r\n",getbbstarget);
+			bbsend = String.join("\r\n",getbbsend);
+			
+			bbsnstart = String.join("\r\n",getbbsnstart);
+			bbsntarget = String.join("\r\n",getbbsntarget); 
+			
+			
+			// erp 디버깅 권한신청 처리현황 가져오기
+			String erp_date = request.getParameter("erp_date");
+			String erp_user = request.getParameter("erp_user");
+			String erp_stext = request.getParameter("erp_stext");
+			String erp_authority = request.getParameter("erp_authority");
+			String erp_division = request.getParameter("erp_division");
+			
+			
+			
+		 // 정상적으로 입력이 되었다면 글쓰기 로직을 수행한다
+			BbsDAO bbsDAO = new BbsDAO();
+			UserDAO user = new UserDAO();
 		
 		
 		
@@ -180,7 +180,7 @@
 				script.println("</script>");
 				} 
 			}
-		}   
+		}
 		
 	%>
 
@@ -191,8 +191,10 @@
 <%-- <a> <%= bbsstart %> </a>
 <a> <%= bbstarget %> </a>
 <a> <%= bbsend %> </a> --%>
-<a> <%= erp_date %></a><br>
-<a> <%= erp_user %></a><br>
-<a> <%= erp_stext %></a><br>
+<a> <%= num %></a><br>
+<a> <%= numli %></a><br>
+<a> <%= nnum %></a><br>
+<a> <%= nnumli %></a><br>
+<a> <%= getbbscontent %></a><br>
 </body>
 </html>

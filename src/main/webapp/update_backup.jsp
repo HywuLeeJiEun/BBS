@@ -377,7 +377,7 @@
 		
 		<div class="container">
 			<div class="row">
-				<form method="post" action="updateAction.jsp?bbsID=<%= bbsID %>">
+				<form method="post" action="updateAction_backup.jsp?bbsID=<%= bbsID %>">
 					<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
 						<thead>
 							<tr>
@@ -470,19 +470,21 @@
 									<tr>
 									 <td colspan="5" >
 										<%
-										if(id.equals(bbs.getUserID()) || rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-											if(dldate.after(today)){
-												if(bbs.getSign().equals("미승인")) {
+										//if(id.equals(bbs.getUserID()) || rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+										//	if(dldate.after(today)){
+										//		if(bbs.getSign().equals("미승인")) {
 										%>
 											<a onclick="return confirm('해당 게시글을 삭제하시겠습니까?')"
 											href="deleteAction.jsp?bbsID=<%= bbsID %>" class="btn btn-danger pull-left">삭제</a>
 											
 											<input type="button" id="update_sub" style="margin-bottom:5px;" class="btn btn-success pull-right" value="수정">
 											<input type="submit" id="update" style="margin-bottom:5px; display:none;" class="btn btn-success pull-right" value="수정"> 
+											
+											
 										<%
-												}
-											}
-										}
+										//		}
+										//	}
+										//}
 										%>
 									</td>	
 								</tr>
@@ -499,10 +501,10 @@
 							String[] erp_authority = list.get(4).split("\r\n");
 							String[] erp_division = list.get(5).split("\r\n");
 						%>
-				<table>
-					<tbody>
+				<table class="table" id="accountTable" style="margin-bottom:50px">
+					<tbody id="tbody">
 						<tr>
-							<th colspan="2" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+							<th colspan="5" style="background-color: #ccffcc; border:none;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
 						</tr>
 						<tr style="background-color: #FF9933; border: 1px solid">
 							<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"><%= list.get(0) %></textarea></th>
@@ -533,18 +535,18 @@
 						<tr style="margin-top:20%;">
 							 <td colspan="5" style="margin-top:100px" >
 								<%
-								if(id.equals(bbs.getUserID()) || rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-									if(dldate.after(today)){
-										if(bbs.getSign().equals("미승인")) {
+							//	if(id.equals(bbs.getUserID()) || rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								//	if(dldate.after(today)){
+								//		if(bbs.getSign().equals("미승인")) {
 								%>
 									<a onclick="return confirm('해당 게시글을 삭제하시겠습니까?')"
 									href="deleteAction.jsp?bbsID=<%= bbsID %>" class="btn btn-danger pull-left" style="margin-bottom:100px; margin-top:30px">삭제</a>
 									
 									<input type="submit" id="update" style="margin-bottom:100px; margin-top:30px" class="btn btn-success pull-right" value="수정"> 
 								<%
-										}
-									}
-								}
+									//	}
+								//	}
+							//	}
 								%>
 							</td>	
 						</tr>
@@ -620,10 +622,38 @@
 	//수정 버튼을 클릭해 submit 하기
 	// https://embed.plnkr.co/mBfHaFGgDdJnl4Zz8KHL/preview
 	function updateSub() {
-		 var txtBox = document.getElementById("bbsContent");
+		/*  var txtBox = document.getElementById("bbsContent");
 		 var lines = txtBox.value.split("\n");
 		 var ntxtBox = document.getElementById("bbsNContent");
 		 var nlines = ntxtBox.value.split("\n");
+		 
+		 var rp = "";
+			var a = txtBox.value.replaceAll("\r\n","\n").split("\n");
+			for(var i=0; i < a.length; i++) {
+				if(a[i].indexOf('-') > -1) {
+					var y = a[i].replaceAll("\n","");
+					y = y.replaceAll("\n","");
+					rp += y.replace("-","§") + "\n";
+				}else {
+					var y = a[i].replaceAll("\n","");
+					rp += y.replaceAll("\n","") + "\n";
+				}
+			}
+			
+		// 차주
+		var nrp = "";
+		var na = ntxtBox.value.replaceAll("\r\n","\n").split("\n");
+		for(var i=0; i < na.length; i++) {
+			if(na[i].indexOf('-') > -1) {
+				var y = na[i].replaceAll("\n","");
+				y = y.replaceAll("\n","");
+				nrp += y.replace("-","§") + "\n";
+			}else {
+				var y = na[i].replaceAll("\n","");
+				nrp += y.replaceAll("\n","") + "\n";
+			}
+		}
+			
 
 		 // generate HTML version of text
 		 var resultString  = "0";
@@ -648,24 +678,13 @@
 		   }
 		 }
 
-		if(resultString == "0" && nresultString == "0" && !txtBox.value == "" && !ntxtBox.value == ""){ 
+		if(resultString == "0" && nresultString == "0" && !txtBox.value == "" && !ntxtBox.value == ""){  */
 			//alert("조건 충족!"); //즉, 형태를 맞춘 경우 넘어감!
 			// + 완료일 개수 맞추기!
 			//정확한 확인을 위해 특수문자 변경
-			var rp = "";
-			var a = txtBox.value.replaceAll("\r\n","\n").split("\n");
-			for(var i=0; i < a.length; i++) {
-				if(a[i].indexOf('-') > -1) {
-					var y = a[i].replaceAll("\n","");
-					y = y.replaceAll("\n","");
-					rp += y.replace("-","§") + "\n";
-				}else {
-					var y = a[i].replaceAll("\n","");
-					rp += y.replaceAll("\n","") + "\n";
-				}
-			}
+			
 				//txtBox.value.replace("-","§"); 
-			var consize = rp.replaceAll(",","").split("§"); //개수 (줄바꿈으로 세는것이 아닌, 특수문자로!)
+			/* var consize = rp.replaceAll(",","").split("§"); //개수 (줄바꿈으로 세는것이 아닌, 특수문자로!)
 			var start = document.getElementById("bbsEnd").value.trim().split("\n");
 			var startsize = 0;
 			for(var i=0; i < start.length; i++) {
@@ -676,20 +695,8 @@
 				}
 			}
 			
-			// 차주
-			var nrp = "";
-			var na = ntxtBox.value.replaceAll("\r\n","\n").split("\n");
-			for(var i=0; i < na.length; i++) {
-				if(na[i].indexOf('-') > -1) {
-					var y = na[i].replaceAll("\n","");
-					y = y.replaceAll("\n","");
-					nrp += y.replace("-","§") + "\n";
-				}else {
-					var y = na[i].replaceAll("\n","");
-					nrp += y.replaceAll("\n","") + "\n";
-				}
-			}
-				//txtBox.value.replace("-","§"); 
+			
+			//txtBox.value.replace("-","§"); 
 			var nconsize = nrp.replaceAll(",","").split("§"); //개수 (줄바꿈으로 세는것이 아닌, 특수문자로!)
 			var nstart = document.getElementById("bbsNTarget").value.trim().split("\n");
 			var nstartsize = 0;
@@ -707,13 +714,16 @@
 				alert("업무내용 개수에 맞춰, 완료 목표일을 작성하여 주십시오. (차주 업무 계획)");
 			} else {
 				 if(!confirm("주간보고가 수정됩니다. 수정하시겠습니까?")) {
-					
-				}else { //확인시,
+					 alert(rp);
+					alert(startsize);
+					alert(nconsize.length - 1);
+					alert(nstartsize);
+				}else { //확인시, */
 					document.getElementById("update").click();
-				} 
+				/* } 
 			}
 			
-		}
+		} */
 	
 	}
 	/* alert(consize.length - 1);

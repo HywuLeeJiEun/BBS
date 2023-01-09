@@ -48,6 +48,14 @@
 		// 유효한 글이라면 구체적인 정보를 'bbs'라는 인스턴스에 담는다
 		int bbsid = new BbsDAO().getMaxbbs(id);
 		Bbs bbs = new BbsDAO().getBbs(bbsid);
+		
+		if(bbsid == -1){ //유효한 글이 없다면,
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("location.href='main.jsp'");
+			script.println("</script>");
+		}
+		
 		UserDAO userDAO = new UserDAO();
 		
 		String DDline = bbs.getBbsDeadline();
@@ -106,7 +114,7 @@
 	<c:set var="works" value="<%= works %>" />
 	<input type="hidden" id="work" value="<c:out value='${works}'/>">
 	
-    <!-- ************ 상단 네비게이션바 영역 ************* -->
+        <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -132,12 +140,13 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								if(pl !="" || !pl.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -145,16 +154,18 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
+								<li><a href="bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=inbbsID%>">작성</a></li>
 								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
-								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
+								}
 							}
 						%>
 						<%
@@ -350,7 +361,7 @@
 		
 		<div class="container">
 			<div class="row">
-				<form method="post" action="mainAction.jsp" id="main">
+				<form method="post" action="mainAction.jsp" id="main" name="main">
 					<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 						<thead>
 							<tr>
@@ -456,7 +467,7 @@
 						<table class="table" id="accountTable" style="text-align: center; cellpadding:50px; display:none;" >
 							<tbody id="tbody">
 							<tr>
-								<th colspan="2" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+								<th colspan="5" style="background-color: #ccffcc; boreder:none" align="center">ERP 디버깅 권한 신청 처리 현황</th>
 							</tr>
 							<tr style="background-color: #FF9933; border: 1px solid">
 								<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date</th>
@@ -555,7 +566,7 @@
 	            innerHtml += '  </div> </td>';
 	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart'+Number(trCnt)+'" class="form-control" placeholder="접수일" name="bbsStart'+Number(trCnt)+'"  value="'+now+'"></td>';
 	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+Number(trCnt)+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsTarget'+Number(trCnt)+'" ></td>';
-	            innerHtml += '  <td><textarea class="textarea" id="bbsEnd'+Number(trCnt)+'" style="height:45px; resize:none; width:100%; border:none;"  data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다."  placeholder="진행율/완료일" name="bbsEnd'+Number(trCnt)+'" ></textarea></td>'; 
+	            innerHtml += '  <td><textarea class="textarea" id="bbsEnd'+Number(trCnt)+'" style="height:45px; resize:none; width:100%; border:none;"  data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다."  placeholder="진행율\n/완료일" name="bbsEnd'+Number(trCnt)+'" ></textarea></td>'; 
 	            innerHtml += '    <td>';
 	            innerHtml += '<button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button>';
 	            innerHtml += '    </td>';
@@ -693,7 +704,7 @@
 	function addRowAccount() {
 		var trACnt = $("#accountTable tr").length; // 기본을 2로 잡음!
 		console.log(trACnt);
-		if(trACnt <= 6) {//최대 5개까지 증진
+		if(trACnt <= 3) {//최대 5개까지 증진(6)
 		var innerHtml = "";
 		innerHtml += '<tr>';
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px">';
@@ -710,13 +721,18 @@
 		
 		$('#accountTable > tbody:last').append(innerHtml);
 		} else {
-			alert("계정관리 업무는 최대 5개까지 작성 가능합니다.");
+			alert("계정관리 업무는 최대 2개까지 작성 가능합니다.");
 			}
 	};
 	</script>
 	
 	
 	<script>
+	/* document.main.addEventListener("keydown", evt => {
+		if((evt.keyCode || evt.which) === 13) {
+			evt.preventDefault();
+		}
+	}); */
 	// 데이터 보내기 (몇줄을 사용하는지!) <trCnt, trNCnt>
    // $(document).on('click', "#id" ,function(){
 	//$("#save").on('click',function(){

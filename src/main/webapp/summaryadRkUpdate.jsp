@@ -215,7 +215,7 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbsAdmin.jsp">조회</a></li>
+							<li><a href="bbsAdmin.jsp">조회</a></li>
 							<!-- <li><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
 							<li><a href="signOn.jsp">승인(제출)</a></li> -->
@@ -631,7 +631,7 @@
 				<table class="table" id="accountTable" style="text-align: center; cellpadding:50px; display:none;" >
 					<tbody id="tbody">
 					<tr>
-						<th colspan="5" style="background-color: #ccffcc; border:none" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+						<th colspan="5" style="background-color: #ccffcc; border:none" align="center" data-toggle="tooltip" title="해당 데이터는 수정이 불가합니다!">ERP 디버깅 권한 신청 처리 현황</th>
 					</tr>
 					<tr style="background-color: #FF9933; border: 1px solid">
 						<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date</th>
@@ -645,16 +645,16 @@
 						%>
 					<tr>
 						<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
-						  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_date.length %></textarea>
-						  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_date[i] %></textarea></td>
+						  <textarea class="textarea" readonly style="display:none" name="erp_size"><%= erp_date.length %></textarea>
+						  <textarea class="textarea"  readonly id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_date[i] %></textarea></td>
 					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp_user[i] %></textarea></td>
+						  <textarea class="textarea"  readonly id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp_user[i] %></textarea></td>
 					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp_stext[i] %></textarea></td>
+						  <textarea class="textarea"  readonly id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp_stext[i] %></textarea></td>
 					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_authority[i] %></textarea></td>
+						  <textarea class="textarea"  readonly id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_authority[i] %></textarea></td>
 					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_division[i] %></textarea></td>
+						  <textarea class="textarea"  readonly id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_division[i] %></textarea></td>
 					</tr>
 					<%
 						}

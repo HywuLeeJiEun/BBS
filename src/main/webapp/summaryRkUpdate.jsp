@@ -216,12 +216,13 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								if(pl !="" || !pl.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -229,16 +230,18 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li ><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
+								<li><a href="bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
 								<li class="active"><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
-								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
+								}
 							}
 						%>
 						<%
@@ -593,7 +596,7 @@
 				<table style="margin-bottom:50px;">
 					<tbody>
 						<tr>
-							<th colspan="2" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+							<th colspan="5" style="background-color: #ccffcc; border:none" align="center" data-toggle="tooltip" title="해당 데이터는 수정이 불가합니다!">ERP 디버깅 권한 신청 처리 현황</th>
 						</tr>
 						<tr style="background-color: #FF9933; border: 1px solid">
 							<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"><%= list.get(0) %></textarea></th>
@@ -639,7 +642,7 @@
 			<%-- <div style="display:inline-block">
 				<button class="btn btn-default btn-lg glyphicon glyphicon-chevron-right" type="button" style=" margin-left:40%; " data-toggle="tooltip" title="<%= nextweek %>" onclick="location.href='lastWeekRk.jsp?week=<%= week %>'"></button>
 			</div> --%>
-				<button type="button" class="btn btn-primary pull-left" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="location.href='summaryUpdateDelete.jsp'">목록</button> 
+				<button type="button" class="btn btn-primary pull-right" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="location.href='summaryUpdateDelete.jsp'">목록</button> 
 			<%
 			if(sign.equals("미승인")) {
 				if(sumad_id == null || sumad_id.isEmpty()) { //sumad가 생기면, 삭제가 불가함!

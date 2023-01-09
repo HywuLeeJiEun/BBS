@@ -128,7 +128,7 @@
 		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 		
-		String str = "제출일에 맞는 최종 요약본을 <br>";
+		String str = "작성된 [ERP/WEB] 요약본을 <br>";
 		str += "확인할 수 있습니다.";
 	%>
 
@@ -158,7 +158,7 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbsAdmin.jsp">조회</a></li>
+							<li><a href="bbsAdmin.jsp">조회</a></li>
 							<!-- <li><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
 							<li><a href="signOn.jsp">승인(제출)</a></li> -->
@@ -376,14 +376,12 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center;" data-toggle="tooltip" data-html="true" data-placement="bottom" title="<%= str %>">요약본 조회
+					<th colspan="5" style=" text-align: center;" data-toggle="tooltip" data-html="true" data-placement="bottom" title="<%= str %>">[ERP/WEB] 요약본 조회
 					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
 				</tr>
 			</thead>
 		</table>
 	</div>
-	
-	
 	
 	<!-- 게시판 메인 페이지 영역 시작 -->
 	<div class="container">
@@ -401,6 +399,7 @@
 				</thead>
 				<tbody>
 					<%
+					if(sumad.size() != 0) {
 						for(int i = 0; i < sumad.size(); i++){
 							
 							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
@@ -443,6 +442,15 @@
 					</tr>
 					<%
 						}
+					} else {
+					%>
+						<tr valign="top" style="height:100px; border:none">
+						</tr>
+						<tr valign="bottom" style="height:120px; border:none" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= bbsDeadline %>,<br>해당 날짜로 작성된 요약본이<br>없습니다.">
+							<th colspan="6" style=" text-align: center; color:black  ; border:none">작성된 요약본 목록이 없습니다. <br><br><br><br></th>
+						</tr>
+					<%
+					}
 					%>
 				</tbody>
 			</table>
@@ -462,7 +470,7 @@
 				}
 			%>
 			<%-- <a href="ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> 요약 pptx</a> --%>
-			<a href="bbsRkwrite.jsp" style="width:50px;" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> 작성 </a>
+			<a href="summaryadAdmin.jsp" style="width:50px;" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="[ERP/WEB] 요약본 작성" id="summary"> 작성 </a>
 		</div>
 	</div>
 	

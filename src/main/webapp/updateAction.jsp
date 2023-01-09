@@ -238,10 +238,11 @@
 		}
 		}
 		
+		
 		//만약, ERP 디버깅 데이터가  들어왔다면
 		int trACnt = 0;
 		if(!request.getParameter("trACnt").isEmpty() && !request.getParameter("trACnt").equals("undefined")) {
-			trACnt = Integer.parseInt(request.getParameter("trACnt")); //최대 1
+			trACnt = Integer.parseInt(request.getParameter("trACnt"));
 		}
 		String erp_date = "";
 		String erp_user = "";
@@ -266,12 +267,13 @@
 		String numlist = String.join("&",numli);
 		String nnumlist = String.join("&",nnumli);
 		
-		
 	%>
-
-	<a> <%= bbsncontent.size() %></a><br>
-	<a> <%= trNCnt %></a><br>
-		<form id="post_item" method="post" action="mainActionComplete.jsp">
+	<a> <%= trACnt %></a><br>	
+	<a> <%= trCnt %></a><br>	
+	<a> <%= trNCnt %></a><br>	
+	<a> <%= erp_date %></a><br>
+	
+		<form id="post_item" method="post" action="updateActionComplete.jsp">
 			<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 				<tbody id="tbody">
 					<tr id="tr">
@@ -352,9 +354,11 @@
 	
 	function addRow() {
 		$('#post_item').submit();
-	}  
+	}     
 	</script> 
 
-
+	 
+	 <a> <%= b %> </a>
+	 <a> <%= trNCnt %> </a> 
 </body>
 </html>

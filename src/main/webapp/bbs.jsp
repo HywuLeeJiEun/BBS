@@ -102,7 +102,7 @@
 	%>
 	
 		
-	   <!-- ************ 상단 네비게이션바 영역 ************* -->
+	      <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -128,12 +128,13 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								if(pl !="" || !pl.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -141,16 +142,18 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
+								<li><a href="bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
 								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
-								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
+								}
 							}
 						%>
 						<%
@@ -381,7 +384,7 @@
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
-						<th style="background-color: #eeeeee; text-align: center;">승인</th>
+						<th style="background-color: #eeeeee; text-align: center;">상태</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -419,9 +422,11 @@
 						<%
 						String sign = null;
 						if(dldate.after(today) && list.get(i).getSign().equals("승인")) { //현재 날짜가 마감일을 아직 넘지 않으면,
-							sign = list.get(i).getSign();
+							//sign = list.get(i).getSign();
+							sign="제출";
 						} else if(dldate.after(today) && list.get(i).getSign().equals("미승인")) {
-							sign = list.get(i).getSign();
+							//sign = list.get(i).getSign();
+							sign="미제출";
 						}else { // 미승인, 마감 상태일 경우엔 하단 진행.
 							sign="마감";
 							// 데이터베이스에 마감처리 진행

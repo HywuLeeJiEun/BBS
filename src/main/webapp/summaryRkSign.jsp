@@ -140,8 +140,8 @@
 		if(list.size() == 0) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('제출된 주간보고가 없습니다.')");
-			script.println("history.back();");
+			script.println("alert('제출된 요약본이 없습니다.')");
+			//script.println("history.back();");
 			script.println("</script>");
 		}
 		
@@ -225,12 +225,13 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								if(pl !="" || !pl.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -238,16 +239,18 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
+								<li><a href="bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
 								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
-								<li class="active" id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
+								<li class="active" id="summary_nav"><a href="summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
+								}
 							}
 						%>
 						<%
@@ -440,7 +443,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center;" data-toggle="tooltip" data-html="true" data-placement="bottom" title="<%= str %>"> 요약본 출력 
+					<th colspan="5" style=" text-align: center;" data-toggle="tooltip" data-html="true" data-placement="bottom" title="<%= str %>"> [ERP/WEB] 요약본 출력 
 					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
 				</tr>
 			</thead>
@@ -460,12 +463,13 @@
 						<th style="background-color: #eeeeee; text-align: center; text-align: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;요약본 상세정보</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
-						<th style="background-color: #eeeeee; text-align: center;">승인</th>
-						<th style="background-color: #eeeeee; text-align: center;">출력(pptx)</th>
+						<th style="background-color: #eeeeee; text-align: center;">상태</th>
+						<th style="background-color: #eeeeee; text-align: center;">pptx</th>
 					</tr>
 				</thead>
 				<tbody>
 					<%
+					if(sumlist.size() != 0) {
 						for(int i = 0; i < sumlist.size(); i++){
 							
 							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
@@ -503,15 +507,42 @@
 							// 데이터베이스에 마감처리 진행
 							int a = bbsDAO.sumadSign(Integer.parseInt(sumlist.get(i).getSumad_id()));
 						}
+						
+						//색상 정의
+						String e_state = "";
+						String w_state = "";
+						if(sumlist.get(i).getE_state().equals("완료")) {
+							e_state = "#00ff00";
+						} else if(sumlist.get(i).getE_state().equals("진행중")){
+							e_state = "#ffff00";
+						} else {
+							e_state = "#ff0000";
+						}
+						if(sumlist.get(i).getW_state().equals("완료")) {
+							w_state = "#00ff00";
+						} else if(sumlist.get(i).getW_state().equals("진행중")){
+							w_state = "#ffff00";
+						} else {
+							w_state = "#ff0000";
+						}
 						%>
 						<%= sign %>
 						</td>
 						<td>
-							<button class="btn btn-success" id="<%= sumlist.get(i).getSumad_id() %>" style="font-size:12px" onclick="location.href='pptPl.jsp?sumad_id=<%= sumlist.get(i).getSumad_id() %>'"> 출력 </button>
+							<button class="btn btn-success" id="<%= sumlist.get(i).getSumad_id() %>" style="font-size:12px" onclick="location.href='pptAdmin.jsp?bbsDeadline=<%= sumlist.get(i).getBbsDeadline() %>&e_state=<%= e_state %>&w_state=<%= w_state %>'"> 출력 </button>
 						</td>
 					</tr>
 					<%
 						}
+					} else {
+					%>
+						<tr valign="top" style="height:100px; border:none">
+						</tr>
+						<tr valign="bottom" style="height:120px; border:none" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= bbsDeadline %>,<br>해당 날짜로 제출된 요약본이<br>없습니다.<br>관리자에게 문의바랍니다.">
+							<th colspan="6" style=" text-align: center; color:black  ; border:none">승인 및 마감된 요약본 목록이 없습니다. <br><br><br><br></th>
+						</tr>
+					<%
+					}
 					%>
 				</tbody>
 			</table>
@@ -531,7 +562,7 @@
 				}
 			%>
 			<%-- <a href="ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> 요약 pptx</a> --%>
-			<a href="summaryRk.jsp" style="width:90px;" class="btn btn-primary pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="<%= pl %> Summary 조회"> <%= pl %> 목록 </a>
+			<%-- <a href="summaryRk.jsp" style="width:90px;" class="btn btn-primary pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="<%= pl %> Summary 조회"> <%= pl %> 목록 </a>  --%>
 			<a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>" style="width:100px; margin-right:20px; display:none" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> Summary</a>
 		</div>
 	</div>
@@ -633,6 +664,7 @@
 		}
 	});
 	</script>
+
 	
 </body>
 </html>

@@ -1,3 +1,5 @@
+<%@page import="java.util.ArrayList"%>
+<%@page import="bbs.BbsDAO"%>
 <%@page import="java.io.OutputStream"%>
 <%@page import="net.sf.jasperreports.swing.JRViewer"%>
 <%@page import="javax.swing.JFrame"%>
@@ -42,6 +44,11 @@
 	String e_state = request.getParameter("ecolor");//"#ff0000";
 	String w_state = request.getParameter("wcolor");//"#ffff00";
 	
+	// erp_bbs가 있다면, 데이터를 저장함!
+	BbsDAO bbsDAO = new BbsDAO();
+	ArrayList<String> list = bbsDAO.geterpid(bbsDeadline);
+	//데이터가 여러개 있다면 쪼개어 저장함
+
 	
 	String templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\SummaryAD.jrxml";
 	//String templatePath = "D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
@@ -67,7 +74,54 @@
 	 paramMap.put("logo",logo);
 	 paramMap.put("e_state",e_state);
 	 paramMap.put("w_state",w_state);
-	
+	 
+	 //erp 데이터를 저장함
+	 String a = "erp_date";
+	 String b = "erp_user";
+	 String c = "erp_stext";
+	 String d = "erp_authority";
+	 String e = "erp_division";
+	 
+	 if(list.size() != 0) {
+			String[] erp_date = list.get(1).split("\r\n");
+			String[] erp_user = list.get(2).split("\r\n");
+			String[] erp_stext = list.get(3).split("\r\n");
+			String[] erp_authority = list.get(4).split("\r\n");
+			String[] erp_division = list.get(5).split("\r\n");
+		 
+		 if (erp_date.length == 1) { //만약, 데이터가 1개라면
+			 paramMap.put(a+0,erp_date[0]);	  
+			 paramMap.put(b+0,erp_user[0]);	  
+			 paramMap.put(c+0,erp_stext[0]);	  
+			 paramMap.put(d+0,erp_authority[0]);  
+			 paramMap.put(e+0,erp_division[0]);	 
+			 paramMap.put(a+1," ");	  
+			 paramMap.put(b+1," ");	  
+			 paramMap.put(c+1," ");	  
+			 paramMap.put(d+1," ");  
+			 paramMap.put(e+1," ");	
+		 } else {
+			 for(int i=0; i < erp_date.length; i++) {
+				 paramMap.put(a+i,erp_date[i]);	  
+				 paramMap.put(b+i,erp_user[i]);	  
+				 paramMap.put(c+i,erp_stext[i]);	  
+				 paramMap.put(d+i,erp_authority[i]);  
+				 paramMap.put(e+i,erp_division[i]);	  
+			 }
+		 }
+	 } else { //만약, erp 데이터가 없다면!
+		 paramMap.put(a+0," ");	  
+		 paramMap.put(b+0," ");	  
+		 paramMap.put(c+0," ");	  
+		 paramMap.put(d+0," ");  
+		 paramMap.put(e+0," ");	 
+		 paramMap.put(a+1," ");	  
+		 paramMap.put(b+1," ");	  
+		 paramMap.put(c+1," ");	  
+		 paramMap.put(d+1," ");  
+		 paramMap.put(e+1," ");	
+	 }
+	 
 	 // (3)데이타소스 생성
 	 Class.forName("org.mariadb.jdbc.Driver");
 	 conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bbs", "root","7471350");
@@ -120,8 +174,9 @@
 		os.write(b,0,length);
 	}
 	
-	os.flush(); 
+	os.flush();  
 %>
 
+<%= list.size() %>
 </body>
 </html>

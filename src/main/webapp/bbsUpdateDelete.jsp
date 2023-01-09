@@ -95,10 +95,20 @@
 				//bbsID를 통한 작성 기능 제공
 				ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
 				String inbbsID = String.join(",",AllbbsID);
+				
+				//미승인 -> 미제출로 변경
+				String[] sign = new String[list.size()];
+				for(int i=0; i < list.size(); i++) {
+					if(list.get(i).getSign().equals("미승인")) {
+						sign[i] = "미제출";
+					} else {
+						sign[i] = list.get(i).getSign();						
+					}
+				}
 		
 	%>	
 	
-	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	    <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -124,12 +134,13 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								if(pl !="" || !pl.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -137,16 +148,18 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
+								<li><a href="bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=inbbsID%>">작성</a></li>
 								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
-								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
+								}
 							}
 						%>
 						<%
@@ -346,7 +359,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; " data-toggle="tooltip" data-html="true" data-placement="bottom" title="'미승인'된 주간보고를 <br>수정/삭제/승인할 수 있습니다.">주간보고 수정 및 승인
+					<th colspan="5" style=" text-align: center; " data-toggle="tooltip" data-html="true" data-placement="bottom" title="'미제출'된 주간보고를 <br>수정/삭제/제출할 수 있습니다.">주간보고 수정 및 제출
 					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
 				</tr>
 			</thead>
@@ -358,7 +371,7 @@
 				<tr valign="top" style="height:150px">
 				</tr>
 				<tr valign="bottom" style="height:150px">
-					<th colspan="5" style=" text-align: center; color:black ">미승인된 보고 목록이 없습니다. <br><br><br><br></th>
+					<th colspan="5" style=" text-align: center; color:black ">미승인된 주간보고가 없습니다. <br><br><br><br></th>
 				</tr>
 
 			</thead>
@@ -376,7 +389,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; " data-toggle="tooltip" data-html="true" data-placement="bottom" title="'미승인'된 주간보고를 <br>수정/삭제/승인할 수 있습니다.">주간보고 수정 및 승인
+					<th colspan="5" style=" text-align: center; " data-toggle="tooltip" data-html="true" data-placement="bottom" title="'미승인'된 주간보고를 <br>수정/삭제/승인할 수 있습니다.">주간보고 수정 및 제출
 					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
 				</tr>
 			</thead>
@@ -397,7 +410,7 @@
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
-						<th style="background-color: #eeeeee; text-align: center;">승인</th>
+						<th style="background-color: #eeeeee; text-align: center;">상태</th>
 						<th style="background-color: #eeeeee; text-align: center;">처리</th>
 					</tr>
 				</thead>
@@ -430,9 +443,9 @@
 							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
 						<td><%= list.get(i).getBbsUpdate() %></td>
 						<!-- 승인/미승인/마감 표시 -->
-						<td><%= list.get(i).getSign() %></td>
-						<td data-toggle="tooltip" data-html="true" data-placement="right" title="승인 시, <br>제출이 확정됩니다.">
-							<button class="btn btn-success" style="font-size:12px" onclick="location.href='signOnAction.jsp?bbsID=<%= list.get(i).getBbsID() %>&bbsDeadline=<%= list.get(i).getBbsDeadline() %>'"> 승인 </button>
+						<td><%= sign[i] %></td>
+						<td data-toggle="tooltip" data-html="true" data-placement="right" title="제출시, <br>수정 및 삭제가 불가합니다.">
+							<button class="btn btn-success" style="font-size:12px" onclick="location.href='signOnAction.jsp?bbsID=<%= list.get(i).getBbsID() %>&bbsDeadline=<%= list.get(i).getBbsDeadline() %>'"> 제출 </button>
 						</td>
 					</tr>
 					<%

@@ -124,6 +124,8 @@
 		
 		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
 		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist);
+		//제출자 확인을 위한 리스트
+		ArrayList<Bbs> fulllist = bbsDAO.getListfull(bbsDeadline, pllist);
 		
 		if(work.equals("") || work == null) {
 			PrintWriter script = response.getWriter();
@@ -137,13 +139,13 @@
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('제출된 주간보고가 없습니다.')");
-			script.println("history.back();");
+			//script.println("history.back();");
 			script.println("</script>");
 		}
 		
 		// 미제출자 인원 계산
 		int psize = plist.size();
-		int lsize = list.size();
+		int lsize = fulllist.size();
 		int noSub =  psize - lsize;
 		
 		//해당 인원 전원 불러오기
@@ -164,9 +166,9 @@
 		// 넘기기 위한 bbsID
 		ArrayList<String> bbsId = new ArrayList<String>();
 		//제출한 bbsID 찾기
-		for(int i=0; i<list.size(); i++) {
-			Subname.add(list.get(i).getUserID()); //제출한 user id 도출.
-			bbsId.add(Integer.toString(list.get(i).getBbsID()));
+		for(int i=0; i<fulllist.size(); i++) {
+			Subname.add(fulllist.get(i).getUserID()); //제출한 user id 도출. (일반 list(10개 제한이 걸림)가 아닌, 모든 제출자를 확인해야함!)
+			bbsId.add(Integer.toString(fulllist.get(i).getBbsID()));
 		}
 		for(int i=0; i<Subname.size(); i++) {
 			plist.remove(Subname.get(i));
@@ -189,7 +191,7 @@
 	%>
 	
 		
-	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	    <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -215,12 +217,13 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								if(pl !="" || !pl.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -228,16 +231,18 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li class="active"><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
+								<li class="active"><a href="bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
 								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
-								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
+								}
 							}
 						%>
 						<%
@@ -443,7 +448,9 @@
 			 	<td id="plist">업무 담당자 인원 : <span style="color:blue; text-decoration:underline"><%= psize %></span></td>
 			 </tr> 
 			 <tr>
+			 	<% if(noSub != 0)  {%>
 			 	<td id="noSublist">미제출자 인원 : <span style="color:blue; text-decoration:underline"><%= noSub %></span></td>
+			 	<% } %>
 			 </tr> 
 			 <%-- <tr>
 			 	<td>업무 담당자 인원 : <%= plist.size() %></td>
@@ -468,6 +475,34 @@
 	 </div>
 	<br>
 	
+	
+	<%
+	if(list.isEmpty()) {
+		/* PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('모든 보고가 승인(또는 마감)처리 되었습니다.')");
+		script.println("location.href='bbs.jsp'");
+		script.println("history.back()");
+		script.println("</script>"); */
+	%>
+	<div class="container">
+		<table class="table" style="text-align: center; cellpadding:50px;" >
+			<thead>
+				<tr valign="top" style="height:150px">
+				</tr>
+				<tr valign="bottom" style="height:150px">
+					<%-- <th colspan="5" style=" text-align: center; color:black "><%= bbsDeadline %> <br><br><br><br></th> --%>
+					<th colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-placement="bottom" title="<%= bbsDeadline %>" >해당 제출일로 제출된 주간보고가 없습니다. <br><br><br><br></th>
+				</tr>
+
+			</thead>
+		</table>
+		<button style="margin:5px" class="btn btn-primary pull-right" onclick="location.href='bbs.jsp'">목록</button>
+	</div>
+	
+	<% 
+	} else {
+	%>
 	
 	<!-- 게시판 메인 페이지 영역 시작 -->
 	<div class="container">
@@ -548,11 +583,19 @@
 			<%
 				}
 			%>
+			<% if(pl.equals("ERP")) {%>
 			<a href="ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> pptx</a>
+			<% }  %>
+			<% if(pl.equals("WEB")) {%>
+			<a href="ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> pptx</a>
+			<% }  %>
 			<a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>" style="width:100px; margin-right:20px" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> Summary</a>
 		</div>
 	</div>
 	
+	<%
+	}
+	%>
 	
 	
 	<!-- 게시판 메인 페이지 영역 끝 -->

@@ -113,16 +113,20 @@
 		// 맨앞 -를 다른 문자로 치환하기
 		String rp = "";
 		for(int i=0; i<content.length; i++) {
-			if(content[i].substring(0).indexOf("-") > -1){ //맨 앞이 -라면,
-				String a = content[i].replaceAll("\r\n","");
-				a = a.replaceAll("\r\n","");
-				rp += a.replaceFirst("-","§") + "\r\n";
+			if(content[i].substring(0).indexOf("-") > -1 && content[i].substring(0).indexOf("-") < 2){ //맨 앞이 -라면,
+				String a = content[i].replaceAll("\r\n","¿");
+				a = a.replaceAll("\r\n","¿");
+				rp += a.replaceFirst("-","§") + "¿";
 			} else {
-				String a = content[i].replaceAll("\r\n","");
-				rp += a.replaceAll("\r\n","") +"\r\n"; // 해당 rp에 § 저장된다! 
+				String a = content[i].replaceAll("\r\n","¿");
+				rp += a.replaceAll("\r\n","") +"¿"; // 해당 rp에 § 저장된다! 
 			}
 		}  
 		String[] ccontent = rp.split("§");
+		for(int i=0; i< ccontent.length; i++) {
+			String del = ccontent[i];
+			ccontent[i] = del.replaceFirst(".$","").replaceAll("¿","\r\n");
+		}
 		//공백제거
 		ArrayList<String> arc = new ArrayList<String>();
 		Collections.addAll(arc, ccontent);
@@ -132,10 +136,10 @@
 		//end 합치기
 		String en ="";
 		for(int i=0; i<list.size(); i++) { 
-			en += list.get(i).getBbsEnd().replace("\r\n","§");
+			en += list.get(i).getBbsEnd() + "\r\n";
 		}
 		// end 자르기
-		String[] end = en.split("§");
+		String[] end = en.split("\r\n");
 		//공백 제거
 		ArrayList<String> arr = new ArrayList<String>();
 		Collections.addAll(arr, end);
@@ -155,16 +159,20 @@
 		// 맨앞 -를 다른 문자로 치환하기
 		String nrp = "";
 		for(int i=0; i< ncontent.length; i++) {
-			if(ncontent[i].substring(0).indexOf("-") > -1){ //맨 앞이 -라면,
-				String a = ncontent[i].replaceAll("\r\n","");
+			if(ncontent[i].substring(0).indexOf("-") > -1 && ncontent[i].substring(0).indexOf("-") < 2){ //맨 앞이 -라면,
+				String a = ncontent[i].replaceAll("\r\n","¿");
 				a = a.replaceAll("\r\n","");
-				nrp += a.replaceFirst("-","§") + "\r\n";
+				nrp += a.replaceFirst("-","§") + "¿";
 			} else {
-				String a = ncontent[i].replaceAll("\r\n","");
-				nrp += a.replaceAll("\r\n","") +"\r\n"; // 해당 rp에 § 저장된다! 
+				String a = ncontent[i].replaceAll("\r\n","¿");
+				nrp += a.replaceAll("\r\n","") +"¿"; // 해당 rp에 § 저장된다! 
 			}
 		}  
 		String[] nccontent = nrp.split("§");
+		for(int i=0; i < nccontent.length; i++) {
+			String del = nccontent[i];
+			nccontent[i] = del.replaceFirst(".$","").replaceAll("¿","\r\n");
+		}
 		//공백제거
 		ArrayList<String> narc = new ArrayList<String>();
 		Collections.addAll(narc, nccontent);
@@ -174,10 +182,10 @@
 		//NTarget 합치기
 		String nen ="";
 		for(int i=0; i<list.size(); i++) { 
-			nen += list.get(i).getBbsNTarget().replace("\r\n","§");
+			nen += list.get(i).getBbsNTarget() + "\r\n";
 		}
 		// end 자르기
-		String[] ntarget = nen.split("§");
+		String[] ntarget = nen.split( "\r\n");
 		//공백 제거
 		ArrayList<String> narr = new ArrayList<String>();
 		Collections.addAll(narr, ntarget);
@@ -240,9 +248,8 @@
 		
 		
 	%>
-	
-	
-	  <!-- ************ 상단 네비게이션바 영역 ************* -->
+
+ <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -268,12 +275,13 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								if(work !="" || !work.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -281,16 +289,18 @@
 								aria-expanded="false"><%= work %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp"><%= work %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= work %></h5></li>
+								<li><a href="bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= work %> Summary</h5></li>
 								<li><a href="summaryRk.jsp">조회</a></li>
-								<li class="active" id="summary_nav"><a href="#">작성</a></li>
+								<li class="active" id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
 								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
-								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
+								}
 							}
 						%>
 						<%
@@ -571,7 +581,7 @@
 		</form>
 		<a type="button" style="width:50px" class="btn btn-primary pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="선택된 내용으로 요약본 생성" id="save" >선택</a>
 	</div>
-	<br><br><br>
+	<br><br><br> 
 	
 	
 	<!-- 부트스트랩 참조 영역 -->

@@ -1,5 +1,7 @@
-<%@page import="java.time.format.DateTimeFormatter"%>
+<%@page import="java.util.Arrays"%>
+<%@page import="java.util.Collections"%>
 <%@page import="java.time.LocalDate"%>
+<%@page import="java.time.format.DateTimeFormatter"%>
 <%@page import="user.User"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.stream.Collectors"%>
@@ -45,11 +47,36 @@
 			script.println("</script>");
 		}
 		
-		// ********** 담당자를 가져오기 위한 메소드 *********** 
-		String workSet;
+		// 유효한 글이라면 구체적인 정보를 'bbs'라는 인스턴스에 담는다
+		int bbsid = new BbsDAO().getMaxbbs(id);
+		Bbs bbs = new BbsDAO().getBbs(bbsid);
+		
+		if(bbsid == -1){ //유효한 글이 없다면,
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("location.href='main.jsp'");
+			script.println("</script>");
+		}
 		
 		UserDAO userDAO = new UserDAO();
+		BbsDAO bbsDAO = new BbsDAO();
+		
+		String DDline = bbs.getBbsDeadline();
+		//String DDline = "2022-12-19";
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		LocalDate date = LocalDate.parse(DDline, formatter);
+		date = date.plusWeeks(1); //일주일을 더하는 것.
+		
+		//현재날짜 구하기
+		LocalDate nowdate = LocalDate.now();
+		String now = nowdate.format(formatter);
+		
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+		String workSet ="";
+		
 		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
 		List<String> works = new ArrayList<String>();
 		
@@ -70,6 +97,9 @@
 		
 		String name = userDAO.getName(id);
 		
+		//erp 자료 가져오기
+		ArrayList<String> list = bbsDAO.geterpbbs(bbs.getBbsID());
+		
 		// 사용자 정보 담기
 		User user = userDAO.getUser(name);
 		String password = user.getPassword();
@@ -81,14 +111,191 @@
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 		
 		//bbsID를 통한 작성 기능 제공
-		BbsDAO bbsDAO = new BbsDAO();
 		ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
 		String inbbsID = String.join(",",AllbbsID);
 		
-		//현재날짜 구하기
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		LocalDate nowdate = LocalDate.now();
-		String now = nowdate.format(formatter);
+		
+		//데이터를 쪼개어 생성함!
+		//금주 업무 실적 - 업무내용
+		//1. 특수문자로 변환하여 스트링 만들기
+		String rp = "";
+		String[] a = bbs.getBbsContent().split("\r\n");
+		for(int i=0; i < a.length; i++) {
+			if(a[i].substring(0).indexOf('-') > -1 && a[i].substring(0).indexOf('-') < 2) {
+				String y = a[i].replaceAll("\r\n","¿");
+				y = y.replaceAll("\r\n","¿");
+				rp += y.replaceFirst("-","§") + "¿";
+			}else {
+				String y = a[i].replaceAll("\r\n","¿");
+				rp += y.replaceAll("\r\n","") + "¿";
+			}
+		}
+		//2. 가공
+		// 2-1. 공백 제거 (빈 배열 제거)
+		String[] con = rp.split("§");
+		for(int i=0; i<con.length; i++) {
+			String del = con[i];
+			con[i] = del.replaceFirst(".$","");
+			con[i] = del.replaceFirst(".$","").replaceAll("¿","\r\n");
+		}
+		ArrayList<String> acon = new ArrayList<String>();
+		Collections.addAll(acon, con);
+		acon.removeAll(Arrays.asList("",null));
+		String[] content = acon.toArray(new String [acon.size()]);
+		// 2-2. 맨앞 '-' 추가
+		String[] bbscontent = new String[content.length];
+		for(int i=0; i < content.length; i++) {
+			bbscontent[i] = "-" + content[i];
+		}
+		
+		
+		//금주 업무 실적 - 접수일
+		//1. 특수문자로 변환하여 스트링 만들기
+		String srp = "";
+		String[] sa = bbs.getBbsStart().split("\r\n");
+		for(int i=0; i < sa.length; i++) {
+				String y = sa[i].replaceAll("\r\n","");
+				srp += y.replaceAll("\r\n","") + "\r\n";
+		}
+		//2. 가공
+		// 2-1. 공백 제거 (빈 배열 제거)
+		String[] sta = srp.split("\r\n");
+		ArrayList<String> star = new ArrayList<String>();
+		Collections.addAll(star, sta);
+		star.removeAll(Arrays.asList("",null));
+		String[] bbsstart = star.toArray(new String [star.size()]);
+		
+		
+		//금주 업무 실적 - 완료목표일
+		//1. 특수문자로 변환하여 스트링 만들기
+		String trp = "";
+		String[] ta = bbs.getBbsTarget().split("\r\n");
+		for(int i=0; i < ta.length; i++) {
+				String y = ta[i].replaceAll("\r\n","");
+				trp += y.replaceAll("\r\n","") + "\r\n";
+		}
+		//2. 가공
+		// 2-1. 공백 제거 (빈 배열 제거)
+		String[] tar = trp.split("\r\n");
+		ArrayList<String> targ = new ArrayList<String>();
+		Collections.addAll(targ, tar);
+		targ.removeAll(Arrays.asList("",null));
+		String[] bbstarget = targ.toArray(new String [targ.size()]);
+		
+		
+		//금주 업무 실적 - 진행율,완료일
+		//1. 특수문자로 변환하여 스트링 만들기
+		String erp = "";
+		String[] ea = bbs.getBbsEnd().split("\r\n");
+		for(int i=0; i < ea.length; i++) {
+				String y = ea[i].replaceAll("\r\n","");
+				erp += y.replaceAll("\r\n","") + "\r\n";
+		}
+		//2. 가공
+		// 2-1. 공백 제거 (빈 배열 제거)
+		String[] en = erp.split("\r\n");
+		ArrayList<String> end = new ArrayList<String>();
+		Collections.addAll(end, en);
+		end.removeAll(Arrays.asList("",null));
+		String[] ends = end.toArray(new String [end.size()]);
+		// 2-2. 맨앞 '-' 추가
+		String[] bbsend = new String[ends.length];
+		for(int i=0; i < ends.length; i++) {
+			bbsend[i] = ends[i];
+		}
+		
+		
+		//차주 업무 계획 - 업무 내용
+		//1. 특수문자로 변환하여 스트링 만들기
+		String nrp = "";
+		String[] na = bbs.getBbsNContent().split("\r\n");
+		for(int i=0; i < na.length; i++) {
+			if(na[i].substring(0).indexOf('-') > -1 && na[i].substring(0).indexOf('-') < 2) {
+				String y = na[i].replaceAll("\r\n","¿");
+				y = y.replaceAll("\r\n","¿");
+				nrp += y.replaceFirst("-","§") + "¿";
+			}else {
+				String y = na[i].replaceAll("\r\n","¿");
+				nrp += y.replaceAll("\r\n","") + "¿";
+			}
+		}
+		//2. 가공
+		// 2-1. 공백 제거 (빈 배열 제거)
+		String[] ncon = nrp.split("§");
+		for(int i=0; i<ncon.length; i++) {
+			String del = ncon[i];
+			ncon[i] = del.replaceFirst(".$","").replaceAll("¿","\r\n");
+		}
+		ArrayList<String> nacon = new ArrayList<String>();
+		Collections.addAll(nacon, ncon);
+		nacon.removeAll(Arrays.asList("",null));
+		String[] ncontent = nacon.toArray(new String [nacon.size()]);
+		// 2-2. 맨앞 '-' 추가
+		String[] bbsncontent = new String[ncontent.length];
+		for(int i=0; i < ncontent.length; i++) {
+			bbsncontent[i] = "-" + ncontent[i];
+		}
+		
+		
+		//차주 업무 계획 - 접수일
+		//1. 특수문자로 변환하여 스트링 만들기
+		String nsrp = "";
+		String[] nsa = bbs.getBbsNStart().split("\r\n");
+		for(int i=0; i < nsa.length; i++) {
+				String y = nsa[i].replaceAll("\r\n","");
+				nsrp += y.replaceAll("\r\n","") + "\r\n";
+		}
+		//2. 가공
+		// 2-1. 공백 제거 (빈 배열 제거)
+		String[] nsta = nsrp.split("\r\n");
+		ArrayList<String> nstar = new ArrayList<String>();
+		Collections.addAll(nstar, nsta);
+		nstar.removeAll(Arrays.asList("",null));
+		String[] bbsnstart = nstar.toArray(new String [nstar.size()]);
+
+		
+		
+		//차주 업무 계획 - 완료 목표일
+		//1. 특수문자로 변환하여 스트링 만들기
+		String ntrp = "";
+		String[] nta = bbs.getBbsNTarget().split("\r\n");
+		for(int i=0; i < nta.length; i++) {
+				String y = nta[i].replaceAll("\r\n","");
+				ntrp += y.replaceAll("\r\n","") + "\r\n";
+		}
+		//2. 가공
+		// 2-1. 공백 제거 (빈 배열 제거)
+		String[] ntar = ntrp.split("\r\n");
+		ArrayList<String> ntarg = new ArrayList<String>();
+		Collections.addAll(ntarg, ntar);
+		ntarg.removeAll(Arrays.asList("",null));
+		String[] bbsntarget = ntarg.toArray(new String [ntarg.size()]);
+		
+		
+		//erp 자료 가져오기
+		ArrayList<String> erplist = bbsDAO.geterpbbs(bbs.getBbsID());
+		
+		
+		//줄바꿈에 대한 정보를 넘기기 (업무 내용) 
+		int num = bbscontent.length; //bbscontent 크기
+		String[] numli = new String[num]; //num 크기만큼 생성
+		for(int i=0; i<num; i++) {
+			String ab = bbscontent[i];
+			//int number = ab.length() - ab.replace("\r\n", "").length();
+			int number = ab.split("\r\n").length;
+			numli[i] = Integer.toString(number);
+		}
+		String numlist = String.join("&",numli);
+		
+		int nnum = bbsncontent.length; //bbsncontent 크기
+		String[] nnumli = new String[nnum]; //num 크기만큼 생성
+		for(int i=0; i<nnum; i++) {
+			String ab = bbsncontent[i];
+			//int number = ab.length() - ab.replace("\r\n", "").length();
+			int number = ab.split("\r\n").length;
+			nnumli[i] = Integer.toString(number); //여기서 에러
+		}
+		String nnumlist = String.join("&",nnumli);
 		
 	%>
 
@@ -346,15 +553,15 @@
 					<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 						<thead>
 							<tr>
-								<th colspan="5" style="background-color: #eeeeee; text-align: center;">주간보고 작성</th>
+								<th colspan="5" style="background-color: #eeeeee; text-align: center;" data-toggle="tooltip" data-placement="top" title="가장 최근에 제출된 보고의 내용을 불러옵니다." >주간보고 작성</th>
 							</tr>
 						</thead>
 						<tbody id="tbody">
 							<tr>
 									<td colspan="2"> 
-									주간보고 명세서 <input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50"></td>
+									주간보고 명세서 <input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50" value=<%= bbs.getBbsTitle().replaceAll(" ","&nbsp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("\n","<br>") %>></td>
 									<td colspan="1"></td>
-									<td colspan="2">  주간보고 제출일 <input type="date" max="9999-12-31" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value=""></td>
+									<td colspan="2">  주간보고 제출일 <input type="date" max="9999-12-31" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value="<%= date %>"></td>
 							</tr>
 									<tr>
 										<th colspan="5" style="background-color: #D4D2FF;" align="center">금주 업무 실적</th>
@@ -362,43 +569,46 @@
 									<tr style="background-color: #FFC57B;">
 										<!-- <th width="6%">|  담당자</th> -->
 										<th width="50%">| &nbsp; 업무내용</th>
-										<th width="10%">| &nbsp; 접수일</th>
-										<th width="10%">| &nbsp; 완료목표일</th>
+										<th width="15%">| &nbsp; 접수일</th>
+										<th width="15%">| &nbsp; 완료목표일</th>
 										<th width="10%">| &nbsp;&nbsp; 진행율<br>&nbsp;&nbsp;&nbsp;&nbsp;/완료일</th>
 										<th></th>
 									</tr>
-									
 									<tr align="center">
-										<td style="display:none"><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:auto; width:100%; border:none; overflow:auto" placeholder="구분/담당자"   readonly><%= workSet %><%= name %></textarea></td> 
+										<td style="display:none"><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:auto; width:100%; border:none; overflow:auto" placeholder="구분/담당자"   readonly><%= workSet %><%= name %></textarea>
+											<textarea style="display:none" id="len"><%= bbscontent.length %></textarea>
+										 	<textarea style="display:none" name="num"><%= num %></textarea>
+											<textarea style="display:none" name="nnum"><%= nnum %></textarea>
+											<textarea style="display:none" name="numlist"><%= numlist %></textarea>
+											<textarea style="display:none" name="nnumlist"><%= nnumlist %></textarea>
+											<textarea style="display:none" id="nlen"><%= bbsncontent.length %></textarea></td> 
 									</tr>
+									<%
+									for(int i=0; i < bbscontent.length; i++) {
+										if(i==0) { //처음 시작일땐,
+									%>
 									<tr>
 										 <td>
-										 	<textarea style="display:none" id="len">0</textarea>
-										 	<textarea style="display:none" name="num">0</textarea>
-											<textarea style="display:none" name="nnum">0</textarea>
-											<textarea style="display:none" name="numlist">0</textarea>
-											<textarea style="display:none" name="nnumlist">0</textarea>
-										 	<div style="float:left">
-											 <select name="jobs0" id="jobs0" style="height:45px; width:105px">
-													 <option> [시스템] 선택 </option>
-													 <%
-													 for(int count=0; count < works.size(); count++) {
-													 %>
-													 	<option> <%= works.get(count) %> </option>
-													 <%
-													 }
-													 %>
-													 <option> 기타 </option>
-												 </select>
-											 </div>
-											 <div style="float:left">
-											 <textarea class="textarea" id="bbsContent" required style="height:45px;width:220%; border:none; resize:none " placeholder="업무내용" name="bbsContent0"></textarea>
-											 </div>
-										 </td>
-										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart0" value="<%= now %>" ></td>
-										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget0" ></td>		
-										 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none; resize:none"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd0" ></textarea></td>
-												</tr>
+											 <textarea class="textarea" id="bbsContent" required style="height:45px;width:100%; border:none; resize:none " placeholder="업무내용" name="bbsContent<%= i %>"><%= bbscontent[i] %></textarea></td>
+										 <td><textarea class="textarea" id="bbsStart" style="height:45px; width:100%; border:none; resize:none"  placeholder="접수일" required name="bbsStart<%= i %>" ><%= bbsstart[i] %></textarea></td>
+										 <td><textarea class="textarea" id="bbsTarget" style="height:45px; width:100%; border:none; resize:none"  placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget<%= i %>" ><%= bbstarget[i] %></textarea></td>	
+										 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none; resize:none"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd<%= i %>" ><%= bbsend[i] %></textarea></td>
+										 <td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button></td>
+									</tr>
+									<%
+										} else {
+									%>
+										<tr>
+											 <td><textarea class="textarea" id="bbsContent" required style="height:45px;width:100%; border:none; resize:none " placeholder="업무내용" name="bbsContent<%= i %>"><%= bbscontent[i] %></textarea></td>
+											 <td><textarea class="textarea" id="bbsStart" style="height:45px; width:100%; border:none; resize:none"  placeholder="접수일" required name="bbsStart<%= i %>" ><%= bbsstart[i] %></textarea></td>
+										 	 <td><textarea class="textarea" id="bbsTarget" style="height:45px; width:100%; border:none; resize:none"  placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget<%= i %>" ><%= bbstarget[i] %></textarea></td>
+										 	 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none; resize:none"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd<%= i %>" ><%= bbsend[i] %></textarea></td>
+											 <td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button></td>
+										</tr>
+									<%
+										}
+									}
+									%>
 									</tbody>
 								</table>
 									<div id="wrapper" style="width:100%; text-align: center;">
@@ -416,76 +626,97 @@
 							</tr>
 							<tr style="background-color: #FFC57B;">
 								<th width="50%">| &nbsp; 업무내용</th>
-								<th width="10%">| &nbsp; 접수일</th>
-								<th width="10%">| &nbsp; 완료목표일</th>
+								<th width="15%">| &nbsp; 접수일</th>
+								<th width="15%">| &nbsp; 완료목표일</th>
 								<th></th>
 								<th></th>
 							</tr>
+							<%
+							for(int i=0; i < bbsncontent.length; i++) {
+								if(i==0) {
+							%>
 							<tr>
-								 <td>
-								 	<div style="float:left">
-									 <select name="njobs0" id="njobs0" style="height:45px; width:105px">
-											 <option> [시스템] 선택 </option>
-											 <%
-											 for(int count=0; count < works.size(); count++) {
-											 %>
-											 	<option> <%= works.get(count) %> </option>
-											 <%
-											 }
-											 %>
-											 <option> 기타 </option>
-										 </select>
-									 </div>
-									 <div style="float:left">
-									 <textarea class="textarea" id="bbsNContent2" required style="height:45px;width:220%; border:none; resize:none" placeholder="업무내용" name="bbsNContent0"></textarea>
-									 </div>
-								 </td>
-								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart0" value="<%= now %>" ></td>
-								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget2" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget0"></td>		
+								 <td><textarea class="textarea" id="bbsNContent0" required style="height:45px;width:100%; border:none; resize:none" placeholder="업무내용" name="bbsNContent0"><%= bbsncontent[i] %></textarea></td>
+								  <td><textarea class="textarea" id="bbsNStart0" style="height:45px; width:100%; border:none; resize:none"  placeholder="접수일" required name="bbsNStart0" ><%= bbsnstart[i] %></textarea></td>
+								 <td><textarea class="textarea" id="bbsNTarget0" style="height:45px; width:100%; border:none; resize:none"  placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget0" ><%= bbsntarget[i] %></textarea></td>
+								 <td></td>
+								<td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delNRow" name="delNRow" class="btn btn-danger"> 삭제 </button></td>
 							</tr>
+							<%
+								} else {
+							%>
+							<tr>
+								 <td><textarea class="textarea" id="bbsNContent<%= i %>" required style="height:45px;width:100%; border:none; resize:none" placeholder="업무내용" name="bbsNContent<%= i %>"><%= bbsncontent[i] %></textarea></td>
+								  <td><textarea class="textarea" id="bbsNStart<%= i %>" style="height:45px; width:100%; border:none; resize:none"  placeholder="접수일" required name="bbsNStart<%= i %>" ><%= bbsnstart[i] %></textarea></td>
+								 <td><textarea class="textarea" id="bbsNTarget<%= i %>" style="height:45px; width:100%; border:none; resize:none"  placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget<%= i %>" ><%= bbsntarget[i] %></textarea></td>
+								  <td></td>
+								  <td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delNRow" name="delNRow" class="btn btn-danger"> 삭제 </button></td>
+							</tr>
+							<%
+								}
+							}
+							%>
 							</tbody>
 						</table>
 						<div id="wrapper" style="width:100%; text-align: center;">
-								<button type="button" style="margin-bottom:5px; margin-top:5px; margin-right:35px" onclick="addNRow()" class="btn btn-primary"> + </button>
+								<button type="button" style="margin-bottom:5px; margin-top:5px; margin-right:35px; margin-bottom:20px" onclick="addNRow()" class="btn btn-primary"> + </button>
 						</div>
 						
-						<!-- '계정 관리가 있을 경우, 생성' -->
-						<table class="table" id="accountTable" style="text-align: center; cellpadding:50px; display:none;" >
+								<!-- erp_bbs에 자료가 있는 경우 하단 출력! -->
+				<%
+						if(workSet.indexOf("계정관리") > -1 && list.size() != 0) { //erp가 비어있지 않다면, 하단 출력
+							String[] erp_date = list.get(1).split("\r\n");
+							String[] erp_user = list.get(2).split("\r\n");
+							String[] erp_stext = list.get(3).split("\r\n");
+							String[] erp_authority = list.get(4).split("\r\n");
+							String[] erp_division = list.get(5).split("\r\n");
+						%>
+						<table class="table" id="accountTable" style="margin-bottom:50px">
 							<tbody id="tbody">
-							<tr>
-								<th colspan="5" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
-							</tr>
-							<tr style="background-color: #FF9933; border: 1px solid">
-								<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date</th>
-								<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
-								<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
-								<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
-								<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
-							</tr>
-							<tr>
-								<td style="text-align:center; border: 1px solid; font-size:10px">  
-								  <textarea class="textarea" id="erp_date2" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date0"></textarea></td>
-							  	<td style="text-align:center; border: 1px solid; font-size:10px">  
-								  <textarea class="textarea" id="erp_user2" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user0"></textarea></td>
-							  	<td style="text-align:center; border: 1px solid; font-size:10px">  
-								  <textarea class="textarea" id="erp_stext2" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext0"></textarea></td>
-							  	<td style="text-align:center; border: 1px solid; font-size:10px">  
-								  <textarea class="textarea" id="erp_authority2" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority0"></textarea></td>
-							  	<td style="text-align:center; border: 1px solid; font-size:10px">  
-								  <textarea class="textarea" id="erp_division2" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division0"></textarea></td>
-							  	
-							</tr>
-							</tbody>
-						</table>
-						<div id="wrapper_account" style="width:100%; text-align: center; display:none">
-							<button type="button" style="margin-bottom:15px; margin-right:30px" onclick="addRowAccount()" class="btn btn-primary"> + </button>
-						</div>
-						<!-- 계정 관리 끝 -->
-							<div id="wrapper" style="width:100%; text-align: center;">
-								<!-- 저장 버튼 생성 -->
-								<button type="button" id="save" style="margin-bottom:50px" class="btn btn-primary pull-right" onclick="saveData()"> 저장 </button>									
-								<button type="Submit" id="save_sub" style="margin-bottom:50px; display:none" class="btn btn-primary pull-right"> 저장 </button>	
-							</div>					
+								<tr>
+									<th colspan="5" style="background-color: #ccffcc; border:none;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
+								</tr>
+								<tr style="background-color: #FF9933; border: 1px solid">
+									<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"><%= list.get(0) %></textarea></th>
+									<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
+									<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
+									<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
+									<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
+								</tr>
+						<%
+						for (int i=0; i < erp_date.length; i++) {
+						%>
+						<tr>
+							<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> <textarea style="display:none" id="elen"><%= erp_date.length %></textarea>
+							  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_date.length %></textarea>
+							  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_date[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp_user[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp_stext[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_authority[i] %></textarea></td>
+						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
+							  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_division[i] %></textarea></td>
+						</tr>
+						<%
+						}
+						%>
+					</tbody>
+				</table>
+				<div id="wrapper_account" style="width:100%; text-align: center;">
+					<button type="button" style="margin-bottom:15px; margin-right:30px" onclick="addRowAccount()" class="btn btn-primary"> + </button>
+				</div>
+				<%
+						}
+				%>
+				<!-- 계정 관리 끝 -->
+					<div id="wrapper" style="width:100%; text-align: center;">
+						<!-- 저장 버튼 생성 -->
+						<button type="button" id="save" style="margin-bottom:50px; margin-left:20px" class="btn btn-primary pull-right" onclick="saveData()" data-toggle="tooltip" data-placement="bottom" title="작성된 내용을 저장합니다."> 저장 </button>									
+						<button type="button" style="margin-bottom:50px" class="btn btn-info pull-right" onClick="empty()" data-toggle="tooltip" data-placement="bottom" title="작성된 내용을 지웁니다."> 비우기 </button>	
+						<button type="Submit" id="save_sub" style="margin-bottom:50px; display:none" class="btn btn-primary pull-right"> 저장 </button>	
+					</div>						
 				</form>
 			</div>
 		</div>
@@ -511,7 +742,7 @@
 	</script>	
 	
 	<script>
-	var trCnt = 1;
+	var trCnt = parseInt(document.getElementById("len").value);
 		function addRow() {
 			var work = "";
 			var strworks ="";
@@ -580,7 +811,7 @@
 	
 	
 	<script>
-	var trNCnt = 1;
+	var trNCnt = parseInt(document.getElementById("nlen").value);
 		function addNRow() {
 			var work = "";
 			var strworks ="";
@@ -697,6 +928,9 @@
 	
 	<script>
 	var trACnt = 1;
+	if(document.getElementById("elen") != null){
+		trACnt = parseInt(document.getElementById("elen").value);
+	}
 	//'계정관리' 업무를 추가함.
 	function addRowAccount() {
 		//var trACnt = $("#accountTable tr").length; // 기본을 2로 잡음!
@@ -747,6 +981,27 @@
         //document.getElementById('save_sub').click;
         $("#save_sub").trigger("click");
     }
+	
+	function empty() {
+		var check = confirm("작성된 내용이 삭제됩니다. 정말 비우시겠습니까?");
+		if(check ){
+			location.href='bbsUpdate_empty.jsp';
+		}
+	}
 	</script>
 	
+	
+	<!-- 	//$("#save").find('[type="submit"]').trigger('click') {
+	//$("#save").on('mousedown',function(){
+	
+	//var form = $('#main')[0]; // DOM 객체인 form tag를 받아옴.
+	
+	//form.addEventListner('submit',function(event) {
+		//event.preventDefault(); // 기본 동작인 submit 중단
+		
+		
+		 // 강제 submit 버튼 클릭
+        //document.getElementById('save_sub').click;
+		//$('#main').submit();
+		//form.submit(); -->
 </body>

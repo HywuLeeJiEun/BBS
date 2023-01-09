@@ -12,13 +12,23 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="MariaDB"/>
 	<property name="net.sf.jasperreports.export.pdf.force.linebreak.policy" value="true"/>
-	<property name="com.jaspersoft.studio.data.sql.tables"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="deadLine" class="java.lang.String">
 		<parameterDescription><![CDATA[제출마감일]]></parameterDescription>
 	</parameter>
 	<parameter name="logo" class="java.lang.String"/>
 	<parameter name="e_state" class="java.lang.String"/>
 	<parameter name="w_state" class="java.lang.String"/>
+	<parameter name="erp_date0" class="java.lang.String"/>
+	<parameter name="erp_date1" class="java.lang.String"/>
+	<parameter name="erp_user0" class="java.lang.String"/>
+	<parameter name="erp_user1" class="java.lang.String"/>
+	<parameter name="erp_stext0" class="java.lang.String"/>
+	<parameter name="erp_stext1" class="java.lang.String"/>
+	<parameter name="erp_authority0" class="java.lang.String"/>
+	<parameter name="erp_authority1" class="java.lang.String"/>
+	<parameter name="erp_division0" class="java.lang.String"/>
+	<parameter name="erp_division1" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[SELECT *
 FROM bbs.summary_admin
@@ -119,6 +129,16 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 	<field name="bbsDeadline" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="bbsDeadline"/>
 		<property name="com.jaspersoft.studio.field.label" value="bbsDeadline"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="summary_admin"/>
+	</field>
+	<field name="sumadDate" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="sumadDate"/>
+		<property name="com.jaspersoft.studio.field.label" value="sumadDate"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="summary_admin"/>
+	</field>
+	<field name="sumadUpdate" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="sumadUpdate"/>
+		<property name="com.jaspersoft.studio.field.label" value="sumadUpdate"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="summary_admin"/>
 	</field>
 	<background>
@@ -582,7 +602,7 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="맑은 고딕" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Z11-22-0019"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{erp_authority0}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="174" y="409" width="346" height="23" uuid="3396be43-de65-456d-a53d-d97df1169ad0"/>
@@ -595,7 +615,7 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="맑은 고딕" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Field contents changed: I_PSTYP -> 0"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{erp_stext0}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="10" y="409" width="100" height="23" uuid="e3da354f-5a8f-4649-b1d7-8bcae737666c"/>
@@ -608,7 +628,7 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="맑은 고딕" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["2022.12.08"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{erp_date0}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement mode="Opaque" x="10" y="390" width="100" height="19" backcolor="#FF9933" uuid="c2ed2fe0-812a-4e47-92eb-e3aacf33bfc9"/>
@@ -660,7 +680,7 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="맑은 고딕" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{erp_date1}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="520" y="432" width="130" height="23" uuid="0538b24c-c885-44d6-80f3-53bbb24a92d4"/>
@@ -673,7 +693,7 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="맑은 고딕" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{erp_authority1}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="174" y="432" width="346" height="23" uuid="601ff2a8-8b12-400e-9937-5d92aff86da2"/>
@@ -686,7 +706,7 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="맑은 고딕" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{erp_stext1}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="110" y="432" width="64" height="23" uuid="0fc309a5-dae7-472f-bbdc-6e921d144de6"/>
@@ -699,7 +719,7 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="맑은 고딕" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{erp_user1}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="110" y="409" width="64" height="23" uuid="2caa1f09-7e16-401c-86ab-9750146ed938"/>
@@ -712,7 +732,7 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="맑은 고딕" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["SROH"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{erp_user0}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement mode="Opaque" x="110" y="390" width="64" height="19" backcolor="#FF9933" uuid="3c7f8c54-e17e-4c18-a0c4-e064d9e1a656"/>
@@ -738,7 +758,7 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="맑은 고딕" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" "]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{erp_division1}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement mode="Opaque" x="650" y="390" width="134" height="19" backcolor="#FF9933" uuid="04a1408c-9433-4d4e-a498-1b9185f3b537"/>
@@ -764,7 +784,7 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="맑은 고딕" size="11" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["일반"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{erp_division0}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

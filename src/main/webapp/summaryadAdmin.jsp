@@ -228,7 +228,7 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbsAdmin.jsp">조회</a></li>
+							<li><a href="bbsAdmin.jsp">조회</a></li>
 							<!-- <li><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
 							<li><a href="signOn.jsp">승인(제출)</a></li> -->

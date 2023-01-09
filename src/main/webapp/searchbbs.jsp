@@ -12,10 +12,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
-<link rel="stylesheet" href="css/css/bootstrap.css">
+<!-- // 폰트어썸 이미지 사용하기 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <link rel="stylesheet" href="css/index.css">
+<meta charset="UTF-8">
+<!-- 화면 최적화 -->
+<!-- <meta name="viewport" content="width-device-width", initial-scale="1"> -->
+<!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <title>RMS</title>
 </head>
 
@@ -110,9 +113,21 @@
 			script.println("location.href='bbs.jsp'");
 			script.println("</script>");
 		} 
+			
+		//미승인 -> 미제출로 변경
+		String[] sign = new String[list.size()];
+		for(int i=0; i < list.size(); i++) {
+			if(list.get(i).getSign().equals("미승인")) {
+				sign[i] = "미제출";
+			} else if(list.get(i).getSign().equals("승인")){
+				sign[i] = "제출";						
+			} else {
+				sign[i] = list.get(i).getSign();						
+			}
+		}
 	%>
 	
-	  <!-- ************ 상단 네비게이션바 영역 ************* -->
+	      <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -138,12 +153,13 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								if(pl !="" || !pl.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -151,16 +167,18 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
+								<li><a href="bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
 								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
-								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
+								}
 							}
 						%>
 						<%
@@ -388,7 +406,7 @@
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
-						<th style="background-color: #eeeeee; text-align: center;">승인</th>
+						<th style="background-color: #eeeeee; text-align: center;">상태</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -406,7 +424,7 @@
 						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
 							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>	
 						<td><%= list.get(i).getBbsUpdate() %></td>		
-						<td><%= list.get(i).getSign() %></td>
+						<td><%= sign[i] %></td>
 					</tr>
 					<%
 						}

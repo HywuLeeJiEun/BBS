@@ -135,14 +135,6 @@
 		ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
 		String bbsID = String.join(",",AllbbsID);
 		
-		if(sumad.size() == 0 || sumad.isEmpty()) { //만약, 미승인 데이터가 없다면!
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('모든 요약본이 승인(또는 마감)처리 되었습니다.')");
-			//script.println("location.href='summaryadRk.jsp'");
-			script.println("history.back()");
-			script.println("</script>");
-		}
 	%>
 
 
@@ -381,7 +373,43 @@
 	  </div>
 	</div>
 
-		
+	<%
+	if(sumad.size() == 0) { //만약, 미승인 데이터가 없다면!
+		//PrintWriter script = response.getWriter();
+		//script.println("<script>");
+		//script.println("alert('모든 요약본이 승인(또는 마감)처리 되었습니다.')");
+		//script.println("location.href='summaryadRk.jsp'");
+		//script.println("history.back()");
+		//script.println("</script>");
+	%>
+	<div class="container area" style="cursor:pointer;" id="jb-title">
+		<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
+			<thead>
+				<tr>
+				</tr>
+				<tr>
+					<th colspan="5" style=" text-align: center; " data-toggle="tooltip" data-html="true" data-placement="bottom" title="'미승인'된 주간보고를 <br>수정/삭제/승인할 수 있습니다.">주간보고 수정 및 승인
+					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	<div class="container">
+		<table class="table" style="text-align: center; cellpadding:50px;" >
+			<thead>
+				<tr valign="top" style="height:150px">
+				</tr>
+				<tr valign="bottom" style="height:150px">
+					<th colspan="5" style=" text-align: center; color:black ">미승인된 요약본이 없습니다. <br><br><br><br></th>
+				</tr>
+			</thead>
+		</table>
+		<button style="margin:5px" class="btn btn-primary pull-right" onclick="location.href='summaryadRk.jsp'">목록</button>
+	</div>
+	
+	<% 
+	} else {
+	%>	
 	<div class="container area" style="cursor:pointer;" id="jb-title">
 		<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
 			<thead>
@@ -400,28 +428,6 @@
 	<!-- 게시판 메인 페이지 영역 시작 -->
 	<div class="container">
 		<div class="row">
-		<%
-		if(sumad.size() == 0 || sumad.isEmpty()) { //만약, 미승인 데이터가 없다면!
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('모든 요약본이 승인(또는 마감)처리 되었습니다.')");
-			//script.println("location.href='summaryadRk.jsp'");
-			script.println("history.back()");
-			script.println("</script>");
-		%>
-		<table class="table" style="text-align: center; cellpadding:50px;" >
-			<thead>
-				<tr valign="top" style="height:150px">
-				</tr>
-				<tr valign="bottom" style="height:150px">
-					<th colspan="5" style=" text-align: center; color:black ">미승인된 요약본 목록이 없습니다. <br><br><br><br></th>
-				</tr>
-
-			</thead>
-		</table>
-		<% 
-		} else {
-		%>
 			<table id="bbsTable" class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
@@ -479,9 +485,6 @@
 							<button class="btn btn-success" style="font-size:12px" onclick="location.href='summaryadsignOnAction.jsp?sumad_id=<%= sumad.get(i).getSumad_id() %>&bbsDeadline=<%= sumad.get(i).getBbsDeadline() %>'"> 승인 </button>
 						</td>
 					</tr>
-					<%
-						}
-					%>
 				</tbody>
 			</table>
 			
@@ -504,6 +507,9 @@
 			<a href=summaryadRk.jsp style="width:50px;" class="btn btn-primary pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본 조회로 돌아가기" id="summary"> 목록 </a>
 		</div>
 	</div>
+	<%
+	}
+	%>
 	
 	
 	

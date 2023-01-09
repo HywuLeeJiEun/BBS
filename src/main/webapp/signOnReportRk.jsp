@@ -126,7 +126,7 @@
 	%>
 	
 	
-	 <!-- ************ 상단 네비게이션바 영역 ************* -->
+	     <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -152,12 +152,13 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정 및 승인</a></li>
+							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								if(pl !="" || !pl.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -165,16 +166,18 @@
 								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="bbsRk.jsp"><%= pl %> 조회</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
+								<li><a href="bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="summaryRk.jsp">조회</a></li>
-								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=inbbsID%>">작성</a></li>
 								<li><a href="summaryUpdateDelete.jsp">수정 및 삭제</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; Summary</h5></li>
-								<li id="summary_nav"><a href="summaryRkSign.jsp">출력(pptx)</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
+								<li id="summary_nav"><a href="summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
+								}
 							}
 						%>
 						<%
@@ -361,8 +364,8 @@
 	
 	
 	
-<div class="container-fluid" style="margin-left:15%">
-<table id="JR_PAGE_ANCHOR_0_1" role="none" class="jrPage" data-jr-height="595" style="empty-cells: show; width: 70%; border-collapse: collapse; background-color: white; top:5%; ">
+<div class="container-fluid" style="margin-left:10%">
+<table id="JR_PAGE_ANCHOR_0_1" role="none" class="jrPage" data-jr-height="595" style="empty-cells: show; width: 80%; border-collapse: collapse; background-color: white; top:5%; ">
 <tr role="none" valign="top" style="height:0">
 <td style="width:70px"></td>
 <td style="width:3px"></td>
@@ -518,8 +521,8 @@
 		String[] erp_authority = list.get(4).split("\r\n");
 		String[] erp_division = list.get(5).split("\r\n");
 	%>
-<div class="container" style="margin-top:80px;">
-<table style="margin-right:50%">
+<div class="container-fluid" style="margin-top:50px;">
+<table style="margin-left:20%">
 <!-- erp_bbs에 자료가 있는 경우 하단 출력! -->
 	<tr>
 		<th colspan="2" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>

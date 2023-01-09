@@ -164,6 +164,24 @@ public class BbsDAO {
 					}
 					return -1; //데이터베이스 오류
 				}
+				
+			// (erp_id)찾기
+			public int getErp(int bbsID) {
+				//현재 게시글을 내림차순으로 조회하여 가장 마지막 글의 번호를 구한다
+				String sql = "select erp_id from erp_bbs where bbsID=?";
+				try {
+					PreparedStatement pstmt = conn.prepareStatement(sql);
+					pstmt.setInt(1, bbsID);
+					rs = pstmt.executeQuery();
+					if(rs.next()) {
+						return rs.getInt(1);
+					}
+					return 1; //첫 번째 게시물인 경우
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+				return -1; //데이터베이스 오류
+			}
 	
 	//게시글 번호 부여 메소드 (Summary_admin)
 			public int getNextSumAdmin() {
@@ -317,6 +335,50 @@ public class BbsDAO {
 		}
 		return list;
 	}
+	
+	//게시글 리스트 메소드 (bbsRk)
+		public ArrayList<Bbs> getListfull(String bbsDeadline, String[] pllist){
+			String sql =  "select * from (select * from bbs where sign='마감' or sign='승인') a "
+					+ "where a.bbsDeadline like '%"+bbsDeadline.trim()+"%' and (";
+					for(int i=0; i<pllist.length; i++) {
+						if(i <pllist.length-1) {
+							sql +="a.userID='"+pllist[i].trim()+"'" +" or ";
+						}else {
+							sql += "a.userID='"+pllist[i].trim()+"'";
+						}	
+					}
+						sql	+= ") order by a.bbsID desc";
+					ArrayList<Bbs> list = new ArrayList<Bbs>();
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
+					Bbs bbs = new Bbs();
+					bbs.setBbsID(rs.getInt(1));
+					bbs.setBbsManager(rs.getString(2));
+					bbs.setBbsTitle(rs.getString(3));
+					bbs.setUserID(rs.getString(4));
+					bbs.setUserName(rs.getString(5));
+					bbs.setBbsDate(rs.getString(6));
+					bbs.setBbsContent(rs.getString(7));
+					bbs.setBbsStart(rs.getString(8));
+					bbs.setBbsTarget(rs.getString(9));
+					bbs.setBbsEnd(rs.getString(10));
+					bbs.setBbsNContent(rs.getString(11));
+					bbs.setBbsNStart(rs.getString(12));
+					bbs.setBbsNTarget(rs.getString(13));
+					bbs.setBbsAvailable(rs.getInt(14));
+					bbs.setBbsDeadline(rs.getString(15));
+					bbs.setBbsUpdate(rs.getString(16));
+					bbs.setSign(rs.getString(17));
+					bbs.setPluser(rs.getString(18));
+					list.add(bbs);
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return list;
+		}
 		
 	
 	// Admin 권한(rank - 실장) => 모든 게시글 확인하기
