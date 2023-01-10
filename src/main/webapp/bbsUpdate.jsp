@@ -121,7 +121,7 @@
 		String rp = "";
 		String[] a = bbs.getBbsContent().split("\r\n");
 		for(int i=0; i < a.length; i++) {
-			if(a[i].substring(0).indexOf('-') > -1 && a[i].substring(0).indexOf('-') < 2) {
+			if(a[i].substring(0).indexOf('-') > -1 && a[i].substring(0).indexOf('-') < 1) {
 				String y = a[i].replaceAll("\r\n","¿");
 				y = y.replaceAll("\r\n","¿");
 				rp += y.replaceFirst("-","§") + "¿";
@@ -210,7 +210,7 @@
 		String nrp = "";
 		String[] na = bbs.getBbsNContent().split("\r\n");
 		for(int i=0; i < na.length; i++) {
-			if(na[i].substring(0).indexOf('-') > -1 && na[i].substring(0).indexOf('-') < 2) {
+			if(na[i].substring(0).indexOf('-') > -1 && na[i].substring(0).indexOf('-') < 1) {
 				String y = na[i].replaceAll("\r\n","¿");
 				y = y.replaceAll("\r\n","¿");
 				nrp += y.replaceFirst("-","§") + "¿";
@@ -327,8 +327,8 @@
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
-							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
+							<li  class="active"><a href="bbsUpdate.jsp">작성</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
@@ -662,54 +662,38 @@
 								<button type="button" style="margin-bottom:5px; margin-top:5px; margin-right:35px; margin-bottom:20px" onclick="addNRow()" class="btn btn-primary"> + </button>
 						</div>
 						
-								<!-- erp_bbs에 자료가 있는 경우 하단 출력! -->
-				<%
-						if(workSet.indexOf("계정관리") > -1 && list.size() != 0) { //erp가 비어있지 않다면, 하단 출력
-							String[] erp_date = list.get(1).split("\r\n");
-							String[] erp_user = list.get(2).split("\r\n");
-							String[] erp_stext = list.get(3).split("\r\n");
-							String[] erp_authority = list.get(4).split("\r\n");
-							String[] erp_division = list.get(5).split("\r\n");
-						%>
-						<table class="table" id="accountTable" style="margin-bottom:50px">
+						<!-- erp_bbs에 자료가 있는 경우 하단 출력! -->
+						<table class="table" id="accountTable" style="margin-bottom:50px; display:none">
 							<tbody id="tbody">
 								<tr>
 									<th colspan="5" style="background-color: #ccffcc; border:none;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
 								</tr>
 								<tr style="background-color: #FF9933; border: 1px solid">
-									<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"><%= list.get(0) %></textarea></th>
+									<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"></textarea></th>
 									<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
 									<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
 									<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
 									<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
 								</tr>
-						<%
-						for (int i=0; i < erp_date.length; i++) {
-						%>
 						<tr>
-							<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> <textarea style="display:none" id="elen"><%= erp_date.length %></textarea>
-							  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_date.length %></textarea>
-							  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_date[i] %></textarea></td>
+							<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> <textarea style="display:none" id="elen"></textarea>
+							  <textarea class="textarea" style="display:none" name="erp_size"></textarea>
+							  <textarea class="textarea" id="erp_date0" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date0"></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-							  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp_user[i] %></textarea></td>
+							  <textarea class="textarea" id="erp_user0" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user0"></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-							  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp_stext[i] %></textarea></td>
+							  <textarea class="textarea" id="erp_stext0" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext0"></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-							  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_authority[i] %></textarea></td>
+							  <textarea class="textarea" id="erp_authority0" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority0"></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-							  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_division[i] %></textarea></td>
+							  <textarea class="textarea" id="erp_division0" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division0"></textarea></td>
 						</tr>
-						<%
-						}
-						%>
 					</tbody>
 				</table>
-				<div id="wrapper_account" style="width:100%; text-align: center;">
+				<div id="wrapper_account" style="width:100%; text-align: center; display:none;">
 					<button type="button" style="margin-bottom:15px; margin-right:30px" onclick="addRowAccount()" class="btn btn-primary"> + </button>
 				</div>
-				<%
-						}
-				%>
+				
 				<!-- 계정 관리 끝 -->
 					<div id="wrapper" style="width:100%; text-align: center;">
 						<!-- 저장 버튼 생성 -->
@@ -792,7 +776,7 @@
 		            innerHtml += '  </div> </td>';
 		            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart'+con+'" class="form-control" placeholder="접수일" name="bbsStart'+con+'"  value="'+now+'"></td>';
 		            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+con+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsTarget'+con+'" ></td>';
-		            innerHtml += '  <td><textarea class="textarea" id="bbsEnd'+con+'" style="height:45px; resize:none; width:100%; border:none;"  data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다."  placeholder="진행율/\n완료일" name="bbsEnd'+con+'" ></textarea></td>'; 
+		            innerHtml += '  <td><textarea class="textarea" id="bbsEnd'+con+'" style="height:45px; resize:none; width:100%; border:none;"  data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다."  placeholder="진행율\n/완료일" name="bbsEnd'+con+'" ></textarea></td>'; 
 		            innerHtml += '    <td>';
 		            innerHtml += '<button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button>';
 		            innerHtml += '    </td>';
@@ -937,9 +921,6 @@
 	
 	<script>
 	var trACnt = 1;
-	if(document.getElementById("elen") != null){
-		trACnt = parseInt(document.getElementById("elen").value);
-	}
 	//'계정관리' 업무를 추가함.
 	function addRowAccount() {
 		//var trACnt = $("#accountTable tr").length; // 기본을 2로 잡음!

@@ -103,7 +103,9 @@
 			trNCnt = "1";
 		}
 		
-		for(int i=0; i< Integer.parseInt(trCnt)+1+num; i++) { //trCnt 개수만큼 반복 
+		//if(a[i].substring(0).indexOf('-') > -1 && a[i].substring(0).indexOf('-') < 2) {
+		//for(int i=0; i< Integer.parseInt(trCnt)+1+num; i++) { //trCnt 개수만큼 반복 
+		for(int i=0; i< 31; i++) { //trCnt 개수만큼 반복 
 			//금주 업무 내용 + select box
 			String a = "bbsContent";
 			String jobs = "jobs";
@@ -115,14 +117,16 @@
 				}else {
 					bbscontent.add("- " + request.getParameter(a+i));
 				}
-			} else {
+			} else if(request.getParameter(a+i) != null && request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2){
 			bbscontent.add(request.getParameter(a+i));
 			//bbscontent.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
+			} else {
+				bbscontent.add("- "+request.getParameter(a+i));
 			}
 			getbbscontent = String.join("\r\n",bbscontent); // 각 배열 요소마다 줄바꿈 하여 넣음.
 			//getbbscontent = getbbscontent.replace("\r\n","/r/n"); // String 내부의 줄바꿈을 표현
 			} else { // 0~num 개수안에서만 이뤄지도록 하며, 해당 내용 제거
-				if(numli.size() < num) {
+				if(i < numli.size()) {
 					num -= 1; //개수를 하나 삭제함 
 					numli.set(i, ""); //빈값으로 만들기
 				}
@@ -183,7 +187,7 @@
 				}
 			}
 		
-		for(int i=0; i< Integer.parseInt(trNCnt)+1+nnum; i++) { //trNCnt 개수만큼 반복 
+		for(int i=0; i< 31; i++) { //trNCnt 개수만큼 반복 
 			// << 차주 >> 
 			String jobs = "njobs";
 			//차주 업무 내용
@@ -196,14 +200,16 @@
 				} else {
 					bbsncontent.add("- " + request.getParameter(e+i));
 				}
-			} else {
+			} else if(request.getParameter(e+i) != null && request.getParameter(e+i).indexOf('-') > -1 && request.getParameter(e+i).indexOf('-') < 2){
 				bbsncontent.add(request.getParameter(e+i));
-				//bbsncontent.removeAll(Arrays.asList("",null));
-			}
+				//bbscontent.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
+				} else {
+					bbsncontent.add("- "+request.getParameter(e+i));
+				}
 			getbbsncontent = String.join("\r\n",bbsncontent);
 			//getbbsncontent = getbbsncontent.replace("\r\n","/r/n");
 			}else { // 0~nnum 개수안에서만 이뤄지므로, 해당 내용 제거
-				if(nnumli.size() < nnum) {
+				if(i < nnumli.size()) {
 				nnum -= 1; //개수를 하나 삭제함 
 				nnumli.set(i, ""); //빈값으로 만들기
 				}
@@ -282,10 +288,8 @@
 		
 	%>
 
-	<a> <%= bbscontent.get(1) %></a><br>
-	<a> <%= trNCnt %></a><br>
 		<form id="post_item" method="post" action="mainActionComplete.jsp">
-			<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
+			<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px; display:none" >
 				<tbody id="tbody">
 					<tr id="tr">
 						<td><textarea class="textarea" id="manager" name="manager" readonly><%= bbs.getBbsManager() %></textarea></td>
@@ -312,7 +316,7 @@
 					</tr>
 				</tbody>
 			</table>
-			<button type="button" id="save" style="margin-bottom:15px; margin-right:30px" onclick="addRow()" class="btn btn-primary"> + </button>
+			<button type="button" id="save" style="margin-bottom:15px; margin-right:30px; display:none" onclick="addRow()" class="btn btn-primary"> + </button>
 		</form>
 
 	
@@ -331,9 +335,6 @@
 		//finalb = finalb.replace("\r\n","/r/n");
 	}
 	%>
-	<textarea><%= finalb  %></textarea><br>
-	<textarea><%= b %></textarea>
-	<textarea><%= getbbscontent %></textarea>
 	<c:set var="content" value="<%= finalb %>"/>
 	<input type="hidden" id="value" value="<c:out value='${content}' />">
 	
@@ -365,7 +366,7 @@
 	
 	function addRow() {
 		$('#post_item').submit();
-	}  
+	} 
 	</script> 
 
 

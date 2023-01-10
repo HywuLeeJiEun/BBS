@@ -144,7 +144,7 @@
 			String rp = "";
 			String[] a = bbs.getBbsContent().split("\r\n");
 			for(int i=0; i < a.length; i++) {
-				if(a[i].substring(0).indexOf('-') > -1 && a[i].substring(0).indexOf('-') < 2) {
+				if(a[i].substring(0).indexOf('-') > -1 && a[i].substring(0).indexOf('-') < 1) {
 					String y = a[i].replaceAll("\r\n","¿");
 					y = y.replaceAll("\r\n","¿");
 					rp += y.replaceFirst("-","§") + "¿";
@@ -233,7 +233,7 @@
 			String nrp = "";
 			String[] na = bbs.getBbsNContent().split("\r\n");
 			for(int i=0; i < na.length; i++) {
-				if(na[i].substring(0).indexOf('-') > -1 && na[i].substring(0).indexOf('-') < 2) {
+				if(na[i].substring(0).indexOf('-') > -1 && na[i].substring(0).indexOf('-') < 1) {
 					String y = na[i].replaceAll("\r\n","¿");
 					y = y.replaceAll("\r\n","¿");
 					nrp += y.replaceFirst("-","§") + "¿";
