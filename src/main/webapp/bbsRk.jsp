@@ -123,9 +123,9 @@
 		
 		
 		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
-		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, "2023-01-09", pllist);
+		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist);
 		//제출자 확인을 위한 리스트
-		ArrayList<Bbs> fulllist = bbsDAO.getListfull("2023-01-09", pllist);
+		ArrayList<Bbs> fulllist = bbsDAO.getListfull(bbsDeadline, pllist);
 		
 		if(work.equals("") || work == null) {
 			PrintWriter script = response.getWriter();

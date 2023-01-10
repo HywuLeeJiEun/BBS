@@ -40,13 +40,15 @@
 	String pluser = request.getParameter("pluser"); // 해당되는 pluser가 나옴(web, erp)
 	String templatePath = null;
 	String newfile = null;
-	if(pluser.equals("WEB")) {
+	/* if(pluser.equals("WEB")) {
 		templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_WEB.jrxml";
 		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\web_sample.pptx";
 	} else if (pluser.equals("ERP")) {
 		templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_ERP.jrxml";
 		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\erp_sample.pptx";
-	}
+	} */
+	templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_EW.jrxml";
+	newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\erp_sample.pptx";
 	//String templatePath = "D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
 	//String templatePath = "D:\\workspace\\sample\\sample_bbs.jrxml";
 	//String templatePath2 = "D:\\workspace\\sample\\sample_bbs.jasper";

@@ -740,8 +740,8 @@
 		            innerHtml += '<tr>';
 		            innerHtml += '    <td>';
 	            	innerHtml += '<div style="float:left">';
-		            innerHtml += '     <select name="jobs'+con+'" id="jobs'+con+'" style="height:45px; width:105px">';
-		            innerHtml += '			<option> [시스템] 선택 </option>';
+		            innerHtml += '     <select name="jobs'+con+'" id="jobs'+con+'" style="height:45px; width:95px; text-align-last:center;">';
+		            innerHtml += '			<option> [시스템] </option>';
 		            innerHtml += strworks; 
 		            innerHtml += '  <option> 기타 </option>';
 		            innerHtml += ' </select>';
@@ -805,8 +805,8 @@
 		            innerHtml += '<tr>';
 		            innerHtml += '    <td>';
 	            	innerHtml += '<div style="float:left">';
-		            innerHtml += '     <select name="njobs'+ncon+'" id="njobs'+ncon+'" style="height:45px; width:105px">';
-		            innerHtml += '			<option> [시스템] 선택 </option>';
+		            innerHtml += '     <select name="njobs'+ncon+'" id="njobs'+ncon+'" style="height:45px; width:95px; text-align-last:center;">';
+		            innerHtml += '			<option> [시스템] </option>';
 		            innerHtml += strworks; 
 		            innerHtml += '  <option> 기타 </option>';
 		            innerHtml += ' </select>';
