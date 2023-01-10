@@ -113,7 +113,7 @@
 		// 맨앞 -를 다른 문자로 치환하기
 		String rp = "";
 		for(int i=0; i<content.length; i++) {
-			if(content[i].substring(0).indexOf("-") > -1 && content[i].substring(0).indexOf("-") < 2){ //맨 앞이 -라면,
+			if(content[i].substring(0).indexOf("-") > -1 && content[i].substring(0).indexOf("-") < 1){ //맨 앞이 -라면,
 				String a = content[i].replaceAll("\r\n","¿");
 				a = a.replaceAll("\r\n","¿");
 				rp += a.replaceFirst("-","§") + "¿";
@@ -159,7 +159,7 @@
 		// 맨앞 -를 다른 문자로 치환하기
 		String nrp = "";
 		for(int i=0; i< ncontent.length; i++) {
-			if(ncontent[i].substring(0).indexOf("-") > -1 && ncontent[i].substring(0).indexOf("-") < 2){ //맨 앞이 -라면,
+			if(ncontent[i].substring(0).indexOf("-") > -1 && ncontent[i].substring(0).indexOf("-") < 1){ //맨 앞이 -라면,
 				String a = ncontent[i].replaceAll("\r\n","¿");
 				a = a.replaceAll("\r\n","");
 				nrp += a.replaceFirst("-","§") + "¿";
@@ -275,7 +275,7 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>

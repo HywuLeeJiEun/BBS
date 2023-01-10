@@ -30,14 +30,27 @@
 
 
 	<%
-	
 
+	String a = request.getParameter("a");
+	
+	String[] b = a.split("\r\n");
 	
 	%>
 <form action="test_submit.jsp" method="post">
-<textarea name="a"></textarea>
+<textarea wrap="hard"><%= a %></textarea>
 <input type="submit">
 </form>
+<br>
+<a><%= b.length %></a>
+<br>
+
+<%
+	for(int i=0; i < b.length; i++) {
+%>
+	<a><%= b[i] %></a><br>
+<% 
+	}
+%>
 
 </body>
 </html>

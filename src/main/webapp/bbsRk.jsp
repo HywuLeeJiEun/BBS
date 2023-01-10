@@ -123,9 +123,9 @@
 		
 		
 		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
-		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist);
+		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, "2023-01-09", pllist);
 		//제출자 확인을 위한 리스트
-		ArrayList<Bbs> fulllist = bbsDAO.getListfull(bbsDeadline, pllist);
+		ArrayList<Bbs> fulllist = bbsDAO.getListfull("2023-01-09", pllist);
 		
 		if(work.equals("") || work == null) {
 			PrintWriter script = response.getWriter();
@@ -189,7 +189,6 @@
 		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 	%>
-	
 		
 	    <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
@@ -217,7 +216,7 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
@@ -492,7 +491,7 @@
 				</tr>
 				<tr valign="bottom" style="height:150px">
 					<%-- <th colspan="5" style=" text-align: center; color:black "><%= bbsDeadline %> <br><br><br><br></th> --%>
-					<th colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-placement="bottom" title="<%= bbsDeadline %>" >해당 제출일로 제출된 주간보고가 없습니다. <br><br><br><br></th>
+					<th colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-placement="bottom" title="<%= bbsDeadline %>" >해당일로 제출된 주간보고가 없습니다. <br><br><br><br></th>
 				</tr>
 
 			</thead>

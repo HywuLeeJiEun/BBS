@@ -137,13 +137,6 @@
 			script.println("</script>");
 		}
 		
-		if(list.size() == 0) {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('제출된 주간보고가 없습니다.')");
-			//script.println("history.back();");
-			script.println("</script>");
-		}
 		
 		// 미제출자 인원 계산
 		int psize = plist.size();
@@ -223,7 +216,7 @@
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
 							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li class="active"><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
+							<li><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
