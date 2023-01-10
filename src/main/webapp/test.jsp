@@ -35,7 +35,7 @@
 	
 	%>
 <form action="test_submit.jsp" method="post">
-<textarea name="a"></textarea>
+<textarea wrap="hard" name="a"></textarea>
 <input type="submit">
 </form>
 

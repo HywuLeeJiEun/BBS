@@ -85,7 +85,7 @@
 			
 		//금주 업무 실적 줄바꿈
 		for(int i=0; i < Integer.parseInt(num); i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
-			for(int j=0; j < Integer.parseInt(numlist[i])-1; j++) { //줄바꿈의 개수만큼
+			for(int j=0; j < Integer.parseInt(numlist[i]); j++) { //줄바꿈의 개수만큼
 					getbbsstart[i] += "\r\n"; // 줄바꿈 추가
 					getbbstarget[i] += "\r\n"; // 줄바꿈 추가
 					getbbsend[i] += "\r\n"; // 줄바꿈 추가
@@ -94,7 +94,7 @@
 			
 		//차주 업무 계획 줄바꿈
 		for(int i=0; i < Integer.parseInt(nnum); i++) { //numarray이 개수만큼, (가지고 있는 content의 요소)
-				for(int j=0; j < Integer.parseInt(nnumlist[i])-1; j++) { //줄바꿈의 개수만큼
+				for(int j=0; j < Integer.parseInt(nnumlist[i]); j++) { //줄바꿈의 개수만큼
 					getbbsnstart[i] += "\r\n"; // 줄바꿈 추가
 					getbbsntarget[i] += "\r\n"; // 줄바꿈 추가
 				}  

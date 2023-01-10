@@ -66,14 +66,7 @@
 		List<String> bbsncontent = new ArrayList<String>();
 		List<String> bbsnstart = new ArrayList<String>();
 		List<String> bbsntarget = new ArrayList<String>();
-		
-		//num, numlist를 가공해야함 (만약 기존 data가 사라진다면, 해당 num 또한 제거)
-		int num = Integer.parseInt(request.getParameter("num"));
-		int nnum = Integer.parseInt(request.getParameter("nnum"));
-		String numl = request.getParameter("numlist");
-		String nnuml = request.getParameter("nnumlist");
-		ArrayList<String> numli = new ArrayList<String>(Arrays.asList(numl.split("&")));
-		ArrayList<String> nnumli = new ArrayList<String>(Arrays.asList(nnuml.split("&")));
+
 		
 		//con, ncon -> bbsContent(con) <- // 이 경우, main은 null이다.
 		int con = 0;
@@ -125,11 +118,6 @@
 			}
 			getbbscontent = String.join("\r\n",bbscontent); // 각 배열 요소마다 줄바꿈 하여 넣음.
 			//getbbscontent = getbbscontent.replace("\r\n","/r/n"); // String 내부의 줄바꿈을 표현
-			} else { // 0~num 개수안에서만 이뤄지도록 하며, 해당 내용 제거
-				if(i < numli.size()) {
-					num -= 1; //개수를 하나 삭제함 
-					numli.set(i, ""); //빈값으로 만들기
-				}
 			}
 			
 			//금주 접수일 (date)
@@ -208,11 +196,6 @@
 				}
 			getbbsncontent = String.join("\r\n",bbsncontent);
 			//getbbsncontent = getbbsncontent.replace("\r\n","/r/n");
-			}else { // 0~nnum 개수안에서만 이뤄지므로, 해당 내용 제거
-				if(i < nnumli.size()) {
-				nnum -= 1; //개수를 하나 삭제함 
-				nnumli.set(i, ""); //빈값으로 만들기
-				}
 			}
 			
 			//차주 접수일 (date)
@@ -279,6 +262,24 @@
 			erp_division += request.getParameter(e+(i)) + "\r\n";
 		} 
 		
+		
+		//bbscontent를 활용해 connum, nummlist 활용하기
+		//num, numlist를 가공해야함 (만약 기존 data가 사라진다면, 해당 num 또한 제거)
+		int num = bbscontent.size(); //가공된 list의 크기
+		int nnum = bbsncontent.size(); //가공된 list의 크기
+		String numl = "";
+		String nnuml = "";
+		
+		
+		for(int i=0; i < bbscontent.size(); i++) {
+			numl += Integer.toString(bbscontent.get(i).split("\r\n").length-1) + "&";
+		}
+		for(int i=0; i < bbsncontent.size(); i++) {
+			nnuml += Integer.toString(bbsncontent.get(i).split("\r\n").length-1) + "&";
+		}
+		
+		ArrayList<String> numli = new ArrayList<String>(Arrays.asList(numl.split("&")));
+		ArrayList<String> nnumli = new ArrayList<String>(Arrays.asList(nnuml.split("&")));
 		//nnumlist 저장
 		numli.removeAll(Arrays.asList("",null));
 		nnumli.removeAll(Arrays.asList("",null));
@@ -287,7 +288,15 @@
 		
 		
 	%>
-
+<%-- 	<a><%= bbscontent.size() %></a><br>
+	<a><%= numl %></a><br>
+	<textarea><%= numlist %></textarea>
+	<br><br> --%>
+	<%
+		for(int i=0; i < bbscontent.size(); i++) {
+	%>
+	<textarea><%= bbscontent.get(i) %></textarea><br><br>
+	<% } %>
 		<form id="post_item" method="post" action="mainActionComplete.jsp">
 			<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px; display:none" >
 				<tbody id="tbody">

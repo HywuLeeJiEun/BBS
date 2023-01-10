@@ -615,7 +615,7 @@
 									%>
 									<tr>
 										 <td>
-											 <textarea class="textarea con" id="bbsContent" required style="height:45px;width:100%; border:none; resize:none " placeholder="업무내용" name="bbsContent0"><%= bbscontent[i] %></textarea>
+											 <textarea class="textarea con" wrap="hard" id="bbsContent" required style="height:45px;width:100%; border:none; resize:none " placeholder="업무내용" name="bbsContent0"><%= bbscontent[i] %></textarea>
 										 </td>
 										 <td><textarea class="textarea" id="bbsStart" style="height:45px; width:100%; border:none; resize:none"  placeholder="접수일" required name="bbsStart0" ><%= bbsstart[i] %></textarea></td>
 										 <td><textarea class="textarea" id="bbsTarget" style="height:45px; width:100%; border:none; resize:none"  placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget0" ><%= bbstarget[i] %></textarea></td>
@@ -626,7 +626,7 @@
 										} else {
 									%>
 										<tr>
-											 <td><textarea class="textarea con" id="bbsContent" required style="height:45px;width:100%; border:none; resize:none " placeholder="업무내용" name="bbsContent<%= i %>"><%= bbscontent[i] %></textarea></td>
+											 <td><textarea class="textarea con" wrap="hard" id="bbsContent" required style="height:45px;width:100%; border:none; resize:none " placeholder="업무내용" name="bbsContent<%= i %>"><%= bbscontent[i] %></textarea></td>
 											 <td><textarea class="textarea" id="bbsStart" style="height:45px; width:100%; border:none; resize:none"  placeholder="접수일" required name="bbsStart<%= i %>" ><%= bbsstart[i] %></textarea></td>
 										 	 <td><textarea class="textarea" id="bbsTarget" style="height:45px; width:100%; border:none; resize:none"  placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget<%= i %>" ><%= bbstarget[i] %></textarea></td>
 										 	 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none; resize:none"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd<%= i %>" ><%= bbsend[i] %></textarea></td>
@@ -679,9 +679,9 @@
 								if(i==0) {
 							%>
 							<tr>
-								 <td><textarea class="textarea ncon" id="bbsNContent2" required style="height:45px;width:100%; border:none; resize:none" placeholder="업무내용" name="bbsNContent0"><%= bbsncontent[i] %></textarea></td>
-								  <td><textarea class="textarea" id="bbsNStart2" style="height:45px; width:100%; border:none; resize:none"  placeholder="접수일" required name="bbsNStart0" ><%= bbsnstart[i] %></textarea></td>
-								 <td><textarea class="textarea" id="bbsNTarget2" style="height:45px; width:100%; border:none; resize:none"  placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget0" ><%= bbsntarget[i] %></textarea></td>
+								 <td><textarea class="textarea ncon" wrap="hard" id="bbsNContent2" required style="height:45px;width:100%; border:none; resize:none" placeholder="업무내용" name="bbsNContent0"><%= bbsncontent[i] %></textarea></td>
+								  <td><textarea class="textarea" wrap="hard" id="bbsNStart2" style="height:45px; width:100%; border:none; resize:none"  placeholder="접수일" required name="bbsNStart0" ><%= bbsnstart[i] %></textarea></td>
+								 <td><textarea class="textarea" wrap="hard" id="bbsNTarget2" style="height:45px; width:100%; border:none; resize:none"  placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget0" ><%= bbsntarget[i] %></textarea></td>
 								 <td></td>
 								<td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delNRow" name="delNRow" class="btn btn-danger"> 삭제 </button></td>
 							</tr>
@@ -689,9 +689,9 @@
 								} else {
 							%>
 							<tr>
-								 <td><textarea class="textarea ncon" id="bbsNContent<%= i %>" required style="height:45px;width:100%; border:none; resize:none" placeholder="업무내용" name="bbsNContent<%= i %>"><%= bbsncontent[i] %></textarea></td>
-								  <td><textarea class="textarea" id="bbsNStart<%= i %>" style="height:45px; width:100%; border:none; resize:none"  placeholder="접수일" required name="bbsNStart<%= i %>" ><%= bbsnstart[i] %></textarea></td>
-								 <td><textarea class="textarea" id="bbsNTarget<%= i %>" style="height:45px; width:100%; border:none; resize:none"  placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget<%= i %>" ><%= bbsntarget[i] %></textarea></td>
+								 <td><textarea class="textarea ncon" wrap="hard" id="bbsNContent<%= i %>" required style="height:45px;width:100%; border:none; resize:none" placeholder="업무내용" name="bbsNContent<%= i %>"><%= bbsncontent[i] %></textarea></td>
+								  <td><textarea class="textarea" wrap="hard" id="bbsNStart<%= i %>" style="height:45px; width:100%; border:none; resize:none"  placeholder="접수일" required name="bbsNStart<%= i %>" ><%= bbsnstart[i] %></textarea></td>
+								 <td><textarea class="textarea" wrap="hard" id="bbsNTarget<%= i %>" style="height:45px; width:100%; border:none; resize:none"  placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget<%= i %>" ><%= bbsntarget[i] %></textarea></td>
 								  <td></td>
 								  <td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delNRow" name="delNRow" class="btn btn-danger"> 삭제 </button></td>
 							</tr>
@@ -853,7 +853,7 @@
 		            innerHtml += ' </select>';
 		            innerHtml += ' </div></td>';
 		            innerHtml += ' <td><div style="float:left">';
-		            innerHtml += ' <textarea class="textarea con" id="bbsContent'+con+'" required style="height:45px;width:180%; border:none; resize:none" placeholder="업무내용" name="bbsContent'+con+'"></textarea>';
+		            innerHtml += ' <textarea wrap="hard" class="textarea con" id="bbsContent'+con+'" required style="height:45px;width:180%; border:none; resize:none" placeholder="업무내용" name="bbsContent'+con+'"></textarea>';
 		            innerHtml += '  </div> </td>';
 		            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart'+con+'" class="form-control" placeholder="접수일" name="bbsStart'+con+'"  value="'+now+'"></td>';
 		            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+con+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsTarget'+con+'" ></td>';
@@ -923,7 +923,7 @@
 		            innerHtml += ' </select>';
 		            innerHtml += ' </div></td>';
 		            innerHtml += ' <td><div style="float:left">';
-		            innerHtml += ' <textarea class="textarea ncon" id="bbsNContent'+ncon+'" required style="height:45px;width:180%; resize:none; border:none; " placeholder="업무내용" name="bbsNContent'+ncon+'"></textarea>';
+		            innerHtml += ' <textarea wrap="hard" class="textarea ncon" id="bbsNContent'+ncon+'" required style="height:45px;width:180%; resize:none; border:none; " placeholder="업무내용" name="bbsNContent'+ncon+'"></textarea>';
 		            innerHtml += '  </div> </td>';
 		            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNStart'+ncon+'" class="form-control" placeholder="접수일" name="bbsNStart'+ncon+'" value="'+now+'"></td>';
 		            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget'+ncon+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsNTarget'+ncon+'" ></td>';
