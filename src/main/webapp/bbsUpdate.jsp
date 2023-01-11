@@ -657,7 +657,7 @@
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
 							  <textarea class="textarea" id="erp_user0" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user0"></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-							  <textarea class="textarea" id="erp_stext0" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext0"></textarea></td>
+							  <textarea class="textarea"  id="erp_stext0" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext0"></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
 							  <textarea class="textarea" id="erp_authority0" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority0"></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  

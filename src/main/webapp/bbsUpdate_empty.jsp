@@ -121,7 +121,7 @@
 		String rp = "";
 		String[] a = bbs.getBbsContent().split("\r\n");
 		for(int i=0; i < a.length; i++) {
-			if(a[i].substring(0).indexOf('-') > -1 && a[i].substring(0).indexOf('-') < 2) {
+			if(a[i].substring(0).indexOf('-') > -1 && a[i].substring(0).indexOf('-') < 1) {
 				String y = a[i].replaceAll("\r\n","¿");
 				y = y.replaceAll("\r\n","¿");
 				rp += y.replaceFirst("-","§") + "¿";
@@ -210,7 +210,7 @@
 		String nrp = "";
 		String[] na = bbs.getBbsNContent().split("\r\n");
 		for(int i=0; i < na.length; i++) {
-			if(na[i].substring(0).indexOf('-') > -1 && na[i].substring(0).indexOf('-') < 2) {
+			if(na[i].substring(0).indexOf('-') > -1 && na[i].substring(0).indexOf('-') < 1) {
 				String y = na[i].replaceAll("\r\n","¿");
 				y = y.replaceAll("\r\n","¿");
 				nrp += y.replaceFirst("-","§") + "¿";
@@ -276,27 +276,6 @@
 		ArrayList<String> erplist = bbsDAO.geterpbbs(bbs.getBbsID());
 		
 		
-		//줄바꿈에 대한 정보를 넘기기 (업무 내용) 
-		int num = bbscontent.length; //bbscontent 크기
-		String[] numli = new String[num]; //num 크기만큼 생성
-		for(int i=0; i<num; i++) {
-			String ab = bbscontent[i];
-			//int number = ab.length() - ab.replace("\r\n", "").length();
-			int number = ab.split("\r\n").length;
-			numli[i] = Integer.toString(number);
-		}
-		String numlist = String.join("&",numli);
-		
-		int nnum = bbsncontent.length; //bbsncontent 크기
-		String[] nnumli = new String[nnum]; //num 크기만큼 생성
-		for(int i=0; i<nnum; i++) {
-			String ab = bbsncontent[i];
-			//int number = ab.length() - ab.replace("\r\n", "").length();
-			int number = ab.split("\r\n").length;
-			nnumli[i] = Integer.toString(number); //여기서 에러
-		}
-		String nnumlist = String.join("&",nnumli);
-		
 	%>
 
 	<c:set var="works" value="<%= works %>" />
@@ -327,7 +306,7 @@
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
 							<li><a href="bbs.jsp">조회</a></li>
-							<li class="active"><a href="bbsUpdate.jsp">작성</a></li>
+							<li  class="active"><a href="bbsUpdate.jsp">작성</a></li>
 							<li><a href="bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
@@ -577,17 +556,13 @@
 									<tr align="center">
 										<td style="display:none"><textarea class="textarea" id="bbsManager" name="bbsManager" style="height:auto; width:100%; border:none; overflow:auto" placeholder="구분/담당자"   readonly><%= workSet %><%= name %></textarea>
 											<textarea style="display:none" id="len"><%= bbscontent.length %></textarea>
-										 	<textarea style="display:none" name="num"><%= num %></textarea>
-											<textarea style="display:none" name="nnum"><%= nnum %></textarea>
-											<textarea style="display:none" name="numlist"><%= numlist %></textarea>
-											<textarea style="display:none" name="nnumlist"><%= nnumlist %></textarea>
 											<textarea style="display:none" id="nlen"><%= bbsncontent.length %></textarea></td> 
 									</tr>
-										<tr>
+									<tr>
 											 <td>
 										 	<div style="float:left">
-											 <select name="jobs0" id="jobs0" style="height:45px; width:105px">
-													 <option> [시스템] 선택 </option>
+											 <select name="jobs0" id="jobs0" style="height:45px; width:95px; text-align-last:center;">
+													 <option> [시스템] </option>
 													 <%
 													 for(int count=0; count < works.size(); count++) {
 													 %>
@@ -599,14 +574,13 @@
 												 </select>
 											 </div>
 											 <div style="float:left">
-											 <textarea class="textarea  con" id="bbsContent" required style="height:45px;width:200%; border:none; resize:none " placeholder="업무내용" name="bbsContent0"></textarea>
+											 <textarea class="textarea  con" wrap="hard" id="bbsContent" required style="height:45px;width:200%; border:none; resize:none " placeholder="업무내용" name="bbsContent0"></textarea>
 											 </div>
 										 </td>
 											 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart0" value="<%= now %>" ></td>
 										 	 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget0" ></td>
 										 	 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none; resize:none"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd0" ></textarea></td>
 										</tr>
-
 									</tbody>
 								</table>
 									<div id="wrapper" style="width:100%; text-align: center;">
@@ -632,8 +606,8 @@
 							<tr>
 								 <td>
 								 	<div style="float:left">
-									 <select name="jobs0" id="jobs0" style="height:45px; width:105px">
-											 <option> [시스템] 선택 </option>
+									 <select name="njobs0" id="njobs0" style="height:45px; width:95px; text-align-last:center;">
+											 <option> [시스템] </option>
 											 <%
 											 for(int count=0; count < works.size(); count++) {
 											 %>
@@ -645,7 +619,7 @@
 										 </select>
 									 </div>
 									 <div style="float:left">
-									 <textarea class="textarea ncon" id="bbsNContent0" required style="height:45px;width:200%; border:none; resize:none" placeholder="업무내용" name="bbsNContent0"></textarea>
+									 <textarea class="textarea ncon" wrap="hard" id="bbsNContent0" required style="height:45px;width:200%; border:none; resize:none" placeholder="업무내용" name="bbsNContent0"></textarea>
 									 </div>
 								 </td>
 								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart0" class="form-control" placeholder="접수일" name="bbsNStart0" value="<%= now %>" ></td>
@@ -657,14 +631,14 @@
 								<button type="button" style="margin-bottom:5px; margin-top:5px; margin-right:35px; margin-bottom:20px" onclick="addNRow()" class="btn btn-primary"> + </button>
 						</div>
 						
-								<!-- erp_bbs에 자료가 있는 경우 하단 출력! -->
-						<table class="table" id="accountTable" style="margin-bottom:50px">
+						<!-- erp_bbs에 자료가 있는 경우 하단 출력! -->
+						<table class="table" id="accountTable" style="margin-bottom:50px; display:none">
 							<tbody id="tbody">
 								<tr>
 									<th colspan="5" style="background-color: #ccffcc; border:none;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
 								</tr>
 								<tr style="background-color: #FF9933; border: 1px solid">
-									<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"><%= list.get(0) %></textarea></th>
+									<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"></textarea></th>
 									<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
 									<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
 									<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
@@ -677,7 +651,7 @@
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
 							  <textarea class="textarea" id="erp_user0" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user0"></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-							  <textarea class="textarea" id="erp_stext0" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext0"></textarea></td>
+							  <textarea class="textarea"  id="erp_stext0" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext0"></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
 							  <textarea class="textarea" id="erp_authority0" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority0"></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
@@ -685,7 +659,7 @@
 						</tr>
 					</tbody>
 				</table>
-				<div id="wrapper_account" style="width:100%; text-align: center;">
+				<div id="wrapper_account" style="width:100%; text-align: center; display:none;">
 					<button type="button" style="margin-bottom:15px; margin-right:30px" onclick="addRowAccount()" class="btn btn-primary"> + </button>
 				</div>
 				
@@ -721,7 +695,7 @@
 	</script>	
 	
 	<script>
-	var trCnt = 0;
+	var trCnt = 1;
 	var conName = document.getElementsByClassName('con');
 	var con = conName[conName.length-1].getAttribute('name');
 		con = Number(con.replace('bbsContent',''));
@@ -760,14 +734,14 @@
 		            innerHtml += '<tr>';
 		            innerHtml += '    <td>';
 	            	innerHtml += '<div style="float:left">';
-		            innerHtml += '     <select name="jobs'+con+'" id="jobs'+con+'" style="height:45px; width:105px">';
-		            innerHtml += '			<option> [시스템] 선택 </option>';
+		            innerHtml += '     <select name="jobs'+con+'" id="jobs'+con+'" style="height:45px; width:95px; text-align-last:center;">';
+		            innerHtml += '			<option> [시스템] </option>';
 		            innerHtml += strworks; 
 		            innerHtml += '  <option> 기타 </option>';
 		            innerHtml += ' </select>';
 		            innerHtml += ' </div>';
 		            innerHtml += ' <div style="float:left">';
-		            innerHtml += ' <textarea class="textarea con" id="bbsContent'+con+'" required style="height:45px;width:200%; border:none; resize:none" placeholder="업무내용" name="bbsContent'+con+'"></textarea>';
+		            innerHtml += ' <textarea class="textarea con" wrap="hard" id="bbsContent'+con+'" required style="height:45px;width:180%; border:none; resize:none" placeholder="업무내용" name="bbsContent'+con+'"></textarea>';
 		            innerHtml += '  </div> </td>';
 		            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart'+con+'" class="form-control" placeholder="접수일" name="bbsStart'+con+'"  value="'+now+'"></td>';
 		            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+con+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsTarget'+con+'" ></td>';
@@ -795,7 +769,7 @@
 	
 	
 	<script>
-	var trNCnt = 0;
+	var trNCnt = 1;
 	var nconName = document.getElementsByClassName('ncon');
 	var ncon= nconName[nconName.length-1].getAttribute('name');
 		ncon = Number(ncon.replace('bbsNContent',''));
@@ -825,14 +799,14 @@
 		            innerHtml += '<tr>';
 		            innerHtml += '    <td>';
 	            	innerHtml += '<div style="float:left">';
-		            innerHtml += '     <select name="njobs'+ncon+'" id="njobs'+ncon+'" style="height:45px; width:105px">';
-		            innerHtml += '			<option> [시스템] 선택 </option>';
+		            innerHtml += '     <select name="njobs'+ncon+'" id="njobs'+ncon+'" style="height:45px; width:95px; text-align-last:center;">';
+		            innerHtml += '			<option> [시스템] </option>';
 		            innerHtml += strworks; 
 		            innerHtml += '  <option> 기타 </option>';
 		            innerHtml += ' </select>';
 		            innerHtml += ' </div>';
 		            innerHtml += ' <div style="float:left">';
-		            innerHtml += ' <textarea class="textarea ncon" id="bbsNContent'+ncon+'" required style="height:45px;width:200%; resize:none; border:none; " placeholder="업무내용" name="bbsNContent'+ncon+'"></textarea>';
+		            innerHtml += ' <textarea wrap="hard" class="textarea ncon" id="bbsNContent'+ncon+'" required style="height:45px;width:180%; resize:none; border:none; " placeholder="업무내용" name="bbsNContent'+ncon+'"></textarea>';
 		            innerHtml += '  </div> </td>';
 		            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNStart'+ncon+'" class="form-control" placeholder="접수일" name="bbsNStart'+ncon+'" value="'+now+'"></td>';
 		            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget'+ncon+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsNTarget'+ncon+'" ></td>';
@@ -916,9 +890,6 @@
 	
 	<script>
 	var trACnt = 1;
-/* 	if(document.getElementById("elen") != null){
-		trACnt = parseInt(document.getElementById("elen").value);
-	} */
 	//'계정관리' 업무를 추가함.
 	function addRowAccount() {
 		//var trACnt = $("#accountTable tr").length; // 기본을 2로 잡음!
