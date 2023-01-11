@@ -29,7 +29,7 @@ if(id != null){
 	PrintWriter script = response.getWriter();
 	script.println("<script>");
 	script.println("alert('현재 로그인 중입니다.')");
-	script.println("location.href='bbs.jsp'");
+	script.println("location.href='/BBS/user/bbs.jsp'");
 	script.println("</script>");
 }
 
@@ -58,10 +58,9 @@ if(id != null){
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li><a href="bbs.jsp">조회</a></li>
-							<li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(최종 제출)</a></li>
+							<li><a href="/BBS/user/bbs.jsp">조회</a></li>
+							<li><a href="/BBS/user/bbsUpdate.jsp">작성</a></li>
+							<li><a href="/BBS/user/bbsUpdateDelete.jsp">수정 및 제출</a></li>
 						</ul>
 					</li>
 				</ul>

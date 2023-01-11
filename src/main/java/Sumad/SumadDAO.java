@@ -64,11 +64,12 @@ public class SumadDAO {
 		
 		
 		//summary sum_id를 통해 내용 가져오기 (전체목록)
-				public ArrayList<Sumad> getlistSumAlllist(){
-					String sql =  "select * from summary_admin order by bbsDeadline desc";
+				public ArrayList<Sumad> getlistSumAlllist(int pageNumber){
+					String sql =  "select * from summary_admin order by bbsDeadline desc limit ?,10";
 							ArrayList<Sumad> list = new ArrayList<Sumad>();
 					try {
 						PreparedStatement pstmt = conn.prepareStatement(sql);
+						 pstmt.setInt(1, (pageNumber-1) * 10);
 						rs = pstmt.executeQuery();
 						while(rs.next()) {
 							Sumad sum = new Sumad();

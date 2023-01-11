@@ -567,7 +567,7 @@ public class BbsDAO {
 		// 검색 메소드 (일반 사용자용)
 				public ArrayList<Bbs> getRkSearch(int pageNumber, String searchField, String searchText){//특정한 리스트를 받아서 반환
 				      ArrayList<Bbs> list = new ArrayList<Bbs>();
-				      String SQL ="select * from (select * from bbs where sign='마감' or sign='승인') a WHERE a."+searchField.trim();
+				      String SQL ="select * from bbs a WHERE a."+searchField.trim();
 				      try {
 				            if(searchText != null && !searchText.equals("") ){
 				                SQL +=" LIKE '%"+searchText.trim()+"%' order by a.bbsDeadline desc limit ?,10";
@@ -608,7 +608,7 @@ public class BbsDAO {
 				
 				//select * from (select * from bbs where userName like '%이지은%') a where a.sign="미승인" order by a.bbsDeadline ASC limit 0,10; 
 				// 검색 메소드 (일반 사용자용 -> '미승인' 만을 가져옴!)
-				public ArrayList<Bbs> getNoneSignSearch(int pageNumber, String searchField, String searchText){//특정한 리스트를 받아서 반환
+				public ArrayList<Bbs> getNoneSignSearch(int pageNumber, String searchText){//특정한 리스트를 받아서 반환
 				      ArrayList<Bbs> list = new ArrayList<Bbs>();
 				      String SQL ="select * from (select * from bbs where userName like '%"+searchText.trim()+"%') a"
 				      		+ " WHERE a.sign='미승인' order by a.bbsDeadline ASC limit ?,10";
