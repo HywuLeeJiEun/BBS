@@ -31,14 +31,19 @@
 	<parameter name="erp_division1" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[SELECT *
-FROM bbs.summary_admin
+FROM  rms.summary_admin 
 WHERE 
-	 bbs.summary_admin.`bbsDeadline` = $P{deadLine} 
-ORDER BY bbs.summary_admin.sumad_id DESC]]>
+	 rms.summary_admin.`bbsDeadline` = $P{deadLine} 
+ORDER BY rms.summary_admin.bbsDeadline DESC]]>
 	</queryString>
-	<field name="sumad_id" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="sumad_id"/>
-		<property name="com.jaspersoft.studio.field.label" value="sumad_id"/>
+	<field name="userID" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="userID"/>
+		<property name="com.jaspersoft.studio.field.label" value="userID"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="summary_admin"/>
+	</field>
+	<field name="bbsDeadline" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="bbsDeadline"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsDeadline"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="summary_admin"/>
 	</field>
 	<field name="e_content" class="java.lang.String">
@@ -124,11 +129,6 @@ ORDER BY bbs.summary_admin.sumad_id DESC]]>
 	<field name="sign" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="sign"/>
 		<property name="com.jaspersoft.studio.field.label" value="sign"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="summary_admin"/>
-	</field>
-	<field name="bbsDeadline" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsDeadline"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsDeadline"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="summary_admin"/>
 	</field>
 	<field name="sumadDate" class="java.sql.Timestamp">

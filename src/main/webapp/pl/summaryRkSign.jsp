@@ -1,3 +1,4 @@
+<%@page import="rms.RmsDAO"%>
 <%@page import="Sumad.Sumad"%>
 <%@page import="Sumad.SumadDAO"%>
 <%@page import="java.util.Arrays"%>
@@ -13,8 +14,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
-<%@ page import="bbs.BbsDAO" %>
-<%@ page import="bbs.Bbs"%>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
 
@@ -38,6 +37,9 @@
 <body>
 	<%
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		RmsDAO rms = new RmsDAO();
+		SumadDAO sumadDAO = new SumadDAO();
+		
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
@@ -60,24 +62,24 @@
 		
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
-				String workSet;
-				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-				List<String> works = new ArrayList<String>();
+		String workSet;
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		List<String> works = new ArrayList<String>();
+		
+		if(code == null) {
+			workSet = "";
+		} else {
+			for(int i=0; i < code.size(); i++) {
 				
-				if(code == null) {
-					workSet = "";
-				} else {
-					for(int i=0; i < code.size(); i++) {
-						
-						String number = code.get(i);
-						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-						String manager = userDAO.getManager(number);
-						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-					}
-					
-					workSet = String.join("/",works);
-					
-				}
+				String number = code.get(i);
+				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+				String manager = userDAO.getManager(number);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			
+			workSet = String.join("/",works);
+			
+		}
 				
 		String name = userDAO.getName(id);
 		
@@ -124,10 +126,9 @@
 		String[] pllist = plist.toArray(new String[plist.size()]); //해당 pllist를 바꿔야함! (제출한 사람만)
 		
 		
-		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
-		SumadDAO sumadDAO = new SumadDAO();
-		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist);
-		ArrayList<Sumad> sumlist = sumadDAO.getlistSumAll();
+		ArrayList<Sumad> sumad = sumadDAO.getlistSumAlllist(pageNumber); //승인상태 상관없이 모두 불러옴!
+		//다음  페이지가 있는지 확인
+		ArrayList<Sumad> afsumad = sumadDAO.getlistSumAlllist(pageNumber+1); //승인상태 상관없이 모두 불러옴!
 		
 		if(work.equals("") || work == null) {
 			PrintWriter script = response.getWriter();
@@ -137,7 +138,7 @@
 			script.println("</script>");
 		}
 		
-		if(list.size() == 0) {
+		if(sumad.size() == 0) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('제출된 요약본이 없습니다.')");
@@ -145,50 +146,7 @@
 			script.println("</script>");
 		}
 		
-		// 미제출자 인원 계산
-		int psize = plist.size();
-		int lsize = list.size();
-		int noSub =  psize - lsize;
-		
-		//해당 인원 전원 불러오기
-		ArrayList<String> username = new ArrayList<String>();
-		for(int i=0; i<plist.size(); i++) {
-			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
-			username.add(userName);	
-		}
-		String[] usernamedata = username.toArray(new String[username.size()]);
-		Arrays.sort(usernamedata);
-		
-		String userdata = String.join(", ", usernamedata);
-		
-		
-		//미제출자 인원
-		ArrayList<String> noSubname = new ArrayList<String>();
-		ArrayList<String> Subname = new ArrayList<String>();
-		// 넘기기 위한 bbsID
-		ArrayList<String> bbsId = new ArrayList<String>();
-		//제출한 bbsID 찾기
-		for(int i=0; i<list.size(); i++) {
-			Subname.add(list.get(i).getUserID()); //제출한 user id 도출.
-			bbsId.add(Integer.toString(list.get(i).getBbsID()));
-		}
-		for(int i=0; i<Subname.size(); i++) {
-			plist.remove(Subname.get(i));
-		}
-		//제출 안한 인원 찾기
-		for(int i=0; i<plist.size(); i++) {
-			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
-			noSubname.add(userName);	
-		}
-		
-		String[] nousernamedata = noSubname.toArray(new String[noSubname.size()]);
-		Arrays.sort(nousernamedata);
-		
-		String nouserdata = String.join(", ", nousernamedata);
-		
-		//bbsID string으로 변환
-		String bbsID = String.join(",",bbsId);
-		
+	
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 		
 		String str = "승인 및 마감처리가 된 요약본을 <br>";
@@ -243,7 +201,7 @@
 								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
-								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
 								<li class="active" id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
@@ -469,14 +427,14 @@
 				</thead>
 				<tbody>
 					<%
-					if(sumlist.size() != 0) {
-						for(int i = 0; i < sumlist.size(); i++){
+					if(sumad.size() != 0) {
+						for(int i = 0; i < sumad.size(); i++){
 							
 							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
 							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 							
 							//bbsDeadline 찾아오기
-							String dl = sumlist.get(i).getBbsDeadline();
+							String dl = sumad.get(i).getBbsDeadline();
 							Date time = new Date();
 							String timenow = dateFormat.format(time);
 
@@ -490,37 +448,37 @@
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/admin/bbsRkAdmin.jsp?sumad_id=<%= sumlist.get(i).getSumad_id() %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
+						<a href="/BBS/pl/bbsRkAdmin.jsp?bbsDeadline=<%= sumad.get(i).getBbsDeadline() %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
 							[ERP/WEB] - summary (<%= dl %>)</a></td>
-						<td><%= sumlist.get(i).getSumadUpdate() %></td>
-						<td><%= sumlist.get(i).getSumadDate().substring(0, 11) + sumlist.get(i).getSumadDate().substring(11, 13) + "시"
-							+ sumlist.get(i).getSumadDate().substring(14, 16) + "분" %></td>
+						<td><%= sumad.get(i).getSumadUpdate() %></td>
+						<td><%= sumad.get(i).getSumadDate().substring(0, 11) + sumad.get(i).getSumadDate().substring(11, 13) + "시"
+							+ sumad.get(i).getSumadDate().substring(14, 16) + "분" %></td>
 						
 						<!-- 승인/미승인/마감 표시 -->
 						<td>
 						<%
 						String sign = null;
 						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
-							sign = sumlist.get(i).getSign();
+							sign = sumad.get(i).getSign();
 						} else {
 							sign="마감";
 							// 데이터베이스에 마감처리 진행
-							int a = bbsDAO.sumadSign(Integer.parseInt(sumlist.get(i).getSumad_id()));
+							int a = sumadDAO.sumadSign(sumad.get(0).getBbsDeadline());
 						}
 						
 						//색상 정의
 						String e_state = "";
 						String w_state = "";
-						if(sumlist.get(i).getE_state().equals("완료")) {
+						if(sumad.get(i).getE_state().equals("완료")) {
 							e_state = "#00ff00";
-						} else if(sumlist.get(i).getE_state().equals("진행중")){
+						} else if(sumad.get(i).getE_state().equals("진행중")){
 							e_state = "#ffff00";
 						} else {
 							e_state = "#ff0000";
 						}
-						if(sumlist.get(i).getW_state().equals("완료")) {
+						if(sumad.get(i).getW_state().equals("완료")) {
 							w_state = "#00ff00";
-						} else if(sumlist.get(i).getW_state().equals("진행중")){
+						} else if(sumad.get(i).getW_state().equals("진행중")){
 							w_state = "#ffff00";
 						} else {
 							w_state = "#ff0000";
@@ -529,7 +487,7 @@
 						<%= sign %>
 						</td>
 						<td>
-							<button class="btn btn-success" id="<%= sumlist.get(i).getSumad_id() %>" style="font-size:12px" onclick="location.href='/BBS/admin/pptx/pptAdmin.jsp?bbsDeadline=<%= sumlist.get(i).getBbsDeadline() %>&e_state=<%= e_state %>&w_state=<%= w_state %>'"> 출력 </button>
+							<button class="btn btn-success" style="font-size:12px" onclick="location.href='/BBS/admin/pptx/pptAdmin.jsp?bbsDeadline=<%= sumad.get(i).getBbsDeadline() %>&e_state=<%= e_state %>&w_state=<%= w_state %>'"> 출력 </button>
 						</td>
 					</tr>
 					<%
@@ -554,7 +512,7 @@
 				<a href="/BBS/pl/summaryRkSign.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(bbsDAO.nextPage(pageNumber + 1)){
+				}if(afsumad.size() != 0){
 			%>
 				<a href="/BBS/pl/summaryRkSign.jsp?pageNumber=<%=pageNumber + 1 %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>
@@ -562,8 +520,8 @@
 				}
 			%>
 			<%-- <a href="ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> 요약 pptx</a> --%>
-			<%-- <a href="summaryRk.jsp" style="width:90px;" class="btn btn-primary pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="<%= pl %> Summary 조회"> <%= pl %> 목록 </a>  --%>
-			<a href="/BBS/pl/bbsRkwrite.jsp?bbsID=<%=bbsID%>" style="width:100px; margin-right:20px; display:none" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> Summary</a>
+			<a href="summaryRk.jsp" style="width:50px;" class="btn btn-primary pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="<%= pl %> Summary 조회"> 목록 </a>
+			<a href="/BBS/pl/bbsRkwrite.jsp" style="width:100px; margin-right:20px; display:none" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> Summary</a>
 		</div>
 	</div>
 	
@@ -651,17 +609,7 @@
 	<script>
 	$("#summary_nav").on('mousedown', function() {
 		//noSub -> 미제출자
-		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
-			var go;
-			go = confirm("미제출자가 있습니다. 작성 페이지로 넘어가시겠습니까?");
-			
-			if(go) { //출력 o
 				document.getElementById("summary").click();
-			} else { //출력 x
-				
-			}
-		
-		}
 	});
 	</script>
 

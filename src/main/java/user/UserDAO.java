@@ -22,7 +22,7 @@ public class UserDAO { //DAO : data access object
 	//2. DB 접근을 자바가 직접하는 것이 아닌, DAO가 담당하도록 하여 호출 문제를 해결함.
 	public UserDAO() {
 		try {
-			String dbURL = "jdbc:mariadb://localhost:3306/bbs"; //연결할 DB
+			String dbURL = "jdbc:mariadb://localhost:3306/rms"; //연결할 DB
 			String dbID = "root"; //DB 접속 ID
 			String dbPassword = "7471350"; //DB 접속 password
 			Class.forName("org.mariadb.jdbc.Driver");
@@ -168,54 +168,54 @@ public class UserDAO { //DAO : data access object
 		}
 		
 		//이름을 검색하여 유저 정보 가져오기.
-				public User getUser(String name) {
-					String sql = "select * from user where name=?";
-					try {
-						PreparedStatement pstmt = conn.prepareStatement(sql);
-						pstmt.setString(1, name);
-						rs = pstmt.executeQuery();
-						if(rs.next()) {
-							User user = new User();
-							user.setId(rs.getString(1));
-							user.setPassword(rs.getString(2));
-							user.setName(rs.getString(3));
-							user.setRank(rs.getString(4));
-							user.setEmail(rs.getString(5));
-							user.setManager(rs.getString(6));
-							user.setAuthority(rs.getString(6));
-							return user;
-						}
-					}catch (Exception e) {
-						e.printStackTrace();
-					}
-					return null;
+		public User getUser(String name) {
+			String sql = "select * from user where name=?";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, name);
+				rs = pstmt.executeQuery();
+				if(rs.next()) {
+					User user = new User();
+					user.setId(rs.getString(1));
+					user.setPassword(rs.getString(2));
+					user.setName(rs.getString(3));
+					user.setRank(rs.getString(4));
+					user.setEmail(rs.getString(5));
+					user.setManager(rs.getString(6));
+					user.setAuthority(rs.getString(6));
+					return user;
 				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
 				
 				
-				//manager를 나누어 code를 저장한다.
-						public ArrayList<String> getAlljobs() {
-							String sql = "select group_concat(work separator ',') from jobs";
-							try {
-								PreparedStatement pstmt = conn.prepareStatement(sql);
-								rs = pstmt.executeQuery();
-								if(rs.next()) {
-									if(rs.getString(1) == null) {
-										return null;
-									}
-									String s = rs.getString(1);
-									String[] codeArray = s.split(",");
-									List<String> split = Arrays.asList(codeArray);
-									ArrayList<String> list = new ArrayList<String>();
-									
-									list.addAll(split);
-									return list;
-								}
-							}catch (Exception e) {
-								e.printStackTrace();
-							}
-							return null; //데이터베이스 오류
-						}
-						
+		//manager를 나누어 code를 저장한다.
+		public ArrayList<String> getAlljobs() {
+			String sql = "select group_concat(work separator ',') from jobs";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				if(rs.next()) {
+					if(rs.getString(1) == null) {
+						return null;
+					}
+					String s = rs.getString(1);
+					String[] codeArray = s.split(",");
+					List<String> split = Arrays.asList(codeArray);
+					ArrayList<String> list = new ArrayList<String>();
+					
+					list.addAll(split);
+					return list;
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null; //데이터베이스 오류
+		}
+				
 						
 				// 이름을 통해 id를 가져옴. 출력을 위한 메소드
 				public String getId(String name) {
@@ -335,4 +335,36 @@ public class UserDAO { //DAO : data access object
 				}
 				return "";
 			}
+			
+			
+		//jobs 테이블에서 업무 code 가져오기
+		public String getJobsCode(String work){
+			String sql =  "select code from jobs where work=?";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, work);
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
+					return rs.getString(1);
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return "";
+		}
+		
+		//담당 업무를 검색해 user name 가져오기
+		public String getIDManger(String code){
+			String sql =  "select id from user where manager like '%"+code.trim()+"%'";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
+					return rs.getString(1);
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return "";
+		}
 }

@@ -1,4 +1,4 @@
-<%@page import="user.User"%>
+<%-- <%@page import="user.User"%>
 <%@page import="java.util.List"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="org.apache.catalina.connector.Response"%>
@@ -96,7 +96,7 @@
 		
 		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
 		String userName = "userName";
-		ArrayList<Bbs> list = bbsDAO.getNoneSignSearch(pageNumber, userName, name);
+		//ArrayList<Bbs> list = bbsDAO.getNoneSignSearch(pageNumber, userName, name);
 		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 		
@@ -417,7 +417,7 @@
 					<tr>
 						<td> <%= list.get(i).getBbsDeadline() %> </td>
 
-						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
+						<td><%= list.get(i).getBbsDeadline() %></td>
 						<td style="text-align: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							<a href="signOnReport.jsp?bbsID=<%= list.get(i).getBbsID() %>">
 							<%= list.get(i).getBbsTitle() %></a></td>
@@ -536,4 +536,4 @@
 	
 	
 </body>
-</html>
+</html> --%>

@@ -1,3 +1,7 @@
+<%@page import="rms.rms"%>
+<%@page import="rms.rms_next"%>
+<%@page import="rms.rms_this"%>
+<%@page import="rms.RmsDAO"%>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
 <%@page import="user.User"%>
@@ -11,8 +15,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
-<%@ page import="bbs.BbsDAO" %>
-<%@ page import="bbs.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
 
@@ -27,8 +29,8 @@
 <!-- 화면 최적화 -->
 <!-- <meta name="viewport" content="width-device-width", initial-scale="1"> -->
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
-<link rel="stylesheet" href="css/css/bootstrap.css">
-<link rel="stylesheet" href="css/index.css">
+<link rel="stylesheet" href="../css/css/bootstrap.css">
+<link rel="stylesheet" href="../css/index.css">
 
 <title>RMS</title>
 </head>
@@ -36,6 +38,8 @@
 <body>
 	<%
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		RmsDAO rms = new RmsDAO();
+		
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
@@ -112,7 +116,10 @@
 		 }
 		 
 		 String bbsDeadline = mon;
-		
+		 // String bbsDeadline ="2023-01-30";
+		 if(request.getParameter("bbsDeadline") != null && !request.getParameter("bbsDeadline").isEmpty()) {
+			 bbsDeadline = request.getParameter("bbsDeadline");
+		 }
 		 
 		//pl 리스트 확인
 		String work = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
@@ -120,14 +127,18 @@
 		//제출한 사람만 남기기
 		
 		String[] pllist = plist.toArray(new String[plist.size()]); //해당 pllist를 바꿔야함! (제출한 사람만)
+		ArrayList<rms> flist = rms.getRmsRkfull(bbsDeadline, work);
+		// 검색 결과를 바탕으로 llist 조회
+		String[] userID = new String[flist.size()];
+		
+			for(int i=0; i < flist.size(); i++) {
+				userID[i] = flist.get(i).getUserID();
+			}
 		
 		
-		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
-		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist);
-		// 다음 버튼 활성화를 위한 list
-		ArrayList<Bbs> aflist = bbsDAO.getList(pageNumber+1, bbsDeadline, pllist);
-		//제출자 확인을 위한 리스트
-		ArrayList<Bbs> fulllist = bbsDAO.getListfull(bbsDeadline, pllist);
+		//기존 데이터 불러오기 (미승인인 주간보고를 불러옴.)
+		//rms
+		ArrayList<rms> rmslist = rms.getRmsRk(bbsDeadline, work, pageNumber);
 		
 		if(work.equals("") || work == null) {
 			PrintWriter script = response.getWriter();
@@ -137,7 +148,7 @@
 			script.println("</script>");
 		}
 		
-		if(list.size() == 0) {
+		if(rmslist.size() == 0) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('제출된 주간보고가 없습니다.')");
@@ -145,12 +156,12 @@
 			script.println("</script>");
 		}
 		
-		// 미제출자 인원 계산
-		int psize = plist.size();
-		int lsize = fulllist.size();
+		// 미제출자 인원 계산 ()
+		int psize = plist.size(); //pl 담당 유저
+		int lsize = userID.length;
 		int noSub =  psize - lsize;
 		
-		//해당 인원 전원 불러오기
+		//해당 인원 전원 불러오기 (이름으로 변경)
 		ArrayList<String> username = new ArrayList<String>();
 		for(int i=0; i<plist.size(); i++) {
 			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
@@ -165,12 +176,11 @@
 		//미제출자 인원
 		ArrayList<String> noSubname = new ArrayList<String>();
 		ArrayList<String> Subname = new ArrayList<String>();
-		// 넘기기 위한 bbsID
-		ArrayList<String> bbsId = new ArrayList<String>();
-		//제출한 bbsID 찾기
-		for(int i=0; i<fulllist.size(); i++) {
-			Subname.add(fulllist.get(i).getUserID()); //제출한 user id 도출. (일반 list(10개 제한이 걸림)가 아닌, 모든 제출자를 확인해야함!)
-			bbsId.add(Integer.toString(fulllist.get(i).getBbsID()));
+
+		//제출한 RMS 도출
+		for(int i=0; i<flist.size(); i++) {
+			Subname.add(flist.get(i).getUserID()); //제출한 user id 도출. (일반 list(10개 제한이 걸림)가 아닌, 모든 제출자를 확인해야함!)
+			//bbsId.add(Integer.toString(flist.get(i).getBbsID()));
 		}
 		for(int i=0; i<Subname.size(); i++) {
 			plist.remove(Subname.get(i));
@@ -186,13 +196,18 @@
 		
 		String nouserdata = String.join(", ", nousernamedata);
 		
-		//bbsID string으로 변환
-		String bbsID = String.join(",",bbsId);
+		//목록의 모든 bbsDeadline 불러오기
+		ArrayList<rms_next> dllist = rms.getNextbbsDeadline(work);
+		 //중복값을 제거하기 위해, bbsDeadline 빼기
+		 for(int i=0; i < dllist.size(); i++) {
+			 if(dllist.get(i).getBbsDeadline().equals(bbsDeadline)) {
+				 dllist.remove(i);
+			 }
+		 }
 		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 	%>
-		
-	    <!-- ************ 상단 네비게이션바 영역 ************* -->
+	
+    <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -224,19 +239,19 @@
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(pl !="" || !pl.isEmpty()) {
+								if(work !="" || !work.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false"><%= pl %><span class="caret"></span></a>
+								aria-expanded="false"><%= work %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= work %></h5></li>
 								<li class="active"><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= work %> Summary</h5></li>
 								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
-								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
 								<li id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
@@ -443,6 +458,34 @@
 		</table>
 	</div>
 	
+	<!-- ***********검색바 추가 ************* -->
+	<div class="container">
+		<div class="row">
+			<table class="pull-left" style="text-align: center; cellpadding:50px; width:60%" >
+			<thead>
+				<tr>
+					<th style=" text-align: left" data-toggle="tooltip" data-html="true" data-placement="bottom" title=""> 
+						<br><i class="glyphicon glyphicon-triangle-right" id="icon"  style="left:5px;"></i> 주간보고 목록 [<%= work %>]
+					</th>
+				</tr>
+			</thead>
+			</table>
+			<form method="post" name="search">
+				<table class="pull-right">
+					<tr>
+						<td><select class="form-control" name="searchField" id="searchField" onchange="if(this.value) location.href=(this.value);">
+								<option value="bbsDeadline"><%= bbsDeadline %></option>
+						<% for(int i=0; i < dllist.size(); i++) { %>
+								<option value="/BBS/pl/bbsRk.jsp?bbsDeadline=<%= dllist.get(i).getBbsDeadline() %>"><%= dllist.get(i).getBbsDeadline() %></option>
+						<% } %>
+						</select></td>
+						<!-- <td><button type="submit" style="margin:5px" class="btn btn-success">검색</button></td> -->
+					</tr>
+				</table>
+			</form>
+		</div>
+	</div>
+	
 	<div class="container" id="jb-text" style="height:10%; width:20%; display:inline-flex; float:left; margin-left: 41%; display:none; position:absolute">
 		<table class="table" style="text-align: center; border:1px solid #444444 ; background-color:white" >
 			 <tr>
@@ -478,7 +521,7 @@
 	
 	
 	<%
-	if(list.isEmpty()) {
+	if(rmslist.isEmpty()) {
 		/* PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('모든 보고가 승인(또는 마감)처리 되었습니다.')");
@@ -516,7 +559,7 @@
 						<th style="background-color: #eeeeee; text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
-						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
+						<th style="background-color: #eeeeee; text-align: center;">담당</th>
 						<th style="background-color: #eeeeee; text-align: center;">승인</th>
 					</tr>
 				</thead>
@@ -524,41 +567,41 @@
 					<%
 						
 						
-						for(int i = 0; i < list.size(); i++){
+						for(int i = 0; i < rmslist.size(); i++){
 							
 							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
 							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 							
-							String dl = bbsDAO.getDLS(list.get(i).getBbsID());
+							String dl = rmslist.get(i).getBbsDeadline();
 							Date time = new Date();
 							String timenow = dateFormat.format(time);
 
 							Date dldate = dateFormat.parse(dl);
 							Date today = dateFormat.parse(timenow);
+							
+							String name_list = userDAO.getName(rmslist.get(i).getUserID());
 					%>
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 					<tr>
-						<td> <%= list.get(i).getBbsDeadline() %> </td>
+						<td> <%= rmslist.get(i).getBbsDeadline() %> </td>
 
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/pl/signOnReportRk.jsp?bbsID=<%= list.get(i).getBbsID() %>">
-							<%= list.get(i).getBbsTitle() %></a></td>
-						<td><%= list.get(i).getUserName() %></td>
-						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
-							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
-						<td><%= list.get(i).getBbsUpdate() %></td>
+						<a href="/BBS/pl/signOnReportRk.jsp?bbsDeadline=<%= rmslist.get(i).getBbsDeadline() %>&userID=<%= rmslist.get(i).getUserID() %>">
+							<%= rmslist.get(i).getBbsTitle() %></a></td>
+						<td><%= name_list %></td>
+						<td><%= rmslist.get(i).getBbsDate().substring(0, 11) + rmslist.get(i).getBbsDate().substring(11, 13) + "시"
+							+ rmslist.get(i).getBbsDate().substring(14, 16) + "분" %></td>
+						<td><%= rmslist.get(i).getPluser() %></td>
 						<!-- 승인/미승인/마감 표시 -->
 						<td>
 						<%
 						String sign = null;
 						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
-							sign = list.get(i).getSign();
+							sign = "승인";
 						} else {
 							sign="마감";
-							// 데이터베이스에 마감처리 진행
-							int a = bbsDAO.getSignDeadLine(list.get(i).getBbsID());
 						}
 						%>
 						<%= sign %>
@@ -574,30 +617,42 @@
 			<%
 				if(pageNumber != 1){
 			%>
-				<a href="/BBS/pl/bbsRk.jsp?pageNumber=<%=pageNumber - 1 %>"
+				<a href="/BBS/pl/bbsRk.jsp?pageNumber=<%=pageNumber - 1 %>&bbsDeadline=<%= bbsDeadline %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(aflist.size() != 0){
+				}if(flist.size() != 0){
 			%>
-				<a href="/BBS/pl/bbsRk.jsp?pageNumber=<%=pageNumber + 1 %>"
+				<a href="/BBS/pl/bbsRk.jsp?pageNumber=<%=pageNumber + 1 %>&bbsDeadline=<%= bbsDeadline %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>
 			<%
 				}
 			%>
-			<% if(pl.equals("ERP")) {%>
-			<a href="/BBS/pl/pptx/ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> pptx</a>
+			<% if(work.equals("ERP")) {%>
+			<a href="/BBS/pl/pptx/ppt.jsp?bbsDeadline=<%=rmslist.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력(ERP)" id="pptx" type="button"> pptx</a>
 			<% }  %>
-			<% if(pl.equals("WEB")) {%>
-			<a href="/BBS/pl/pptx/ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> pptx</a>
+			<% if(work.equals("WEB")) {%>
+			<a href="/BBS/pl/pptx/ppt.jsp?bbsDeadline=<%=rmslist.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력(WEB)" id="pptx" type="button"> pptx</a>
 			<% }  %>
-			<a href="/BBS/pl/bbsRkwrite.jsp?bbsID=<%=bbsID%>" style="width:100px; margin-right:20px" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> Summary</a>
+			<% 	
+			// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			
+			String dl = mon;
+			Date time = new Date();
+			String timenow = dateFormat.format(time);
+
+			Date dldate = dateFormat.parse(dl);
+			Date today = dateFormat.parse(timenow);
+			
+			//if(dldate.before(today)){ %>
+			<a href="/BBS/pl/bbsRkwrite.jsp?bbsDeadline=<%=bbsDeadline%>" style="width:100px; margin-right:20px" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> Summary</a>
+			<% //} %>
 		</div>
 	</div>
 	
 	<%
 	}
 	%>
-	
 	
 	<!-- 게시판 메인 페이지 영역 끝 -->
 	
@@ -715,12 +770,13 @@
 	</script>	
 	
 	<script>
+	var data = "<%= nouserdata %>";
 	//$("#pptx").find('[type="button"]').trigger('click') {
 	$("#pptx").on('mousedown', function() {
 		//noSub -> 미제출자
 		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
 			var go;
-			go = confirm("미제출자가 있습니다. 출력 하시겠습니까?");
+			go = confirm("미제출자가 있습니다.\n"+"["+data+"]"+"\n\n출력 하시겠습니까?");
 			
 			if(go) { //출력 o
 				document.getElementById("pptx").click();
@@ -736,7 +792,7 @@
 		//noSub -> 미제출자
 		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
 			var go;
-			go = confirm("미제출자가 있습니다. 작성 페이지로 넘어가시겠습니까?");
+			go = confirm("미제출자가 있습니다.\n"+"["+data+"]"+"\n\n요약본을 작성 하시겠습니까?");
 			
 			if(go) { //출력 o
 				document.getElementById("summary").click();
@@ -751,7 +807,7 @@
 		//noSub -> 미제출자
 		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
 			var go;
-			go = confirm("미제출자가 있습니다. 작성 페이지로 넘어가시겠습니까?");
+			go = confirm("미제출자가 있습니다.\n"+"["+data+"]"+"\n\n요약본을 작성 하시겠습니까?");
 			
 			if(go) { //출력 o
 				document.getElementById("summary").click();

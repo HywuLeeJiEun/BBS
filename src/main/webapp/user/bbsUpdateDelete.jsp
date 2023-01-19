@@ -1,3 +1,6 @@
+<%@page import="rms.rms_next"%>
+<%@page import="rms.rms_this"%>
+<%@page import="rms.RmsDAO"%>
 <%@page import="user.User"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.Date"%>
@@ -10,8 +13,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
-<%@ page import="bbs.BbsDAO" %>
-<%@ page import="bbs.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
 
@@ -56,57 +57,68 @@
 	
 		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
-				String workSet;
-				
-				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-				List<String> works = new ArrayList<String>();
-				
-				if(code == null) {
-					workSet = "";
-				} else {
-					for(int i=0; i < code.size(); i++) {
-						
-						String number = code.get(i);
-						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-						String manager = userDAO.getManager(number);
-						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-					}
-					
-					workSet = String.join("/",works);
-					
-				}
-				
-				String name = userDAO.getName(id);
-				
-				// 사용자 정보 담기
-				User user = userDAO.getUser(name);
-				String password = user.getPassword();
-				String rank = user.getRank();
-				//이메일  로직 처리
-				String Staticemail = user.getEmail();
-				String[] email = Staticemail.split("@");
-				
-				BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
-				ArrayList<Bbs> list = bbsDAO.getNoneSignSearch(pageNumber, name);
-				
-				String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
-				
-				//bbsID를 통한 작성 기능 제공
-				ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
-				String inbbsID = String.join(",",AllbbsID);
-				
-				//미승인 -> 미제출로 변경
-				String[] sign = new String[list.size()];
-				for(int i=0; i < list.size(); i++) {
-					if(list.get(i).getSign().equals("미승인")) {
-						sign[i] = "미제출";
-					} else {
-						sign[i] = list.get(i).getSign();						
-					}
-				}
+		String workSet;
 		
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		List<String> works = new ArrayList<String>();
+		
+		if(code == null) {
+			workSet = "";
+		} else {
+			for(int i=0; i < code.size(); i++) {
+				
+				String number = code.get(i);
+				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+				String manager = userDAO.getManager(number);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			
+			workSet = String.join("/",works);
+			
+		}
+		
+		String name = userDAO.getName(id);
+		
+		// 사용자 정보 담기
+		User user = userDAO.getUser(name);
+		String password = user.getPassword();
+		String rank = user.getRank();
+		//이메일  로직 처리
+		String Staticemail = user.getEmail();
+		String[] email = Staticemail.split("@");
+		
+		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+				
+		//기존 데이터 불러오기 (미승인인 주간보고를 불러옴.)
+		RmsDAO rms = new RmsDAO();
+		//rms_last -> 목록 불러오기 (사용자)
+		// [bbsDeadline, sign, pluser]
+		ArrayList<rms_next> llist = rms.getlastSign(id,"미승인",pageNumber);
+		// 검색 결과를 바탕으로 llist 조회
+		String[] bbsDeadline = new String[llist.size()];
+			//조회를 위한 bbsDeadline list 생성
+			for(int i=0; i < llist.size(); i++) {
+				bbsDeadline[i] = llist.get(i).getBbsDeadline();
+			}
+		//rms_this -> 목록 불러오기 (사용자)
+		// [bbsDeadline, bbsTitle, bbsDate]
+		ArrayList<rms_this> tlist = rms.getthisSign(id, pageNumber, bbsDeadline);
+		
+		//미승인 -> 미제출로 변경
+		String[] sign = new String[llist.size()];
+		for(int i=0; i < llist.size(); i++) {
+			if(llist.get(i).getSign().equals("미승인")) {
+				sign[i] = "미제출";
+			} else if(llist.get(i).getSign().equals("승인")){
+				sign[i] = "제출";						
+			} else {
+				sign[i] = llist.get(i).getSign();						
+			}
+		}
+		
+		// [bbsDeadline, sign, pluser] 다음 목록이 있는지 확인
+		ArrayList<rms_next> afllist = rms.getlastSign(id,"미승인",pageNumber);
 	%>	
-	
 	    <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
@@ -151,7 +163,7 @@
 								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
-								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp?bbsID=<%=inbbsID%>">작성</a></li>
+								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
 								<li id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
@@ -344,7 +356,7 @@
 	
 	
 	<%
-	if(list.isEmpty()) {
+	if(llist.isEmpty()) {
 		/* PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('모든 보고가 승인(또는 마감)처리 되었습니다.')");
@@ -408,7 +420,7 @@
 						<th style="background-color: #eeeeee; text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
-						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
+						<th style="background-color: #eeeeee; text-align: center;">담당</th>
 						<th style="background-color: #eeeeee; text-align: center;">상태</th>
 						<th style="background-color: #eeeeee; text-align: center;">처리</th>
 					</tr>
@@ -417,12 +429,12 @@
 					<%
 						
 						// 미승인 (마감, 승인 제외)인 bbs만을 가져옴!
-						for(int i = 0; i < list.size(); i++){
+						for(int i = 0; i < tlist.size(); i++){
 							
 							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
 							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 							
-							String dl = bbsDAO.getDLS(list.get(i).getBbsID());
+							String dl = tlist.get(i).getBbsDeadline();
 							Date time = new Date();
 							String timenow = dateFormat.format(time);
 
@@ -433,18 +445,19 @@
 
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 					<tr>
-						<td> <%= list.get(i).getBbsDeadline() %> </td>
+						<td> <%= tlist.get(i).getBbsDeadline() %> </td>
 						<td style="text-align: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a href="/BBS/user/update.jsp?bbsID=<%= list.get(i).getBbsID() %>">
-							<%= list.get(i).getBbsTitle() %></a></td>
-						<td><%= list.get(i).getUserName() %></td>
-						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
-							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
-						<td><%= list.get(i).getBbsUpdate() %></td>
+							<a href="/BBS/user/update.jsp?bbsDeadline=<%= tlist.get(i).getBbsDeadline() %>">
+							<%= tlist.get(i).getBbsTitle() %></a></td>
+						<td><%= name %></td>
+						<td><%= tlist.get(i).getBbsDate().substring(0, 11) + tlist.get(i).getBbsDate().substring(11, 13) + "시"
+							+ tlist.get(i).getBbsDate().substring(14, 16) + "분" %></td>
+						<td><%= llist.get(i).getPluser() %></td>
 						<!-- 승인/미승인/마감 표시 -->
 						<td><%= sign[i] %></td>
 						<td data-toggle="tooltip" data-html="true" data-placement="right" title="제출시, <br>수정 및 삭제가 불가합니다.">
-							<button class="btn btn-success" style="font-size:12px" onclick="location.href='/BBS/user/action/signOnAction.jsp?bbsID=<%= list.get(i).getBbsID() %>&bbsDeadline=<%= list.get(i).getBbsDeadline() %>'"> 제출 </button>
+							<%-- <button class="btn btn-success" style="font-size:12px" onclick="location.href='/BBS/user/action/signOnAction.jsp?bbsDeadline=<%= tlist.get(i).getBbsDeadline() %>&workset=<%= workSet %>'"> 제출 </button> --%>
+							<a class="btn btn-success" style="font-size:12px" href="/BBS/user/action/signOnAction.jsp?bbsDeadline=<%= tlist.get(i).getBbsDeadline() %>&workset=<%= workSet %>"> 제출 </a>
 						</td>
 					</tr>
 					<%
@@ -460,7 +473,7 @@
 				<a href="/BBS/user/bbs.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(bbsDAO.nextPage(pageNumber + 1)){
+				}if(afllist.size() != 0){
 			%>
 				<a href="/BBS/user/bbs.jsp?pageNumber=<%=pageNumber + 1 %>"
 					id="next" class="btn btn-success btn-arraw-left">다음</a>

@@ -1,3 +1,7 @@
+<%@page import="user.UserDAO"%>
+<%@page import="rms.erp"%>
+<%@page import="user.User"%>
+<%@page import="rms.RmsDAO"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="bbs.BbsDAO"%>
 <%@page import="java.io.OutputStream"%>
@@ -45,8 +49,13 @@
 	String w_state = request.getParameter("wcolor");//"#ffff00";
 	
 	// erp_bbs가 있다면, 데이터를 저장함!
-	BbsDAO bbsDAO = new BbsDAO();
-	ArrayList<String> list = bbsDAO.geterpid(bbsDeadline);
+	UserDAO userDAO = new UserDAO();
+	RmsDAO rms = new RmsDAO();
+	//erp 데이터가 있는지 확인
+	//id -> erp 작성을 담당하는 user의 ID를 가져와야함!
+	String jobs = userDAO.getJobsCode("계정관리");
+	String erp_id = userDAO.getIDManger(jobs);
+	ArrayList<erp> erp_list = rms.geterp(bbsDeadline, erp_id);
 	//데이터가 여러개 있다면 쪼개어 저장함
 
 	
@@ -82,32 +91,13 @@
 	 String d = "erp_authority";
 	 String e = "erp_division";
 	 
-	 if(list.size() != 0) {
-			String[] erp_date = list.get(1).split("\r\n");
-			String[] erp_user = list.get(2).split("\r\n");
-			String[] erp_stext = list.get(3).split("\r\n");
-			String[] erp_authority = list.get(4).split("\r\n");
-			String[] erp_division = list.get(5).split("\r\n");
-		 
-		 if (erp_date.length == 1) { //만약, 데이터가 1개라면
-			 paramMap.put(a+0,erp_date[0]);	  
-			 paramMap.put(b+0,erp_user[0]);	  
-			 paramMap.put(c+0,erp_stext[0]);	  
-			 paramMap.put(d+0,erp_authority[0]);  
-			 paramMap.put(e+0,erp_division[0]);	 
-			 paramMap.put(a+1," ");	  
-			 paramMap.put(b+1," ");	  
-			 paramMap.put(c+1," ");	  
-			 paramMap.put(d+1," ");  
-			 paramMap.put(e+1," ");	
-		 } else {
-			 for(int i=0; i < erp_date.length; i++) {
-				 paramMap.put(a+i,erp_date[i]);	  
-				 paramMap.put(b+i,erp_user[i]);	  
-				 paramMap.put(c+i,erp_stext[i]);	  
-				 paramMap.put(d+i,erp_authority[i]);  
-				 paramMap.put(e+i,erp_division[i]);	  
-			 }
+	 if(erp_list.size() != 0) {
+		 for(int i=0; i < erp_list.size(); i++) {
+			 paramMap.put(a+i,erp_list.get(i).getE_date());	  
+			 paramMap.put(b+i,erp_list.get(i).getE_user());	  
+			 paramMap.put(c+i,erp_list.get(i).getE_text());	  
+			 paramMap.put(d+i,erp_list.get(i).getE_authority());  
+			 paramMap.put(e+i,erp_list.get(i).getE_division());	  
 		 }
 	 } else { //만약, erp 데이터가 없다면!
 		 paramMap.put(a+0," ");	  
@@ -124,7 +114,7 @@
 	 
 	 // (3)데이타소스 생성
 	 Class.forName("org.mariadb.jdbc.Driver");
-	 conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bbs", "root","7471350");
+	 conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/rms", "root","7471350");
 	
 	 // (4)데이타의 동적 바인드
 	 JasperPrint print = JasperFillManager.fillReport(jasperReport, paramMap, conn);
@@ -174,9 +164,10 @@
 		os.write(b,0,length);
 	}
 	
-	os.flush();  
+	os.flush();   
 %>
 
-<%= list.size() %>
+
+
 </body>
 </html>

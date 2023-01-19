@@ -1,3 +1,9 @@
+<%@page import="Sumad.Sumad"%>
+<%@page import="Sumad.SumadDAO"%>
+<%@page import="rms.RmsDAO"%>
+<%@page import="rms.erp"%>
+<%@page import="sum.Sum"%>
+<%@page import="sum.SumDAO"%>
 <%@page import="net.sf.jasperreports.engine.type.CalculationEnum"%>
 <%@page import="java.time.LocalDateTime"%>
 <%@page import="java.util.Arrays"%>
@@ -13,8 +19,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
-<%@ page import="bbs.BbsDAO" %>
-<%@ page import="bbs.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
 
@@ -38,7 +42,9 @@
 <body>
 	<%
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		BbsDAO bbsDAO = new BbsDAO();
+		SumDAO sumDAO = new SumDAO();
+		RmsDAO rms = new RmsDAO();
+		SumadDAO sumadDAO = new SumadDAO();
 		
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
@@ -61,24 +67,24 @@
 		}
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
-				String workSet;
-				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-				List<String> works = new ArrayList<String>();
+		String workSet;
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		List<String> works = new ArrayList<String>();
+		
+		if(code == null) {
+			workSet = "";
+		} else {
+			for(int i=0; i < code.size(); i++) {
 				
-				if(code == null) {
-					workSet = "";
-				} else {
-					for(int i=0; i < code.size(); i++) {
-						
-						String number = code.get(i);
-						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-						String manager = userDAO.getManager(number);
-						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-					}
-					
-					workSet = String.join("/",works);
-					
-				}
+				String number = code.get(i);
+				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+				String manager = userDAO.getManager(number);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			
+			workSet = String.join("/",works);
+			
+		}
 				
 		String name = userDAO.getName(id);
 		
@@ -115,20 +121,16 @@
 		 }
 		 
 		 String bbsDeadline = mon; //Deadline은 '월'요일까지 포함된, 가장 가까운 월요일
-		
 
 		// 최종 관리자로서, Pl(파트리더)가 작성한 요약본을 불러옴! 
 		// 가장 최근으로 작성된 bbsDeadline을 기준으로 -> web, erp를 모두 불러와야함! (작성되어 있지 않다면 이를 표시)
 		String pl = userDAO.getpl(id);
 		//String MaxbbsDeadline = bbsDAO.getDeadLineListSum();
 		//ERP 관련 수집
-		String erp_id = bbsDAO.getSumid(bbsDeadline, "ERP");
-		ArrayList<String> erp = bbsDAO.getlistSum(erp_id, "ERP");
-		
+		ArrayList<Sum> erp = sumDAO.getlistSum(bbsDeadline, "ERP");
+
 		//WEB 관련 수집
-		String web_id = bbsDAO.getSumid(bbsDeadline, "WEB");
-		ArrayList<String> web = bbsDAO.getlistSum(web_id, "WEB");
-		
+		ArrayList<Sum> web = sumDAO.getlistSum(bbsDeadline, "WEB");
 		
 		String str = "미승인 - 관리자의 미승인 상태<br>";
 		str += "승인 - 관리자가 확정한 상태<br>";
@@ -155,53 +157,36 @@
 		cal3.add(Calendar.DATE, 14);
 		//다음주,
 		nextweek = format.format(cal3.getTime());
+
 		
-		int count = bbsDAO.getCountSumAddmin()-1;
+		//erp 데이터가 있는지 확인
+		//id -> erp 작성을 담당하는 user의 ID를 가져와야함!
+		String jobs = userDAO.getJobsCode("계정관리");
+		String erp_id = userDAO.getIDManger(jobs);
 		
-		
-		// summary_admin에 해당 날짜에 대한 기록이 저장되었는지 확인!
-		String sumad_id = bbsDAO.getSumAdminid(bbsDeadline);
-		ArrayList<String> sumad = bbsDAO.getlistSumad(sumad_id);
-		
-		//만약 sumad_id가 존재한다면, 다음으로 넘길때 같은 페이지가 나오지 않도록 하기
-		if(sumad_id != null && !sumad_id.isEmpty()) {
-			week += 1;
+		ArrayList<erp> erp_list = rms.geterp(bbsDeadline, erp_id);
+
+		int Set = -1;
+		//workSet에 숫자 넣기
+		if(erp_list.size() != 0) {
+			Set = 1;
 		}
-		
-		// 승인 상태를 확인하기 위한 sign 불러오기 
-		String sign = "[보류]";
-		
-		//sign이 저장된 경우,
-		if(sumad.size() != 0) {
-			sign = sumad.get(17);
-		} 
-		
-		
-		//erp_bbs가 존재하는지 확인하기
-		ArrayList<String> erp_bbs = bbsDAO.geterpid(bbsDeadline);
-		
-		String erpbbs_id = "-1";
-		if(erp_bbs.size() != 0)  {
-			if(erp_bbs.get(0) != null) {
-				erpbbs_id = erp_bbs.get(0); //erp_id 정보 넣기
-			}
-		}
-		
 		
 		//summary_admin에 이미 저장이 되어 있다면, 생성 불가!
+		ArrayList<Sumad> sumad = sumadDAO.getlistSumad(bbsDeadline);
 		
-		if(sumad_id != null && !sumad_id.equals("")) {
-			PrintWriter script = response.getWriter();
+		 if(sumad.size() != 0) {
+			/* PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('해당 요일로 작성된 요약본이 있습니다.')");
-			//script.println("location.href='summaryRkUpdate.jsp?sum_id="+sum_id+"''");
-			//script.println("location.href='summaryRkUpdate.jsp?sum_id='");
-			script.println("location.href='/BBS/admin/summaryadRk.jsp'");
-			script.println("</script>");
-		}
+			script.println("alert('해당일로 작성된 요약본이 있습니다. \\n수정 및 승인 페이지로 이동합니다.')");
+			script.println("location.href='/BBS/admin/summaryadUpdateDelete.jsp'");
+			script.println("</script>"); */
+		} 
+		 
 		%>
+		
 <!-- erp가 존재하는 경우, 확인하기 -->
-<textarea class="textarea" id="workSet" name="workSet" style="display:none"><%= erpbbs_id %></textarea>
+<textarea class="textarea" id="workSet" name="workSet" style="display:none"><%= Set %></textarea>
 
 
 	<!-- ************ 상단 네비게이션바 영역 ************* -->
@@ -482,19 +467,21 @@
 		 </table>
 	 </div>
 	 
+	 
+	 
 	<div class="container">
-	<form method="post" action="/BBS/admin/bbsRkAdminUpdate.jsp" id="bbsRk">
+	<form method="post" action="/BBS/admin/action/bbsRkAdminUpdate.jsp" id="bbsRk">
 		<div class="row">
 			<div class="container">
 				<!-- 금주 업무 실적 테이블 -->
-				<table id="Table" class="table" style="text-align: center;">
+				<table id="Table" class="table" style="text-align: center; font-size:13px">
 					<thead>
 						<tr>			
 							<td style="background-color:#f9f9f9;" colspan="1" style="align:left;" >요약본</td>
-							<td style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title=""> [ERP/WEB] - summary (<%= bbsDeadline %>)<textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= bbsDeadline %></textarea></td>
+							<td style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title=""> WEB] - summary (<%= bbsDeadline %>)<textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= bbsDeadline %></textarea></td>
 							<td colspan="2"  style="background-color:#f9f9f9;"></td>
 							<td  style="background-color:#f9f9f9;" colspan="1" style="txet:center">승인</td>
-							<td  style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" ><%= sign %><textarea id="sign" name="sign" style="display:none"><%= sign %></textarea></td>
+							<td  style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" >보류<textarea id="sign" name="sign" style="display:none">보류</textarea></td>
 						</tr>
 						<tr>
 							<th colspan="6" style="background-color:#D4D2FF; align:left; border:none" > &nbsp;금주 업무 실적</th>
@@ -510,21 +497,21 @@
 							<th width="25%" style="text-align: center; border: 1px solid">비고</th>
 						</tr>
 						<%
-						if(!erp.isEmpty() && erp != null) {
+						if(erp.size() != 0) {
 						%>
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid"><%= erp.get(1) %><textarea id="estate_value" name="estate_value" style="display:none"><%= erp.get(5) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><%= erp.get(0).getPluser() %><textarea id="estate_value" name="estate_value" style="display:none"><%= erp.get(0).getState() %></textarea></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="econtent" id="econtent" style="resize: none; width:100%; height:100px"><%= erp.get(2) %></textarea></td>
+							<td style=" border: 1px solid"><textarea required name="econtent" id="econtent" wrap="hard" style="resize: none; width:100%; height:100px"><%= erp.get(0).getBbsContent() %></textarea></td>
 							<!-- 완료일 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="eend" id="eend" style="resize: none; width:100%; height:100px"><%= erp.get(3) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="eend" id="eend" style="resize: none; width:100%; height:100px"><%= erp.get(0).getBbsEnd() %></textarea></td>
 							<!-- 진행율 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="eprogress" id="eprogress" style="resize: none; width:100%; height:100px"><%= erp.get(4) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="eprogress" id="eprogress" style="resize: none; width:100%; height:100px"><%= erp.get(0).getProgress() %></textarea></td>
 							<!-- 상태 -->
 							<td style="text-align: center; border: 1px solid;" id="estate"></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea  name="enote" id="enote" style="resize: none; width:100%; height:100px"><%= erp.get(6) %></textarea><textarea id="esum_id" name="esum_id" style="display:none"><%= erp.get(0) %></textarea></td>
+							<td style=" border: 1px solid"><textarea  name="enote" id="enote" wrap="hard" style="resize: none; width:100%; height:100px"><%= erp.get(0).getNote() %></textarea><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= erp.get(0).getBbsDeadline() %></textarea></td>
 						</tr>
 						<%
 						} else {
@@ -535,22 +522,22 @@
 						</tr>
 						<%
 						}
-						if(!web.isEmpty() && web != null) {
+						if(web.size() != 0) {
 						%>
 						<tr>
 							
 							<!-- 구분 -->
-							<td style="border: 1px solid; text-align: center; "><textarea id="wstate_value" name="wstate_value" style="display:none"><%= web.get(5) %></textarea><%= web.get(1) %></td>
+							<td style="border: 1px solid; text-align: center; "><textarea id="wstate_value" name="wstate_value" style="display:none"><%= web.get(0).getState() %></textarea><%= web.get(0).getPluser() %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="wcontent" id="wcontent" style="resize: none; width:100%; height:100px"><%= web.get(2) %></textarea></td>
+							<td style=" border: 1px solid"><textarea required name="wcontent" id="wcontent" wrap="hard" style="resize: none; width:100%; height:100px"><%= web.get(0).getBbsContent() %></textarea></td>
 							<!-- 완료일 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="wend" id="wend" style="resize: none; width:100%; height:100px"><%= web.get(3) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="wend" id="wend" style="resize: none; width:100%; height:100px"><%= web.get(0).getBbsEnd() %></textarea></td>
 							<!-- 진행율 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="wprogress" id="wprogress" style="resize: none; width:100%; height:100px"><%= web.get(4) %></textarea><textarea id="wsum_id" name="wsum_id" style="display:none"><%= web.get(0) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="wprogress" id="wprogress" style="resize: none; width:100%; height:100px"><%= web.get(0).getProgress() %></textarea></td>
 							<!-- 상태 -->
 							<td style="text-align: center; border: 1px solid;" id="wstate"></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea  name="wnote" id="wnote" style="resize: none; width:100%; height:100px"><%= web.get(6) %></textarea></td>
+							<td style=" border: 1px solid"><textarea  name="wnote" id="wnote" wrap="hard" style="resize: none; width:100%; height:100px"><%= web.get(0).getNote() %></textarea></td>
 						</tr>
 						<%
 						} else {
@@ -569,7 +556,7 @@
 				</table>
 				
 				<!-- 차주 업무 계획 테이블 -->
-				<table  class="table" style="text-align: center;">
+				<table  class="table" style="text-align: center; font-size:13px">
 					<thead>
 						<tr>
 							<td></td>
@@ -586,17 +573,17 @@
 							<th width="50%" style="text-align: center; border: 1px solid">비고</th>
 						</tr>
 						<%
-						if(!erp.isEmpty() && erp != null) {
+						if(erp.size() != 0) {
 						%>
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid"><textarea style="display:none"><%= erp.get(1) %></textarea><%= erp.get(1) %></td>
+							<td style="text-align: center; border: 1px solid"><textarea style="display:none"><%= erp.get(0).getPluser() %></textarea><%= erp.get(0).getPluser() %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="encontent" id="encontent" style="resize: none; width:100%; height:100px"><%= erp.get(7) %></textarea></td>
+							<td style=" border: 1px solid"><textarea required name="encontent" id="encontent" wrap="hard" style="resize: none; width:100%; height:100px"><%= erp.get(0).getBbsNContent() %></textarea></td>
 							<!-- 완료예정 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="entarget" id="entarget" style="resize: none; width:100%; height:100px"><%= erp.get(8) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="entarget" id="entarget" style="resize: none; width:100%; height:100px"><%= erp.get(0).getBbsNTarget() %></textarea></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea name="ennote" id="ennote" style="resize: none; width:100%; height:100px"><%= erp.get(10) %></textarea></td>
+							<td style=" border: 1px solid"><textarea name="ennote" id="ennote" wrap="hard" style="resize: none; width:100%; height:100px"><%= erp.get(0).getNnote() %></textarea></td>
 						</tr>
 						<%
 						} else { 
@@ -607,17 +594,17 @@
 						</tr>
 						<% 
 						}
-						if(!web.isEmpty() && web != null) {
+						if(web.size() != 0) {
 						%>
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid"><textarea  style="display:none"><%= web.get(1) %></textarea><%=web.get(1) %></td>
+							<td style="text-align: center; border: 1px solid"><textarea  style="display:none"><%= web.get(0).getPluser() %></textarea><%=web.get(0).getPluser() %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="wncontent" id="wncontent" style="resize: none; width:100%; height:100px"><%= web.get(7) %></textarea></td>
+							<td style=" border: 1px solid"><textarea required name="wncontent" wrap="hard"  id="wncontent" style="resize: none; width:100%; height:100px"><%= web.get(0).getBbsNContent() %></textarea></td>
 							<!-- 완료예정 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="wntarget" id="wntarget" style="resize: none; width:100%; height:100px"><%= web.get(8) %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="wntarget" id="wntarget" style="resize: none; width:100%; height:100px"><%= web.get(0).getBbsNTarget() %></textarea></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea name="wnnote" id="wnnote" style="resize: none; width:100%; height:100px"><%= web.get(10) %></textarea></td>
+							<td style=" border: 1px solid"><textarea name="wnnote" wrap="hard"  id="wnnote" style="resize: none; width:100%; height:100px"><%= web.get(0).getNnote() %></textarea></td>
 						</tr>
 						<%
 						} else {
@@ -633,12 +620,7 @@
 				</table>
 				
 				<%
-				if(erp_bbs.size() != 0 && !erp.isEmpty()) {
-					String[] erp_date = erp_bbs.get(1).split("\r\n");
-					String[] erp_user = erp_bbs.get(2).split("\r\n");
-					String[] erp_stext = erp_bbs.get(3).split("\r\n");
-					String[] erp_authority = erp_bbs.get(4).split("\r\n");
-					String[] erp_division = erp_bbs.get(5).split("\r\n");
+				if(erp_list.size() != 0 && erp.size() != 0) {
 				%>
 				<!-- '계정 관리가 있을 경우, 생성' -->
 				<table class="table" id="accountTable" style="text-align: center; cellpadding:50px; display:none;" >
@@ -654,20 +636,20 @@
 						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
 					</tr>
 						<%
-						for (int i=0; i < erp_date.length; i++) {
+						for (int i=0; i < erp_list.size(); i++) {
 						%>
 					<tr>
 						<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
-						  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_date.length %></textarea>
-						  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_date[i] %></textarea></td>
+						  <textarea class="textarea" style="display:none" name="erp_size"><%= erp_list.size()%></textarea>
+						  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" readonly placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp_list.get(i).getE_date() %></textarea></td>
 					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp_user[i] %></textarea></td>
+						  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" readonly placeholder="사용자명" name="erp_user<%= i %>"><%= erp_list.get(i).getE_user() %></textarea></td>
 					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp_stext[i] %></textarea></td>
+						  <textarea class="textarea" wrap="hard" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" readonly placeholder="변경값" name="erp_stext<%= i %>"><%= erp_list.get(i).getE_text() %></textarea></td>
 					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_authority[i] %></textarea></td>
+						  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" readonly placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp_list.get(i).getE_authority() %></textarea></td>
 					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_division[i] %></textarea></td>
+						  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " readonly placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp_list.get(i).getE_division() %></textarea></td>
 					</tr>
 					<%
 						}
@@ -685,7 +667,6 @@
 	</form>
 	</div>
 	<br><br><br>	
-
 	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -867,20 +848,6 @@
 	}
 	</script>
 	
-	<script>
-	function signOn() {
-		if(document.getElementById("eprogress").value == '' || document.getElementById("eprogress").value == null) {
-			alert("ERP - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
-		} else if (document.getElementById("wprogress").value == '' || document.getElementById("wprogress").value == null) { 
-			alert("WEB - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
-		}else {
-			var innerHtml = '<td><textarea class="textarea" id="ecolor" name="ecolor" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
-				innerHtml += '<td><textarea class="textarea" id="wcolor" name="wcolor" style="display:none">'+wcon.style.backgroundColor+'</textarea></td>';
-			$('#Table > tbody > tr:last').append(innerHtml);
-			$('#bbsRk').attr("action","/BBS/admin/bbsRkAdminSign.jsp").submit();
-		}
-	}
-	</script>
 	
 	
 </body>

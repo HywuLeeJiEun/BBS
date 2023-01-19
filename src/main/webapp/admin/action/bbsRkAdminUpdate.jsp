@@ -1,3 +1,5 @@
+<%@page import="sum.SumDAO"%>
+<%@page import="rms.RmsDAO"%>
 <%@page import="Sumad.Sumad"%>
 <%@page import="Sumad.SumadDAO"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -6,7 +8,6 @@
 <%@page import="java.util.ArrayList"%>
 <%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
-<%@page import="bbs.BbsDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <% request.setCharacterEncoding("utf-8"); %>
@@ -19,7 +20,9 @@
 <body>
 	<%
 	UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-	BbsDAO bbsDAO = new BbsDAO();
+	RmsDAO rms = new RmsDAO();
+	SumDAO sumDAO = new SumDAO();
+	SumadDAO sumadDAO = new SumadDAO();
 	
 	// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 	String id = null;
@@ -37,8 +40,10 @@
 	// String 가져오기
 	String bbsDeadline = request.getParameter("bbsDeadline");
 	String sign = request.getParameter("sign");
+	if(sign.equals("보류")) {
+		sign = "미승인";
+	} 
 	//ERP
-	int esum_id = Integer.parseInt(request.getParameter("esum_id"));
 	String econtent = request.getParameter("econtent");
 	String eend = request.getParameter("eend");
 	String eprogress = request.getParameter("eprogress");
@@ -55,8 +60,8 @@
 	String encontent = request.getParameter("encontent");
 	String entarget = request.getParameter("entarget");
 	String ennote = request.getParameter("ennote");
+	
 	//WEB
-	int wsum_id = Integer.parseInt(request.getParameter("wsum_id"));
 	String wcontent = request.getParameter("wcontent");
 	String wend = request.getParameter("wend");
 	String wprogress = request.getParameter("wprogress");
@@ -73,32 +78,29 @@
 	String wncontent = request.getParameter("wncontent");
 	String wntarget = request.getParameter("wntarget");
 	String wnnote = request.getParameter("wnnote");
-	java.sql.Timestamp SummaryDate = bbsDAO.getDateNow();
-	String summaryUpdate = bbsDAO.name(id);
+	java.sql.Timestamp summaryDate = rms.getDateNow();
+	String summaryUpdate = userDAO.getName(id);
 	
 	//이동을 위함
-	SumadDAO sumadDAO = new SumadDAO();
 	ArrayList<Sumad> afsumad = sumadDAO.getlistSumSign(); //미승인 상태만 불러옴!
 	
-	int erp = bbsDAO.updateSum(esum_id, econtent, eend, eprogress, estate, enote, encontent, entarget, bbsDeadline, ennote, sign, SummaryDate, summaryUpdate);
-	int web = bbsDAO.updateSum(wsum_id, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, bbsDeadline, wnnote, sign, SummaryDate, summaryUpdate);
+	int erp = sumDAO.updateSum(bbsDeadline, "ERP", econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, sign, summaryDate, summaryUpdate);
+	int web = sumDAO.updateSum(bbsDeadline, "WEB", wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, summaryDate, summaryUpdate);
 	
 	int num= -1;
 	
-	String sumad_id = bbsDAO.getSumAdminid(bbsDeadline);
-	java.sql.Timestamp SumadDate = bbsDAO.getDateNow();
-	String sumadUpdate = bbsDAO.name(id);
+	//sumad <- (summary_admin)에 저장되었는지 확인함!
+	ArrayList<Sumad> sumad = sumadDAO.getlistSumad(bbsDeadline);
 	
-	if(sumad_id.equals("")) { //데이터가 없기 때문에 저장!  (insert)
-		sign = "미승인";
-		num = bbsDAO.SummaryAdminWrite(econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline, SumadDate, sumadUpdate);
+	if(sumad.size() == 0) { //데이터가 없기 때문에 저장!  (insert)
+		num = sumadDAO.SummaryAdminWrite(id, bbsDeadline, econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, summaryDate, summaryUpdate);
 		if(num==-1){
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('데이터베이스 오류입니다. 관리자에게 문의 바랍니다.')");
 			script.println("history.back();");
 			script.println("</script>");
-		} else {
+		} else { 
 			if(afsumad.size() == 0) {
 				PrintWriter script = response.getWriter();
 				script.println("<script>");
@@ -114,8 +116,8 @@
 			script.println("</script>");
 			}
 		} 
-	} else { //데이터가 이미 있으므로 수정! (update)
-		num = bbsDAO.SummaryAdminUpdate(Integer.parseInt(sumad_id), econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, bbsDeadline, SumadDate);
+	} else { //데이터가 이미 있으므로 수정! (update)  //sumad가 이미 저장됨
+		num = sumadDAO.SummaryAdminUpdate(bbsDeadline, econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, summaryDate, userDAO.getName(id));
 		if(num==-1){
 			PrintWriter script = response.getWriter();
 			script.println("<script>");

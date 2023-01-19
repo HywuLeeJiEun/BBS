@@ -1,4 +1,4 @@
-<%@page import="bbs.BbsDAO"%>
+<%@page import="rms.RmsDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@page import="user.UserDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -35,7 +35,7 @@
 		
 		// ************** 로그인을 담당하는 JSP 페이지 ***************
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		BbsDAO bbsDAO = new BbsDAO();
+		RmsDAO rms = new RmsDAO();
 		
 		String rk = userDAO.getRank(id);
 		
@@ -50,22 +50,10 @@
 			// 로그인에 성공하면 세션을 부여한다. 
 			session.setAttribute("id", user.getId());
 			//session.setMaxInactiveInterval(60 * 60); 
-			
-			
-			// bbs 이력 확인
-			int confirm = bbsDAO.getBbsRecord((String)session.getAttribute("id"));
-			
-			if(confirm == 1) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("location.href='/BBS/user/bbs.jsp'");
-				script.println("</script>");
-			} else {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("location.href='/BBS/user/bbs.jsp'");
-				script.println("</script>");
-			}
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("location.href='/BBS/user/bbs.jsp'");
+			script.println("</script>");
 		}else if(result == 0){
 			PrintWriter script = response.getWriter();
 			script.println("<script>");

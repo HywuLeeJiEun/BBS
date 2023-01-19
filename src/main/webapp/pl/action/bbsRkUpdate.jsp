@@ -1,3 +1,5 @@
+<%@page import="rms.RmsDAO"%>
+<%@page import="sum.SumDAO"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
@@ -29,7 +31,8 @@
 <body>
 	<%
 	UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-	BbsDAO bbsDAO = new BbsDAO();
+	SumDAO sumDAO = new SumDAO();
+	RmsDAO rms = new RmsDAO();
 	
 	// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 	String id = null;
@@ -45,8 +48,7 @@
 	}
 		
 	// String 가져오기
-	int sum_id = Integer.parseInt(request.getParameter("sum_id"));
-	String pl = request.getParameter("pl");
+	String pluser = request.getParameter("pl");
 	String bbsDeadline = request.getParameter("bbsDeadline");
 	String bbsContent = request.getParameter("content");
 	String bbsEnd = request.getParameter("end");
@@ -68,10 +70,10 @@
 	if(sign == null || sign.equals("")) {
 		sign = "미승인";
 	}
-	java.sql.Timestamp SummaryDate = bbsDAO.getDateNow();
-	String SummaryUpdate = bbsDAO.getName(id); //user id의 이름을 가져와 업데이트한 사람으로 추가함.
+	java.sql.Timestamp SummaryDate = rms.getDateNow();
+	String SummaryUpdate = userDAO.getName(id); //user id의 이름을 가져와 업데이트한 사람으로 추가함.
 	
-	int num = bbsDAO.updateSum(sum_id, bbsContent, bbsEnd, progress, state, note, bbsNContent, bbsNTarget, bbsDeadline, nnote, sign, SummaryDate, SummaryUpdate);
+	int num = sumDAO.updateSum(bbsDeadline, pluser, bbsContent, bbsEnd, progress, state, note, bbsNContent, bbsNTarget, nnote, sign, SummaryDate, SummaryUpdate);
 	
 	if(num==-1){
 		PrintWriter script = response.getWriter();
@@ -83,16 +85,14 @@
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('정상적으로 요약본이 수정되었습니다.')");
-		script.println("location.href='summaryUpdateDelete.jsp'");
+		script.println("location.href='/BBS/pl/summaryUpdateDelete.jsp'");
 		script.println("</script>");
 	}  
 	%>
-	
-	<textarea><%= statecolor %></textarea><br> 
-	<textarea><%= sign %></textarea><br> 
+
 	
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script src="css/js/bootstrap.js"></script>
+	<script src="../../css/js/bootstrap.js"></script>
  	
 
 </body>

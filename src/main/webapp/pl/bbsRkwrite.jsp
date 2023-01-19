@@ -1,3 +1,10 @@
+<%@page import="javax.swing.RepaintManager"%>
+<%@page import="sum.Sum"%>
+<%@page import="sum.SumDAO"%>
+<%@page import="rms.rms_next"%>
+<%@page import="rms.rms_this"%>
+<%@page import="rms.RmsDAO"%>
+<%@page import="rms.rms_next"%>
 <%@page import="java.util.Collections"%>
 <%@page import="java.util.regex.Matcher"%>
 <%@page import="java.util.regex.Pattern"%>
@@ -15,8 +22,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
-<%@ page import="bbs.BbsDAO" %>
-<%@ page import="bbs.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
 
@@ -40,20 +45,11 @@
 <body>
 	<%
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		BbsDAO bbsDAO = new BbsDAO();
+		RmsDAO rms = new RmsDAO();
 		
-		//bbsID 배열에 bbsid 담기!
-		String rq = request.getParameter("bbsID");
-		if(rq.equals("") && rq.isEmpty()) { //만약 bbsID가 넘어온 게 없다면!
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('요약본 작성이 가능한 주간보고가 없습니다.\\n승인 상태를 확인해주시길 바랍니다.')");
-			script.println("history.back()");
-			script.println("</script>");
-		}
-		String[] bbsID = rq.split(",");
-		
+		// 로그인 사용자의 랭크 가져오기
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -67,134 +63,8 @@
 			script.println("</script>");
 		}
 		
-	
-		// ********** 담당자를 가져오기 위한 메소드 *********** 
-				String workSet;
-				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-				List<String> works = new ArrayList<String>();
-				
-				if(code == null) {
-					workSet = "";
-				} else {
-					for(int i=0; i < code.size(); i++) {
-						
-						String number = code.get(i);
-						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-						String manager = userDAO.getManager(number);
-						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-					}
-					
-					workSet = String.join("/",works);
-					
-				}
-				
-		String name = userDAO.getName(id);
-		
-		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
-		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
-		
-		
-		//bbs 가져오기
-		ArrayList<Bbs> list = bbsDAO.getListBbs(bbsID);
-		
-		String con="";
-		//업무내용(Content, NContent) / 시작일(Start, NStart) 나누기 ((list.size))
-		// content 합치기
-		for(int i=0; i<list.size(); i++) {  
-			con += list.get(i).getBbsContent()+"\r\n"; //하나의 content
-		}
-		// content 자르기
-		String[] content = con.split("\r\n"); // - ~~~, ~~~,  - ~~ ...
-		// 맨앞 -를 다른 문자로 치환하기
-		String rp = "";
-		for(int i=0; i<content.length; i++) {
-			if(content[i].substring(0).indexOf("-") > -1 && content[i].substring(0).indexOf("-") < 1){ //맨 앞이 -라면,
-				String a = content[i].replaceAll("\r\n","¿");
-				a = a.replaceAll("\r\n","¿");
-				rp += a.replaceFirst("-","§") + "¿";
-			} else {
-				String a = content[i].replaceAll("\r\n","¿");
-				rp += a.replaceAll("\r\n","") +"¿"; // 해당 rp에 § 저장된다! 
-			}
-		}  
-		String[] ccontent = rp.split("§");
-		for(int i=0; i< ccontent.length; i++) {
-			String del = ccontent[i];
-			ccontent[i] = del.replaceFirst(".$","").replaceAll("¿","\r\n");
-		}
-		//공백제거
-		ArrayList<String> arc = new ArrayList<String>();
-		Collections.addAll(arc, ccontent);
-		arc.removeAll(Arrays.asList("",null));
-		String[] comcontent = arc.toArray(new String[arc.size()]); 
-		
-		//end 합치기
-		String en ="";
-		for(int i=0; i<list.size(); i++) { 
-			en += list.get(i).getBbsEnd() + "\r\n";
-		}
-		// end 자르기
-		String[] end = en.split("\r\n");
-		//공백 제거
-		ArrayList<String> arr = new ArrayList<String>();
-		Collections.addAll(arr, end);
-		arr.removeAll(Arrays.asList("",null));
-		String[] comend = arr.toArray(new String[arr.size()]);
-		
-		
-		//차주 Data
-		String ncon="";
-		//업무내용(Content, NContent) / 시작일(Start, NStart) 나누기 ((list.size))
-		// content 합치기
-		for(int i=0; i<list.size(); i++) {  
-			ncon += list.get(i).getBbsNContent()+"\r\n"; //하나의 ncontent
-		}
-		// content 자르기
-		String[] ncontent = ncon.split("\r\n|&#10;"); // - ~~~, ~~~,  - ~~ ...
-		// 맨앞 -를 다른 문자로 치환하기
-		String nrp = "";
-		for(int i=0; i< ncontent.length; i++) {
-			if(ncontent[i].substring(0).indexOf("-") > -1 && ncontent[i].substring(0).indexOf("-") < 1){ //맨 앞이 -라면,
-				String a = ncontent[i].replaceAll("\r\n","¿");
-				a = a.replaceAll("\r\n","");
-				nrp += a.replaceFirst("-","§") + "¿";
-			} else {
-				String a = ncontent[i].replaceAll("\r\n","¿");
-				nrp += a.replaceAll("\r\n","") +"¿"; // 해당 rp에 § 저장된다! 
-			}
-		}  
-		String[] nccontent = nrp.split("§");
-		for(int i=0; i < nccontent.length; i++) {
-			String del = nccontent[i];
-			nccontent[i] = del.replaceFirst(".$","").replaceAll("¿","\r\n");
-		}
-		//공백제거
-		ArrayList<String> narc = new ArrayList<String>();
-		Collections.addAll(narc, nccontent);
-		narc.removeAll(Arrays.asList("",null));
-		String[] ncomcontent = narc.toArray(new String[narc.size()]); 
-		
-		//NTarget 합치기
-		String nen ="";
-		for(int i=0; i<list.size(); i++) { 
-			nen += list.get(i).getBbsNTarget() + "\r\n";
-		}
-		// end 자르기
-		String[] ntarget = nen.split( "\r\n");
-		//공백 제거
-		ArrayList<String> narr = new ArrayList<String>();
-		Collections.addAll(narr, ntarget);
-		narr.removeAll(Arrays.asList("",null));
-		String[] ncomtarget = narr.toArray(new String[narr.size()]);
-		
+		//pl 리스트 확인
 		String work = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
-		
-		
 		
 		//(월요일) 제출 날짜 확인
 		String mon = "";
@@ -221,33 +91,146 @@
 		 }
 		 
 		 String bbsDeadline = mon;
-				 
-				 
-		// 이미 해당 날짜에 제출된 요약본이 있다면, 작성 불가!
-		String sum_id =  bbsDAO.getSumid(bbsDeadline, work);
-		if(sum_id != null && !sum_id.equals("")) {
+		if(request.getParameter("bbsDeadline") != null || !request.getParameter("bbsDeadline").isEmpty()) {
+			bbsDeadline = request.getParameter("bbsDeadline");
+		}
+		
+		//마감기간이 지난 보고의 요약본은 작성할 수 없음!
+			//해당 bbsDeadline으로 조회하여 sign이 마감인 경우,
+		String getSign = rms.getSignNext(bbsDeadline);
+		if(getSign.equals("마감")) {
+			/* PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('제출 기한이 지나 작성이 불가합니다.')");
+			script.println("location.href='/BBS/pl/bbsRk.jsp'");
+			script.println("</script>"); */
+		}
+		
+		
+		 
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+		String workSet;
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		List<String> works = new ArrayList<String>();
+		
+		if(code == null) {
+			workSet = "";
+		} else {
+			for(int i=0; i < code.size(); i++) {
+				
+				String number = code.get(i);
+				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+				String manager = userDAO.getManager(number);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			
+			workSet = String.join("/",works);
+			
+		}
+				
+		String name = userDAO.getName(id);
+		
+		// 사용자 정보 담기
+		User user = userDAO.getUser(name);
+		String password = user.getPassword();
+		String rank = user.getRank();
+		//이메일  로직 처리
+		String Staticemail = user.getEmail();
+		String[] email = Staticemail.split("@");
+		
+		
+		//만약 이미 해당 날짜로 요약본이 작성되어 있다면, 뒤로 돌려보냄!
+		SumDAO sumDAO = new SumDAO();
+		ArrayList<Sum> list = sumDAO.getlistSum(bbsDeadline, work);
+		if(list.size() != 0){ //데이터가 있다면,
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('해당 요일로 작성된 요약본이 있습니다.')");
-			//script.println("location.href='summaryRkUpdate.jsp?sum_id="+sum_id+"''");
-			//script.println("location.href='summaryRkUpdate.jsp?sum_id='");
-			script.println("location.href='/BBS/pl/summaryRk.jsp'");
+			script.println("alert('해당 날짜로 제출된 요약본이 있습니다. \\n수정 및 삭제 페이지로 이동합니다.')");
+			script.println("location.href='/BBS/pl/summaryUpdateDelete.jsp'");
 			script.println("</script>");
 		}
-	
-	
-		// 제출자 이름 뽑기
-		String subname = "";
-		for(int i=0; i < list.size(); i ++) {
-			if(i == list.size()-1) {
-				subname += list.get(i).getUserName();
+		
+		//만약 제출자가 전체 인원보다 적을 경우, 경고창을 띄움!
+		ArrayList<String> plist = userDAO.getpluser(work); //pl 관련 유저의 아이디만 출력
+		
+		//RMS 내용 가져오기!
+		//해당 주차로 제출된 RMS 내용 찾기 (nav바)
+		// 모든 내용 (pageNumber가 없음!)이기에 full을 통해 검색함!
+		ArrayList<rms_next> llist = rms.getlastSignRkfullSelect(bbsDeadline, work);
+		
+		String[] userID = new String[llist.size()];
+		
+		for(int i=0; i < llist.size(); i++) {
+			userID[i] = llist.get(i).getUserID();
+		}
+		
+		ArrayList<rms_this> tlist = rms.getthisSignRkfullSelect(bbsDeadline, userID);
+		
+		//사용자 ID -> 사용자 name으로 전환
+		ArrayList<rms_next> flist = rms.getlastSignRkfull(bbsDeadline, work);
+		
+		String userName ="";
+		for (int i=0; i < flist.size(); i++) {
+			if(i < flist.size() -1) {
+				userName += userDAO.getName(flist.get(i).getUserID()) + ", ";
 			} else {
-			subname += list.get(i).getUserName() + ",";
-			}		
+				userName +=  userDAO.getName(flist.get(i).getUserID());
+			}
 		}
 		
 		
+		// 미제출자 인원 계산 ()
+		int psize = plist.size(); //pl 담당 유저
+		int lsize = flist.size();
+		int noSub =  psize - lsize;
+		
+		//해당 인원 전원 불러오기 (이름으로 변경)
+		ArrayList<String> username = new ArrayList<String>();
+		for(int i=0; i<plist.size(); i++) {
+			String a = userDAO.getName(plist.get(i)); //user 이름을 도출.
+			username.add(a);	
+		}
+		String[] usernamedata = username.toArray(new String[username.size()]);
+		Arrays.sort(usernamedata);
+		
+		String userdata = String.join(", ", usernamedata);
+		
+		
+		//미제출자 인원
+		ArrayList<String> noSubname = new ArrayList<String>();
+		ArrayList<String> Subname = new ArrayList<String>();
+
+		//제출한 RMS 도출
+		for(int i=0; i<flist.size(); i++) {
+			Subname.add(flist.get(i).getUserID()); //제출한 user id 도출. (일반 list(10개 제한이 걸림)가 아닌, 모든 제출자를 확인해야함!)
+			//bbsId.add(Integer.toString(flist.get(i).getBbsID()));
+		}
+		for(int i=0; i<Subname.size(); i++) {
+			plist.remove(Subname.get(i));
+		}
+		//제출 안한 인원 찾기
+		for(int i=0; i<plist.size(); i++) {
+			String b = userDAO.getName(plist.get(i)); //user 이름을 도출.
+			noSubname.add(b);	
+		}
+		
+		String[] nousernamedata = noSubname.toArray(new String[noSubname.size()]);
+		Arrays.sort(nousernamedata);
+		
+		String nouserdata = String.join(", ", nousernamedata);
+		
+		//alert가 넘어오면 경고창 미표시, 넘어오지 않으면 표시!
+		String alert = request.getParameter("alert");
+		if(alert == null || alert.isEmpty()) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('주간보고 제출이 확인되지 않은 사용자가 있습니다\n작성에 유의해주시기 바랍니다.')");
+			//script.println("location.href='../login.jsp'");
+			script.println("</script>");
+		} 
+		
 	%>
+
 
  <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
@@ -293,7 +276,7 @@
 								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= work %> Summary</h5></li>
 								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
-								<li class="active" id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li class="active" id="summary_nav"><a href="bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
 								<li id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
@@ -493,13 +476,26 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-html="true" data-placement="bottom" title="제출자: <%= subname %> <br> 제출 인원: <%= list.size() %> "> <%= work  %> 요약본 작성
+					<th colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-html="true" data-placement="bottom" title="제출자: <%= userName %> <br> 제출 인원: <%= flist.size() %> "> <%= work  %> 요약본 작성
+					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
+	<%	
+	if(noSub != 0) {
+	%>
+				<tr>
+				</tr>
+				<tr>
+					<th colspan="5" style=" text-align: center; color:blue; font-size:13px " data-toggle="tooltip" data-html="true" data-placement="bottom" title="미제출자: <%= nouserdata %> <br> 미제출 인원: <%= noSub %> "> 미제출 인원이 존재합니다
 					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
 				</tr>
+	<%
+	}
+	%>
 			</thead>
 		</table>
 	</div>
 	<br>
+	
+
 	
 	<!-- 목록 조회 table -->
 	<div class="container">
@@ -520,15 +516,23 @@
 						</tr>
 						
 						<%
-						for(int i=0; i< comcontent.length; i++) { //content의 길이가 더 길 수 있음!
+						//금주 업무 내용을 나열!
+						for(int i=0; i< tlist.size(); i++) { //content
+							//content의 "-" 제거하기
+							String bbsContent = "";
+							if(tlist.get(i).getBbsContent().indexOf('-') > -1 && tlist.get(i).getBbsContent().indexOf('-') < 2) { //맨 앞이 - 라면,
+								bbsContent = tlist.get(i).getBbsContent().replaceFirst("-", "");
+							} else { //bbsContent의 앞에 '-'이 없거나, 또는 빈칸일때 -> 이 경우는 저장부터 문제가 발생하는 경우!
+								bbsContent = tlist.get(i).getBbsContent();
+							}
 						%>
 						<tr>
 							<td style="text-align: left; font-size:13px">
-								<textarea name="content<%=i%>" id="content<%=i%>" rows="2" style="resize: none; height:30px; width:300px;"><%= comcontent[i].replaceAll("(\n\r|\r\n|\n|\r)$","") %></textarea>
+								<textarea name="content<%=i%>" id="content<%=i%>" rows="2" style="resize: none; height:30px; width:300px;"><%= bbsContent %></textarea>
 							</td>
 							<td style="text-align: left; font-size:13px">
-								<textarea name="end<%=i%>" id="end<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= comend[i] %></textarea>
-								<textarea name="bbsDeadline" id="bbsDeadline" rows="1" style="resize: none; height:30px; width:60px; text-align: center; display:none"><%= list.get(0).getBbsDeadline() %></textarea>
+								<textarea name="end<%=i%>" id="end<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= tlist.get(i).getBbsEnd() %></textarea>
+								<textarea name="bbsDeadline" id="bbsDeadline" rows="1" style="resize: none; height:30px; width:60px; text-align: center; display:none"><%= bbsDeadline %></textarea>
 							</td>
 							<td>
 								<input type="checkbox" name="chk" id="chk<%=i%>" style="zoom:2.0;" value="<%= i %>">
@@ -557,14 +561,33 @@
 " style="zoom:2.0;" value="selectall" onclick="nselectAll(this)"></th>
 						</tr>
 						<%
-						for(int i=0; i< ncomcontent.length; i++) { //content의 길이가 더 길 수 있음!
+						//차주 업무 목록
+						for(int i=0; i< llist.size(); i++) { 
+							
+							//content의 "-" 제거하기
+							String bbsNContent = "";
+							if(llist.get(i).getBbsNContent().indexOf('-') > -1 && llist.get(i).getBbsNContent().indexOf('-') < 2) { //맨 앞이 - 라면,
+								bbsNContent = llist.get(i).getBbsNContent().replaceFirst("-", "");
+							} else { //bbsContent의 앞에 '-'이 없거나, 또는 빈칸일때 -> 이 경우는 저장부터 문제가 발생하는 경우!
+								bbsNContent = llist.get(i).getBbsNContent();
+							}
+							
+							//bbsNTarget이 가공되지 않음!
+							//해당 데이터 가공하여 출력하기!
+							String bbsNTarget = "";
+							if(llist.get(i).getBbsNTarget().isEmpty()) { //보류 표시
+								bbsNTarget = "[보류]";
+							} else { //데이터가 들어가 있는 경우 (ex> 2023-01-16) ...
+								bbsNTarget = llist.get(i).getBbsNTarget().substring(5);
+								bbsNTarget = bbsNTarget.replace("-", "/");
+							}
 						%>
 						<tr>
 							<td style="text-align: left; font-size:13px">
-								<textarea name="ncontent<%=i%>" id="ncontent<%=i%>" rows="2" style="resize: none; height:30px; width:300px;"><%= ncomcontent[i].replaceAll("(\n\r|\r\n|\n|\r)$","") %></textarea>
+								<textarea name="ncontent<%=i%>" id="ncontent<%=i%>" rows="2" style="resize: none; height:30px; width:300px;"><%= bbsNContent %></textarea>
 							</td>
 							<td style="text-align: left; font-size:13px">
-								<textarea name="ntarget<%=i%>" id="ntarget<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= ncomtarget[i] %></textarea>
+								<textarea name="ntarget<%=i%>" id="ntarget<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= bbsNTarget %></textarea>
 							</td>
 							<td>
 								<input type="checkbox" name="nchk" id="nchk<%=i%>" style="zoom:2.0;" value="<%= i %>">

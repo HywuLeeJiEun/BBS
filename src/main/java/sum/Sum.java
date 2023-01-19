@@ -1,8 +1,9 @@
 package sum;
 
 public class Sum {
-	private String sum_id;
-	private String pl;
+	private String userID;
+	private String bbsDeadline;
+	private String pluser;
 	private String bbsContent;
 	private String bbsEnd;
 	private String progress;
@@ -10,23 +11,28 @@ public class Sum {
 	private String note;
 	private String bbsNContent;
 	private String bbsNTarget;
-	private String bbsDeadline;
 	private String nnote;
 	private String sign;
 	private String summaryDate;
 	private String summaryUpdate;
 	
-	public String getSum_id() {
-		return sum_id;
+	public String getUserID() {
+		return userID;
 	}
-	public void setSum_id(String sum_id) {
-		this.sum_id = sum_id;
+	public void setUserID(String userID) {
+		this.userID = userID;
 	}
-	public String getPl() {
-		return pl;
+	public String getBbsDeadline() {
+		return bbsDeadline;
 	}
-	public void setPl(String pl) {
-		this.pl = pl;
+	public void setBbsDeadline(String bbsDeadline) {
+		this.bbsDeadline = bbsDeadline;
+	}
+	public String getPluser() {
+		return pluser;
+	}
+	public void setPluser(String pluser) {
+		this.pluser = pluser;
 	}
 	public String getBbsContent() {
 		return bbsContent;
@@ -69,12 +75,6 @@ public class Sum {
 	}
 	public void setBbsNTarget(String bbsNTarget) {
 		this.bbsNTarget = bbsNTarget;
-	}
-	public String getBbsDeadline() {
-		return bbsDeadline;
-	}
-	public void setBbsDeadline(String bbsDeadline) {
-		this.bbsDeadline = bbsDeadline;
 	}
 	public String getNnote() {
 		return nnote;

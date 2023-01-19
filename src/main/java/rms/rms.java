@@ -1,12 +1,11 @@
-package bbs;
+package rms;
 
-public class Bbs {
-	private int bbsID;
-	private String bbsManager;
-	private String bbsTitle;
+public class rms {
 	private String userID;
-	private String userName;
+	private String bbsDeadline;
+	private String bbsTitle;
 	private String bbsDate;
+	private String bbsManager;
 	private String bbsContent;
 	private String bbsStart;
 	private String bbsTarget;
@@ -14,25 +13,19 @@ public class Bbs {
 	private String bbsNContent;
 	private String bbsNStart;
 	private String bbsNTarget;
-	private int bbsAvailable;
-	private String bbsDeadline;
-	private String bbsUpdate;
-	private String sign;
 	private String pluser;
 	
-	
-	
-	public int getBbsID() {
-		return bbsID;
+	public String getUserID() {
+		return userID;
 	}
-	public void setBbsID(int bbsID) {
-		this.bbsID = bbsID;
+	public void setUserID(String userID) {
+		this.userID = userID;
 	}
-	public String getBbsManager() {
-		return bbsManager;
+	public String getBbsDeadline() {
+		return bbsDeadline;
 	}
-	public void setBbsManager(String bbsManager) {
-		this.bbsManager = bbsManager;
+	public void setBbsDeadline(String bbsDeadline) {
+		this.bbsDeadline = bbsDeadline;
 	}
 	public String getBbsTitle() {
 		return bbsTitle;
@@ -40,23 +33,17 @@ public class Bbs {
 	public void setBbsTitle(String bbsTitle) {
 		this.bbsTitle = bbsTitle;
 	}
-	public String getUserID() {
-		return userID;
-	}
-	public void setUserID(String userID) {
-		this.userID = userID;
-	}
-	public String getUserName() {
-		return userName;
-	}
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
 	public String getBbsDate() {
 		return bbsDate;
 	}
 	public void setBbsDate(String bbsDate) {
 		this.bbsDate = bbsDate;
+	}
+	public String getBbsManager() {
+		return bbsManager;
+	}
+	public void setBbsManager(String bbsManager) {
+		this.bbsManager = bbsManager;
 	}
 	public String getBbsContent() {
 		return bbsContent;
@@ -100,35 +87,13 @@ public class Bbs {
 	public void setBbsNTarget(String bbsNTarget) {
 		this.bbsNTarget = bbsNTarget;
 	}
-	public int getBbsAvailable() {
-		return bbsAvailable;
-	}
-	public void setBbsAvailable(int bbsAvailable) {
-		this.bbsAvailable = bbsAvailable;
-	}
-	public String getBbsDeadline() {
-		return bbsDeadline;
-	}
-	public void setBbsDeadline(String bbsDeadline) {
-		this.bbsDeadline = bbsDeadline;
-	}
-	public String getBbsUpdate() {
-		return bbsUpdate;
-	}
-	public void setBbsUpdate(String bbsUpdate) {
-		this.bbsUpdate = bbsUpdate;
-	}
-	public String getSign() {
-		return sign;
-	}
-	public void setSign(String sign) {
-		this.sign = sign;
-	}
 	public String getPluser() {
 		return pluser;
 	}
 	public void setPluser(String pluser) {
 		this.pluser = pluser;
 	}
+	
+	
+	
 }
-

@@ -1,3 +1,4 @@
+<%@page import="rms.RmsDAO"%>
 <%@page import="Sumad.Sumad"%>
 <%@page import="Sumad.SumadDAO"%>
 <%@page import="sum.Sum"%>
@@ -40,6 +41,10 @@
 <body>
 	<%
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		SumadDAO sumadDAO = new SumadDAO();
+		RmsDAO rms = new RmsDAO();
+		SumDAO sumDAO = new SumDAO();
+		
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
@@ -62,24 +67,24 @@
 		
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
-				String workSet;
-				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-				List<String> works = new ArrayList<String>();
+		String workSet;
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		List<String> works = new ArrayList<String>();
+		
+		if(code == null) {
+			workSet = "";
+		} else {
+			for(int i=0; i < code.size(); i++) {
 				
-				if(code == null) {
-					workSet = "";
-				} else {
-					for(int i=0; i < code.size(); i++) {
-						
-						String number = code.get(i);
-						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-						String manager = userDAO.getManager(number);
-						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-					}
-					
-					workSet = String.join("/",works);
-					
-				}
+				String number = code.get(i);
+				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+				String manager = userDAO.getManager(number);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			
+			workSet = String.join("/",works);
+			
+		}
 				
 		String name = userDAO.getName(id);
 		
@@ -115,26 +120,19 @@
 			day = dateFmt.format(cal2.getTime());
 		 }
 		 
-		 String bbsDeadline = mon;
+		 //String bbsDeadline = mon;
 		
 		 
 		//Admin의 작성 리스트 확인 (summary_admin)
-		SumadDAO sumadDAO = new SumadDAO();
 		ArrayList<Sumad> sumad = sumadDAO.getlistSumSign(); //미승인 상태만 불러옴!
 		
 		
-		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
-		SumDAO sumDAO = new SumDAO();
 		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 		
 		String str = "'미승인'된 요약본을<br>";
 		str += "수정/삭제/승인할 수 있습니다.";
-		
-		//bbsID를 통한 작성 기능 제공
-		ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
-		String bbsID = String.join(",",AllbbsID);
-		
+
 	%>
 
 
@@ -414,7 +412,7 @@
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">상태</th>
-						<th style="background-color: #eeeeee; text-align: center;" data-toggle="tooltip" data-html="true" data-placement="right" title="관리자의 승인 이후, <br>상태가 변경됩니다.">승인</th>
+						<th style="background-color: #eeeeee; text-align: center;" data-toggle="tooltip" data-html="true" data-placement="right" title="요약본 승인시,<br>수정/삭제가 불가합니다.">승인</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -439,7 +437,7 @@
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/admin/summaryadRkUpdate.jsp?sum_id=<%= sumad.get(i).getSumad_id() %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
+						<a href="/BBS/admin/summaryadRkUpdate.jsp?bbsDeadline=<%= sumad.get(i).getBbsDeadline() %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
 							[WEB/ERP] - summary (<%= dl %>)</a></td>
 						<td><%= name %></td>
 						<td><%= sumad.get(i).getSumadDate().substring(0, 11) + sumad.get(i).getSumadDate().substring(11, 13) + "시"
@@ -453,13 +451,13 @@
 						} else {
 							sign="마감";
 							// 데이터베이스에 마감처리 진행
-							int a = bbsDAO.sumadSign(Integer.parseInt(sumad.get(i).getSumad_id()));
+							int a = sumadDAO.sumadSign(sumad.get(i).getBbsDeadline());
 						}
 						%>
 						<%= sign %>
 						</td>
-						<td data-toggle="tooltip" data-html="true" data-placement="right" title="관리자의 승인 이후, <br>상태가 변경됩니다.">
-							<button class="btn btn-success" style="font-size:12px" onclick="location.href='/BBS/admin/action/summaryadsignOnAction.jsp?sumad_id=<%= sumad.get(i).getSumad_id() %>&bbsDeadline=<%= sumad.get(i).getBbsDeadline() %>'"> 승인 </button>
+						<td data-toggle="tooltip" data-html="true" data-placement="right" title="요약본 승인시,<br>수정/삭제가 불가합니다.">
+							<button class="btn btn-success" style="font-size:12px" onclick="location.href='/BBS/admin/action/summaryadsignOnAction.jsp?bbsDeadline=<%= sumad.get(i).getBbsDeadline() %>'"> 승인 </button>
 						</td>
 					</tr>
 				</tbody>

@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>baynex-logout</title>
+<title>RMS</title>
 </head>
 <body>
 	<%

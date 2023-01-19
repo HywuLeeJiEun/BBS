@@ -48,7 +48,12 @@
 		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\erp_sample.pptx";
 	} */
 	templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_EW.jrxml";
-	newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\erp_sample.pptx";
+	if(pluser.equals("WEB")) {
+		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\web_sample.pptx";
+	} else if(pluser.equals("ERP")) {
+		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\erp_sample.pptx";
+	}
+	
 	//String templatePath = "D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
 	//String templatePath = "D:\\workspace\\sample\\sample_bbs.jrxml";
 	//String templatePath2 = "D:\\workspace\\sample\\sample_bbs.jasper";
@@ -74,7 +79,7 @@
 	
 	 // (3)데이타소스 생성
 	 Class.forName("org.mariadb.jdbc.Driver");
-	 conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/bbs", "root","7471350");
+	 conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/rms", "root","7471350");
 	
 	 // (4)데이타의 동적 바인드
 	 JasperPrint print = JasperFillManager.fillReport(jasperReport, paramMap, conn);

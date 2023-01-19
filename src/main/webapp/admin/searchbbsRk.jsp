@@ -1,39 +1,53 @@
-<%@page import="java.util.List"%>
+<%@page import="rms.rms"%>
+<%@page import="rms.rms_next"%>
+<%@page import="rms.rms_this"%>
+<%@page import="rms.RmsDAO"%>
 <%@page import="user.User"%>
+<%@page import="java.util.List"%>
 <%@page import="user.UserDAO"%>
 <%@page import="org.mariadb.jdbc.internal.failover.tools.SearchFilter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
-<%@ page import="bbs.BbsDAO" %>
-<%@ page import="bbs.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
-<link rel="stylesheet" href="../css/css/bootstrap.css">
+<!-- // 폰트어썸 이미지 사용하기 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <link rel="stylesheet" href="../css/index.css">
+<meta charset="UTF-8">
+<!-- 화면 최적화 -->
+<!-- <meta name="viewport" content="width-device-width", initial-scale="1"> -->
+<!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <title>RMS</title>
 </head>
 
 <body>
 	<%
+		UserDAO userDAO = new UserDAO();
+	
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
 			id = (String)session.getAttribute("id");
+		}
+		if(id == null){
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('로그인이 필요한 서비스입니다.')");
+			script.println("location.href='../login.jsp'");
+			script.println("</script>");
 		}
 		int pageNumber = 1; //기본은 1 페이지를 할당
 		// 만약 파라미터로 넘어온 오브젝트 타입 'pageNumber'가 존재한다면
 		// 'int'타입으로 캐스팅을 해주고 그 값을 'pageNumber'변수에 저장한다
 		if(request.getParameter("pageNumber") != null){
 			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
-		}
+		}		
 		
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		String name = userDAO.getName(id);
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
@@ -55,39 +69,37 @@
 			workSet = String.join("/",works);
 			
 		}
-		
-		String name = userDAO.getName(id);
-		
+
+	
 		// 사용자 정보 담기
 		User user = userDAO.getUser(name);
 		String password = user.getPassword();
 		String rank = user.getRank();
 		//이메일  로직 처리
 		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
-		
+		String[] email;
+		email = Staticemail.split("@");
 		//요약본 처리를 위한 Deadline 
-		BbsDAO bbsDAO = new BbsDAO();
 		//ArrayList<Bbs> listbbs = bbsDAO.getDeadLineList(); 
 		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
 		
-		//검색한 데이터 저장
+		//검색을 위한 설정
 		String category = request.getParameter("searchField");
 		String str = request.getParameter("searchText");
-		
-		if(str == null || str.trim().isEmpty()) {
+		if(category == null) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('내용이 비어있습니다.')");
+			script.println("alert('검색 내용이 비어있습니다.')");
 			script.println("location.href='/BBS/user/bbs.jsp'");
 			script.println("</script>");
 		}
 		
 		if(category.equals("bbsDeadline")) {
 			int len = str.length();
+			
 			// 2글자 이상이며 -을 포함하지 않는다면, 
-			if(len > 2 && str.contains("-") == false) {
+			if(len > 2 && str.contains("-") == false && len <4) {
 				PrintWriter script = response.getWriter();
 				script.println("<script>");
 				script.println("alert('날짜 형식은 - 을 갖추어야 합니다.')");
@@ -96,21 +108,29 @@
 			}
 		}
 		
+		//작성자명 검색시,
+		if(category.equals("userID")) {
+			str = userDAO.getId(request.getParameter("searchText"));
+		}
 		
-		ArrayList<Bbs> list =  bbsDAO.getRkSearch(pageNumber, category, str);
-		//다음이 적용되는지 확인
-		ArrayList<Bbs> aflist =  bbsDAO.getRkSearch(pageNumber+1, category, str);
+		// 검색 결과 조회
+		RmsDAO rms = new RmsDAO();
+		ArrayList<rms> rmslist =  rms.getRmsAdminSearch(pageNumber, category, str);
 		
-			if (list.size() == 0 || list.isEmpty()) {
+			if (rmslist.size() == 0) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('검색결과가 없습니다.')");
 			script.println("location.href='/BBS/user/bbs.jsp'");
 			script.println("</script>");
 		} 
+		
+		//다음 페이지가 있는지,
+		ArrayList<rms> afrmslist =  rms.getRmsAdminSearch(pageNumber+1, category, str);
+		
 	%>
 	
-	  <!-- ************ 상단 네비게이션바 영역 ************* -->
+	      <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -134,32 +154,34 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li class="active"><a href="bbsAdmin.jsp">조회</a></li>
-							<!-- <li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li> -->
+							<li  class="active"><a href="/BBS/user/bbs.jsp">조회</a></li>
+							<li><a href="/BBS/user/bbsUpdate.jsp">작성</a></li>
+							<li><a href="/BBS/user/bbsUpdateDelete.jsp">수정 및 제출</a></li>
+							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
-						%>
-						<%
-						 if (pl.equals("WEB") || pl.equals("ERP")) {
+							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
+								if(pl !="" || !pl.isEmpty()) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false">요약본<span class="caret"></span></a>
+								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
-						
 							<ul class="dropdown-menu">
-								<li><a href="/BBS/pl/bbsRk.jsp">작성</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
+								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
+								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
+								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
+								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
+								<li id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
-						<%
-						 }
-						%>
 							</li>
 						<%
+								}
 							}
 						%>
 						<%
@@ -194,7 +216,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장")||rk.equals("관리자")) {
+					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="/BBS/admin/work/workChange.jsp">담당업무 변경</a></li>
@@ -216,8 +238,7 @@
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
 	
-		
-	<!-- 모달 영역! -->
+		<!-- 모달 영역! -->
 	   <div class="modal fade" id="UserUpdateModal" role="dialog">
 		   <div class="modal-dialog">
 		    <div class="modal-content">
@@ -342,29 +363,34 @@
 		   </div>
 	  </div>
 	</div>
-	
+		
 		
 	<!-- ***********검색바 추가 ************* -->
-	<%
-		
-	%>
-
-
 	<div class="container">
 		<div class="row">
-			<form method="post" name="search" id="search" action="/BBS/admin/searchbbsRk.jsp">
+		<table class="pull-left" style="text-align: center; cellpadding:50px; width:60%" >
+			<thead>
+				<tr>
+					<th style=" text-align: left" data-toggle="tooltip" data-html="true" data-placement="bottom" title=""> 
+					<br><i class="glyphicon glyphicon-triangle-right" id="icon"  style="left:5px;"></i> 주간보고 목록 (개인)
+				</th>
+				</tr>
+			</thead>
+			</table>
+			<form method="post" name="search" id="search" action="/BBS/user/searchbbs.jsp">
 				<table class="pull-right">
 					<tr>
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
 								<option value="bbsDeadline" <%= category.equals("bbsDeadline")?"selected":""%>>제출일</option>
 								<option value="bbsTitle" <%= category.equals("bbsTitle")?"selected":""%>>제목</option>
-								<option value="userName" <%= category.equals("userName")?"selected":""%>>작성자</option>
-								<option value="pluser" <%= category.equals("pluser")?"selected":""%>>업무 파트</option>
+								<option value="bbsTitle" <%= category.equals("userID")?"selected":""%>>작성자</option>
+								<option value="bbsTitle" <%= category.equals("pluser")?"selected":""%>>업무 파트</option>
 						</select></td>
 						<td>
 							<input type="text" class="form-control"
-							placeholder="" name="searchText" maxlength="100" value="<%= str %>"></td>
-						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="/BBS/admin/searchbbsRk.jsp">검색</button></td>
+							placeholder="" name="searchText" maxlength="100" value="<%= request.getParameter("searchText") %>"></td>
+						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="/BBS/user/searchbbs.jsp">검색</button></td>
+						<!-- <td><button type="submit" class="btn btn-warning pull-right" formaction="gathering.jsp" onclick="return submit2(this.form)">취합</button></td> -->
 					</tr>
 
 				</table>
@@ -377,36 +403,35 @@
 	<!-- # <검색된게시판 메인 페이지 영역 시작 -->
 	<div class="container">
 		<div class="row">
-			<table  id="bbsTable" class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
+			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
+						<!-- <th style="background-color: #eeeeee; text-align: center;">번호</th> -->
 						<th style="background-color: #eeeeee; text-align: center;">제출일</th>
-						<th style="background-color: #eeeeee; text-align: center;">제목</th>
+						<th style="background-color: #eeeeee; text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
-						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
-						<th style="background-color: #eeeeee; text-align: center;">업무 파트</th>
-						<th style="background-color: #eeeeee; text-align: center;">승인</th>
+						<th style="background-color: #eeeeee; text-align: center;">담당</th>
 					</tr>
 				</thead>
 				<tbody>
 					<%
+						
 
-						for(int i = 0; i < list.size(); i++){
+						for(int i = 0; i < rmslist.size(); i++){
+							String userName = userDAO.getName(rmslist.get(i).getUserID());
 					%>
 					<tr>
-						<td><%= list.get(i).getBbsDeadline() %></td>
+						<td><%= rmslist.get(i).getBbsDeadline() %></td>
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/user/update.jsp?bbsID=<%= list.get(i).getBbsID() %>">
-							<%= list.get(i).getBbsTitle() %></a></td>
-						<td><%= list.get(i).getUserName() %></td>
-						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
-							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>	
-						<td><%= list.get(i).getBbsUpdate() %></td>	
-						<td><%= list.get(i).getPluser() %></td>		
-						<td><%= list.get(i).getSign() %></td>	
+						<a href="/BBS/user/update.jsp?bbsDeadline=<%= rmslist.get(i).getBbsDeadline() %>&userID=<%= rmslist.get(i).getUserID() %>">
+							<%= rmslist.get(i).getBbsTitle() %></a></td>
+						<td><%= userName %></td>
+						<td><%= rmslist.get(i).getBbsDate().substring(0, 11) + rmslist.get(i).getBbsDate().substring(11, 13) + "시"
+							+ rmslist.get(i).getBbsDate().substring(14, 16) + "분" %></td>	
+						<td><%= rmslist.get(i).getPluser() %></td>		
 					</tr>
 					<%
 						}
@@ -418,14 +443,17 @@
 			<%
 				if(pageNumber != 1){
 			%>
-				<a href="/BBS/admin/searchbbsRk.jsp?pageNumber=<%=pageNumber - 1 %>&searchField=<%= category %>&searchText=<%= str %>"
+				<a href="/BBS/user/searchbbs.jsp?pageNumber=<%=pageNumber - 1 %>&searchField=<%= category %>&searchText=<%= str %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(aflist.size() != 0) {
+				}if(afrmslist.size() != 0){
 			%>
-				<a href="/BBS/admin/searchbbsRk.jsp?pageNumber=<%=pageNumber + 1 %>&searchField=<%= category %>&searchText=<%= str %>"
+				<a href="/BBS/user/searchbbs.jsp?pageNumber=<%=pageNumber + 1 %>&searchField=<%= category %>&searchText=<%= str %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>
-			<% } %>
+			<%
+				}
+			%>
+			
 			
 			<a href="/BBS/user/bbs.jsp" class="btn btn-primary pull-right">목록</a> 
 		</div>
@@ -436,16 +464,8 @@
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="../css/js/bootstrap.js"></script>
-	<script>
-		function ChangeValue() {
-			var value_str = document.getElementById('searchField');
-			
-		}
-		
 	
-	</script>
-	
-    <!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
+	 <!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
 	<script>
 	var trCnt = $('#bbsTable tr').length; 
 	

@@ -1,3 +1,5 @@
+<%@page import="rms.RmsDAO"%>
+<%@page import="rms.rms_next"%>
 <%@page import="sum.Sum"%>
 <%@page import="sum.SumDAO"%>
 <%@page import="java.util.Arrays"%>
@@ -13,8 +15,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
-<%@ page import="bbs.BbsDAO" %>
-<%@ page import="bbs.Bbs"%>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
 
@@ -38,6 +38,7 @@
 <body>
 	<%
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		RmsDAO rms = new RmsDAO();
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
@@ -60,24 +61,24 @@
 		
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
-				String workSet;
-				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-				List<String> works = new ArrayList<String>();
+		String workSet;
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		List<String> works = new ArrayList<String>();
+		
+		if(code == null) {
+			workSet = "";
+		} else {
+			for(int i=0; i < code.size(); i++) {
 				
-				if(code == null) {
-					workSet = "";
-				} else {
-					for(int i=0; i < code.size(); i++) {
-						
-						String number = code.get(i);
-						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-						String manager = userDAO.getManager(number);
-						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-					}
-					
-					workSet = String.join("/",works);
-					
-				}
+				String number = code.get(i);
+				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+				String manager = userDAO.getManager(number);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			
+			workSet = String.join("/",works);
+			
+		}
 				
 		String name = userDAO.getName(id);
 		
@@ -113,21 +114,19 @@
 			day = dateFmt.format(cal2.getTime());
 		 }
 		 
-		 String bbsDeadline = mon;
-		
+		 //String bbsDeadline = mon;
+		String bbsDeadline = "2023-01-16";
 		 
 		//pl 리스트 확인
 		String work = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
-		ArrayList<String> plist = userDAO.getpluser(work); //pl 관련 유저의 아이디만 출력
-		//제출한 사람만 남기기
+		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+
 		
-		String[] pllist = plist.toArray(new String[plist.size()]); //해당 pllist를 바꿔야함! (제출한 사람만)
-		
-		
-		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
+		// 데이터 불러오기
 		SumDAO sumDAO = new SumDAO();
-		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist);
-		ArrayList<Sum> sumlist = sumDAO.getlistSumAll(work);
+		ArrayList<Sum> sumlist = sumDAO.getlistSumAll(work, pageNumber);
+		//다음 리스트가 있는지 확인
+		ArrayList<Sum> next_sumlist = sumDAO.getlistSumAll(work, pageNumber+1);
 		
 		if(work.equals("") || work == null) {
 			PrintWriter script = response.getWriter();
@@ -138,32 +137,30 @@
 		}
 		
 		
-		// 미제출자 인원 계산
-		int psize = plist.size();
-		int lsize = list.size();
-		int noSub =  psize - lsize;
+		ArrayList<String> plist = userDAO.getpluser(work); //pl 관련 유저의 아이디만 출력
+		//제출한 사람만 남기기
 		
-		//해당 인원 전원 불러오기
-		ArrayList<String> username = new ArrayList<String>();
-		for(int i=0; i<plist.size(); i++) {
-			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
-			username.add(userName);	
+		String[] pllist = plist.toArray(new String[plist.size()]); //해당 pllist를 바꿔야함! (제출한 사람만)
+		ArrayList<rms_next> flist = rms.getlastSignRkfull(bbsDeadline, work);
+		// 검색 결과를 바탕으로 llist 조회
+		String[] userID = new String[flist.size()];
+		
+		for(int i=0; i < flist.size(); i++) {
+			userID[i] = flist.get(i).getUserID();
 		}
-		String[] usernamedata = username.toArray(new String[username.size()]);
-		Arrays.sort(usernamedata);
-		
-		String userdata = String.join(", ", usernamedata);
-		
-		
+		// 미제출자 인원 계산 ()
+		int psize = plist.size(); //pl 담당 유저
+		int lsize = userID.length;
+		int noSub =  psize - lsize;
+				
 		//미제출자 인원
 		ArrayList<String> noSubname = new ArrayList<String>();
 		ArrayList<String> Subname = new ArrayList<String>();
-		// 넘기기 위한 bbsID
-		ArrayList<String> bbsId = new ArrayList<String>();
-		//제출한 bbsID 찾기
-		for(int i=0; i<list.size(); i++) {
-			Subname.add(list.get(i).getUserID()); //제출한 user id 도출.
-			bbsId.add(Integer.toString(list.get(i).getBbsID()));
+
+		//제출한 RMS 도출
+		for(int i=0; i<flist.size(); i++) {
+			Subname.add(flist.get(i).getUserID()); //제출한 user id 도출. (일반 list(10개 제한이 걸림)가 아닌, 모든 제출자를 확인해야함!)
+			//bbsId.add(Integer.toString(flist.get(i).getBbsID()));
 		}
 		for(int i=0; i<Subname.size(); i++) {
 			plist.remove(Subname.get(i));
@@ -178,12 +175,7 @@
 		Arrays.sort(nousernamedata);
 		
 		String nouserdata = String.join(", ", nousernamedata);
-		
-		//bbsID string으로 변환
-		String bbsID = String.join(",",bbsId);
-		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
-		
+				
 		String str = "작성된 요약본을 <br>";
 		str += "확인할 수 있습니다.";
 	%>
@@ -234,7 +226,7 @@
 								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li  class="active"><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
-								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
 								<li id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
@@ -480,7 +472,7 @@
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/pl/summaryRkUpdate.jsp?sum_id=<%= sumlist.get(i).getSum_id() %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
+						<a href="/BBS/pl/summaryRkUpdate.jsp?bbsDeadline=<%= sumlist.get(i).getBbsDeadline() %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
 							[<%= pl %>] - summary (<%= dl %>)</a></td>
 						<td><%= name %></td>
 						<td><%= sumlist.get(i).getSummaryDate().substring(0, 11) + sumlist.get(i).getSummaryDate().substring(11, 13) + "시"
@@ -495,7 +487,7 @@
 						} else {
 							sign="마감";
 							// 데이터베이스에 마감처리 진행
-							int a = bbsDAO.sumSign(Integer.parseInt(sumlist.get(i).getSum_id()));
+							int a = sumDAO.sumSign(sumlist.get(i).getBbsDeadline());
 						}
 						%>
 						<%= sign %>
@@ -514,7 +506,7 @@
 				<a href="/BBS/pl/summaryRk.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(bbsDAO.nextPage(pageNumber + 1)){
+				}if(next_sumlist.size() != 0){
 			%>
 				<a href="/BBS/pl/summaryRk.jsp?pageNumber=<%=pageNumber + 1 %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>
@@ -523,7 +515,7 @@
 			%>
 			<%-- <a href="ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> 요약 pptx</a> --%>
 
-			<a href="/BBS/pl/bbsRkwrite.jsp?bbsID=<%=bbsID%>" style="width:50px;" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> 작성 </a>
+			<a href="/BBS/pl/bbsRkwrite.jsp" style="width:50px;" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> 작성 </a>
 
 		</div>
 	</div>

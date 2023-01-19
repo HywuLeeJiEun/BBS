@@ -1,3 +1,6 @@
+<%@page import="rms.rms"%>
+<%@page import="rms.rms_next"%>
+<%@page import="rms.RmsDAO"%>
 <%@page import="java.util.List"%>
 <%@page import="user.User"%>
 <%@page import="java.util.Date"%>
@@ -10,8 +13,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
-<%@ page import="bbs.BbsDAO" %>
-<%@ page import="bbs.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
 
@@ -35,6 +36,8 @@
 <body>
 	<%
 		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		RmsDAO rms = new RmsDAO();
+		
 		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
@@ -62,24 +65,24 @@
 		}
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
-				String workSet;
-				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-				List<String> works = new ArrayList<String>();
+		String workSet;
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		List<String> works = new ArrayList<String>();
+		
+		if(code == null) {
+			workSet = "";
+		} else {
+			for(int i=0; i < code.size(); i++) {
 				
-				if(code == null) {
-					workSet = "";
-				} else {
-					for(int i=0; i < code.size(); i++) {
-						
-						String number = code.get(i);
-						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-						String manager = userDAO.getManager(number);
-						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-					}
-					
-					workSet = String.join("/",works);
-					
-				}
+				String number = code.get(i);
+				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+				String manager = userDAO.getManager(number);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			
+			workSet = String.join("/",works);
+			
+		}
 				
 		String name = userDAO.getName(id);
 		
@@ -91,11 +94,14 @@
 		String Staticemail = user.getEmail();
 		String[] email = Staticemail.split("@");
 		
-		//요약본 처리를 위한 Deadline 
-		BbsDAO bbsDAO = new BbsDAO();
-		//ArrayList<Bbs> listbbs = bbsDAO.getDeadLineList(); 
 		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		
+		//리스트 가져오기
+		ArrayList<rms> rmslist =  rms.getRmsAdmin(pageNumber);
+		
+		//다음 리스트 조회
+		ArrayList<rms> afrmslist =  rms.getRmsAdmin(pageNumber+1);
 	%>
 	
 		
@@ -352,8 +358,8 @@
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
 								<option value="bbsDeadline">제출일</option>
 								<option value="bbsTitle">제목</option>
-								<option value="userName">작성자</option>
-								<option value="pluser">업무 파트</option>
+								<option value="userID">작성자</option>
+								<option value="pluser">담당</option>
 						</select></td>
 						<td><input type="text" class="form-control"
 							placeholder="검색어 입력" name="searchText" maxlength="100"></td>
@@ -379,54 +385,28 @@
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">업무 파트</th>
-						<th style="background-color: #eeeeee; text-align: center;">승인</th>
 					</tr>
 				</thead>
 				<tbody>
-					<%
-						String userName = "userName";
-						ArrayList<Bbs> list = bbsDAO.getList(pageNumber);
-						
-						for(int i = 0; i < list.size(); i++){
-							
-							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
-							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-							
-							String dl = bbsDAO.getDLS(list.get(i).getBbsID());
-							Date time = new Date();
-							String timenow = dateFormat.format(time);
+					<%		
+						for(int i = 0; i < rmslist.size(); i++){
+							String userName = userDAO.getName(rmslist.get(i).getUserID());
 
-							Date dldate = dateFormat.parse(dl);
-							Date today = dateFormat.parse(timenow);
 					%>
 
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 					<tr>
-						<td> <%= list.get(i).getBbsDeadline() %> </td>
+						<td> <%= rmslist.get(i).getBbsDeadline() %> </td>
 
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/user/update.jsp?bbsID=<%= list.get(i).getBbsID() %>">
-							<%= list.get(i).getBbsTitle() %></a></td>
-						<td><%= list.get(i).getUserName() %></td>
-						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
-							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
-						<!-- 승인/미승인/마감 표시 -->
-						<td><%= list.get(i).getPluser() %></td>
-						<td>
-						<%
-						String sign = null;
-						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
-							sign = list.get(i).getSign();
-						} else {
-							sign="마감";
-							// 데이터베이스에 마감처리 진행
-							int a = bbsDAO.getSignDeadLine(list.get(i).getBbsID());
-						}
-						%>
-						<%= sign %>
-						</td>
+						<a href="/BBS/user/update.jsp?userID=<%= rmslist.get(i).getUserID() %>&bbsDeadline=<%= rmslist.get(i).getBbsDeadline() %>">
+							<%= rmslist.get(i).getBbsTitle() %></a></td>
+						<td><%= userName %></td>
+						<td><%= rmslist.get(i).getBbsDate().substring(0, 11) + rmslist.get(i).getBbsDate().substring(11, 13) + "시"
+							+ rmslist.get(i).getBbsDate().substring(14, 16) + "분" %></td>
+						<td><%= rmslist.get(i).getPluser() %></td>
 					</tr>
 					<%
 						}
@@ -441,7 +421,7 @@
 				<a href="/BBS/admin/bbsAdmin.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(bbsDAO.nextPage(pageNumber + 1)){
+				}if(afrmslist.size() != 0){
 			%>
 				<a href="/BBS/admin/bbsAdmin.jsp?pageNumber=<%=pageNumber + 1 %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>

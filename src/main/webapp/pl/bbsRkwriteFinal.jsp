@@ -1,5 +1,4 @@
 <%@page import="sum.Sum"%>
-<%@page import="bbs.Bbs"%>
 <%@page import="sum.SumDAO"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.util.Calendar"%>
@@ -10,7 +9,6 @@
 <%@page import="java.util.ArrayList"%>
 <%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
-<%@page import="bbs.BbsDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <% request.setCharacterEncoding("utf-8"); %>
@@ -32,7 +30,6 @@
 <body>
 <% 
 	UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-	BbsDAO bbsDAO = new BbsDAO();
 	
 	// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 	String id = null;
@@ -82,18 +79,12 @@
 
 
 	// 선택된 데이터 정보
-	//String chk_arr = request.getParameter("chk_arr");
-	//String nchk_arr = request.getParameter("nchk_arr");
 	String content = request.getParameter("content");
 	String end = request.getParameter("end");
 	String ncontent = request.getParameter("ncontent");
 	String ntarget = request.getParameter("ntarget");
 	String bbsDeadline = request.getParameter("bbsDeadline");
-	// 선택된 데이터 가공하기 § (사이즈는 동일함!)
-/* 	String[] bbsContent = content.split("§");
-	String[] bbsEnd = end.split("§");
-	String[] bbsNContent = ncontent.split("§");
-	String[] bbsNTarget = ntarget.split("§"); */
+
 	content = content.replaceAll("§","\r\n");
     end = end.replaceAll("§","\r\n");
 	ncontent = ncontent.replaceAll("§","\r\n");
@@ -101,30 +92,6 @@
 	bbsDeadline = bbsDeadline.replaceAll("§","\r\n");
 
 	
-	//(월요일) 제출 날짜 확인
-	String mon = "";
-	String day ="";
-	
-	Calendar cal = Calendar.getInstance(); 
-	Calendar cal2 = Calendar.getInstance(); //오늘 날짜 구하기
-	SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
-	
-	cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-	//cal.add(Calendar.DATE, 7); //일주일 더하기
-	
-	 // 비교하기 cal.compareTo(cal2) => 월요일이 작을 경우 -1, 같은 날짜 0, 월요일이 더 큰 경우 1 
-	 if(cal.compareTo(cal2) == -1) {
-		 //월요일이 해당 날짜보다 작다.
-		 cal.add(Calendar.DATE, 7);
-		 
-		 mon = dateFmt.format(cal.getTime());
-		day = dateFmt.format(cal2.getTime());
-	 } else { // 월요일이 해당 날짜보다 크거나, 같다 
-		 mon = dateFmt.format(cal.getTime());
-		day = dateFmt.format(cal2.getTime());
-	 }
-	 //확인할 월요일 날짜
-	 String monday = mon;
 
 	// 진행율 구하기 (정확히 구현하려면 - 상세 Data가 DB에 저장되어야 함.)
 	String a = "[보류],12/31,12/30";
@@ -150,10 +117,6 @@
 		
 	}
 	
-	
-	//bbsID를 통한 작성 기능 제공
-	ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
-	String bbsID = String.join(",",AllbbsID);
 %>
 
 
@@ -201,7 +164,7 @@
 								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
-								<li class="active" id="summary_nav"><a href="bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
+								<li class="active" id="summary_nav"><a href="bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
 								<li id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
@@ -401,7 +364,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th id="summary" colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-placement="bottom" title="제출일 : <%= bbsDeadline %>"> 요약본(Summary) 작성 </th>
+					<th id="summary" colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-placement="bottom" title="제출일 : <%= bbsDeadline %>"> 요약본 작성 </th>
 				</tr>
 			</thead>
 		</table>

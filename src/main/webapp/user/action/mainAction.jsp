@@ -1,30 +1,21 @@
+<%@page import="rms.rms_next"%>
+<%@page import="rms.rms_this"%>
+<%@page import="rms.RmsDAO"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
-<%@page import="bbs.BbsDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <% request.setCharacterEncoding("utf-8"); %>
-<jsp:useBean id="bbs" class="bbs.Bbs" scope="page" />
-<jsp:setProperty name="bbs" property="bbsTitle" />
-<jsp:setProperty name="bbs" property="bbsManager" />
-<jsp:setProperty name="bbs" property="bbsContent" />
-<jsp:setProperty name="bbs" property="bbsStart" />
-<jsp:setProperty name="bbs" property="bbsTarget" />
-<jsp:setProperty name="bbs" property="bbsEnd" />
-<jsp:setProperty name="bbs" property="bbsNContent" />
-<jsp:setProperty name="bbs" property="bbsNStart" />
-<jsp:setProperty name="bbs" property="bbsNTarget" />
-<jsp:setProperty name="bbs" property="bbsDeadline" />
 
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Baynex-insert</title>
+<title>RMS</title>
 </head>
 <body>
 	<%
@@ -36,6 +27,16 @@
 		String NStart = null;
 		String NTarget = null;
 		
+		//생성된 마지막 content의 수
+		int con = Integer.parseInt(request.getParameter("con"));
+		int ncon = Integer.parseInt(request.getParameter("ncon"));
+		int acon = Integer.parseInt(request.getParameter("acon"));
+		
+		//줄 개수
+		int trCnt = Integer.parseInt(request.getParameter("trCnt"));
+		int trNCnt = Integer.parseInt(request.getParameter("trNCnt"));
+		int trACnt = Integer.parseInt(request.getParameter("trACnt"));
+		
 		if(session.getAttribute("id") != null){
 			id = (String)session.getAttribute("id");
 		}
@@ -46,337 +47,230 @@
 			script.println("alert('로그인이 되어 있지 않습니다. 로그인 후 사용해주시길 바랍니다.')");
 			script.println("location.href='../../login.jsp'");
 			script.println("</script>");
+		} else {
+		UserDAO userDAO = new UserDAO();
+		String pluser = "";
+		if(userDAO.getpluserunder(id) != null) { // 비어있지 않다면,
+			pluser = userDAO.getpluserunder(id);
 		}
-		
-		// 저장할 내용을 담을 리스트 생성
-		String getbbscontent = "";
-		String getbbsstart = "";
-		String getbbstarget = "";
-		String getbbsend = "";
-
-		String getbbsncontent = "";
-		String getbbsnstart = "";
-		String getbbsntarget = "";
-
-		List<String> bbscontent = new ArrayList<String>();
-		List<String> bbsstart = new ArrayList<String>();
-		List<String> bbstarget = new ArrayList<String>();
-		List<String> bbsend = new ArrayList<String>();
-
-		List<String> bbsncontent = new ArrayList<String>();
-		List<String> bbsnstart = new ArrayList<String>();
-		List<String> bbsntarget = new ArrayList<String>();
-
-		
-		//con, ncon -> bbsContent(con) <- // 이 경우, main은 null이다.
-		int con = 0;
-		if(request.getParameter("con") != null) {
-			con = Integer.parseInt(request.getParameter("con"));
-		}
-		int ncon = 0;
-		if(request.getParameter("ncon") != null) {
-			con = Integer.parseInt(request.getParameter("ncon"));
-		}
+		String name = userDAO.getName(id);
 		
 		
-		// 몇번 반복하는지!
-		String trCnt = null;
-		if(request.getParameter("trCnt") != null){
-			trCnt = request.getParameter("trCnt");
-		} 
-		if(trCnt == null) {
-			trCnt = "1";
-		}
+		// 필요한 데이터 추출
+		RmsDAO rms = new RmsDAO();
 		
-		String trNCnt = null;
-		if(request.getParameter("trNCnt") != null){
-			trNCnt = request.getParameter("trNCnt");
-		}
-		if(trNCnt == null) {
-			trNCnt = "1";
-		}
+		String bbsDeadline = request.getParameter("bbsDeadline");		
+		String bbsTitle = request.getParameter("bbsTitle");
+		java.sql.Timestamp date = rms.getDateNow();
 		
-		//if(a[i].substring(0).indexOf('-') > -1 && a[i].substring(0).indexOf('-') < 2) {
-		//for(int i=0; i< Integer.parseInt(trCnt)+1+num; i++) { //trCnt 개수만큼 반복 
-		for(int i=0; i< 31; i++) { //trCnt 개수만큼 반복 
-			//금주 업무 내용 + select box
-			String a = "bbsContent";
-			String jobs = "jobs";
-			// -[담당업무] CONTENT 내용~ 으로 나오도록 함.
-			if(request.getParameter(a+i) != null) { 
-			if(request.getParameter(a+i) != null && request.getParameter(jobs+i) != null) { // 값이 비어있지 않다면,
-				if(!request.getParameter(jobs+i).contains("시스템") && !request.getParameter(jobs+i).contains("기타")) { //시스템이나 기타가 아니라면,
-			bbscontent.add("- ["+ request.getParameter(jobs+i) +"] " + request.getParameter(a+i));
-				}else {
-					bbscontent.add("- " + request.getParameter(a+i));
-				}
-			} else if(request.getParameter(a+i) != null && request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2){
-			bbscontent.add(request.getParameter(a+i));
-			//bbscontent.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
-			} else {
-				bbscontent.add("- "+request.getParameter(a+i));
-			}
-			getbbscontent = String.join("\r\n",bbscontent); // 각 배열 요소마다 줄바꿈 하여 넣음.
-			//getbbscontent = getbbscontent.replace("\r\n","/r/n"); // String 내부의 줄바꿈을 표현
-			}
-			
-			//금주 접수일 (date)
-			String b = "bbsStart";
-			String date = request.getParameter(b+i);
-			//String[] adddate = date.split("-");
-			//start = adddate[1] +"/"+ adddate[2];
-			// 양식 2022-11-14 	
-			String start ="";
-			if(date != null) {
-				if(date.length() > 5) {
-					start = date.substring(5); // 5번쨰 이후부터 출력 11-14 
-					String finalstart = start.replace("-","/");
-					bbsstart.add(finalstart);
-				} else {
-					bbsstart.add(date);
-				}
-				//bbsstart.removeAll(Arrays.asList("",null));
-				getbbsstart = String.join("§",bbsstart);
-				//getbbsstart = getbbsstart.replace("\r\n","/r/n");
-			}
-			
-			//금주 완료 목표일 (null) (date)
-			String c = "bbsTarget";
-			if(request.getParameter(a+i) != null) {
-				if(request.getParameter(c+i).isEmpty() || request.getParameter(c+i) == null) {
-					bbstarget.add("[보류]");
-				} else {
-					String datec = request.getParameter(c+i);
-					String target ="";
-					if(datec.length() > 5) {
-						target = datec.substring(5);
-						String finaltarget = target.replace("-", "/");
-						bbstarget.add(finaltarget);
-					}else {
-						bbstarget.add(datec);
+		int n = 0;
+		int nn = 0;
+		int an = 0;
+		
+		// 해당 날짜에 제출된 보고가 있는지 확인
+		String overlap = rms.getOverlap(bbsDeadline, id);
+		if(overlap != "") { 
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('해당 날짜로 저장된 주간보고가 있습니다.')");
+			script.println("location.href='../bbs.jsp'");
+			script.println("</script>");
+		} else {
+				
+			// << 금주 데이터 저장 >> - rms_this
+			for(int i=0; i < trCnt+con; i++) {
+				String a = "bbsContent";
+				String jobs = "jobs";
+				//줄바꿈 세기
+				int num = 0;
+				
+				//bbscontent
+				String bbscontent = "";
+				if(request.getParameter(a+i) != null) {
+					if(request.getParameter(a+i) != null && request.getParameter(jobs+i) != null) { // 값이 비어있지 않다면,
+						if(!request.getParameter(jobs+i).contains("시스템") && !request.getParameter(jobs+i).contains("기타")) { //시스템이나 기타가 아니라면,
+							bbscontent = "- ["+ request.getParameter(jobs+i) +"] " + request.getParameter(a+i);
+							//줄바꿈 세기
+							num = bbscontent.split("\r\n").length-1;
+						}else {
+							bbscontent = "- " + request.getParameter(a+i);
+							//줄바꿈 세기
+							num = bbscontent.split("\r\n").length-1;
+						}
+					} else { //job 선택이 없는 경우!
+						if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
+							// -가 있는 경우,
+							bbscontent = request.getParameter(a+i);
+						} else {
+							bbscontent ="- " + request.getParameter(a+i);
+						}
+						//줄바꿈 세기
+						num = bbscontent.split("\r\n").length-1;
 					}
 				}
-			//bbstarget.removeAll(Arrays.asList("",null));
-			getbbstarget = String.join("§",bbstarget);
-			//getbbstarget = getbbstarget.replace("\r\n","/r/n"); 
-			}
-			
-			//금주 진행율/완료일 (null)
-			String d = "bbsEnd";
-			if(request.getParameter(a+i) != null) {
-				if(request.getParameter(d+i).isEmpty() || request.getParameter(d+i) == null) {
-					bbsend.add("[보류]");
-				} else {
-				bbsend.add(request.getParameter(d+i));
-				}
-				//bbsend.removeAll(Arrays.asList("",null));
-				getbbsend = String.join("§",bbsend);
-				//getbbsend = getbbsend.replace("\r\n","/r/n");	
-				}
-			}
-		
-		for(int i=0; i< 31; i++) { //trNCnt 개수만큼 반복 
-			// << 차주 >> 
-			String jobs = "njobs";
-			//차주 업무 내용
-			String e = "bbsNContent";
-			if(request.getParameter(e+i) != null) { //만약 기존 데이터가 삭제됐다면! (0~num 개수만큼)
 				
-			if(request.getParameter(e+i) != null && request.getParameter(jobs+i) != null) {
-				if(!request.getParameter(jobs+i).contains("시스템") && !request.getParameter(jobs+i).contains("기타")) {
-			bbsncontent.add("- ["+ request.getParameter(jobs+i) + "] " + request.getParameter(e+i));
-				} else {
-					bbsncontent.add("- " + request.getParameter(e+i));
+				//bbsstart - 접수일 (not null)
+				String b = "bbsStart";
+				String bbsstart ="";
+				if(request.getParameter(a+i) != null) {
+					bbsstart = request.getParameter(b+i);
 				}
-			} else if(request.getParameter(e+i) != null && request.getParameter(e+i).indexOf('-') > -1 && request.getParameter(e+i).indexOf('-') < 2){
-				bbsncontent.add(request.getParameter(e+i));
-				//bbscontent.removeAll(Arrays.asList("",null)); // 없는 배열을 삭제함!! (null 제거)
-				} else {
-					bbsncontent.add("- "+request.getParameter(e+i));
+				
+				
+				//bbstarget - 완료목표일 
+				String c = "bbsTarget";
+				String bbstarget = "";
+				if(request.getParameter(a+i) != null) {
+					if(request.getParameter(c+i).isEmpty() || request.getParameter(c+i) == null) {
+						bbstarget = "";
+					} else {
+						bbstarget = request.getParameter(c+i);
+					}
 				}
-			getbbsncontent = String.join("\r\n",bbsncontent);
-			//getbbsncontent = getbbsncontent.replace("\r\n","/r/n");
-			}
-			
-			//차주 접수일 (date)
-			String f = "bbsNStart";
-			String datef = request.getParameter(f+i);
-			
-			String nstart ="";
-			if(datef != null) {
-				if(datef.length() > 5) {
-				nstart= datef.substring(5);
-				String finalnstart = nstart.replace("-", "/");
-				bbsnstart.add(finalnstart);
-				} else {
-					bbsnstart.add(datef);
-				}
-			//bbsnstart.removeAll(Arrays.asList("",null));
-			getbbsnstart = String.join("§",bbsnstart);
-			//getbbsnstart = getbbsnstart.replace("\r\n","/r/n"); 
-			}
-			
-			//차주 완료 목표일 (null) (date)
-			String g = "bbsNTarget";
-			if(request.getParameter(e+i) != null) {
-			if(request.getParameter(g+i).isEmpty() || request.getParameter(g+i) == null){
-				bbsntarget.add("[보류]");
-			}else {
-				String dateg = request.getParameter(g+i);
-				String ntarget ="";
-				if(dateg.length() > 5) {
-					ntarget = dateg.substring(5);
-					String finalntarget = ntarget.replace("-", "/");
-					bbsntarget.add(finalntarget);
-				}else {
-					bbsntarget.add(dateg);
-				}
-			}
-			//bbsntarget.removeAll(Arrays.asList("",null));
-			getbbsntarget = String.join("§",bbsntarget);
-			//getbbsntarget = getbbsntarget.replace("\r\n","/r/n"); 
-		}
-		}
-		
-		//만약, ERP 디버깅 데이터가  들어왔다면
-		int trACnt = 0;
-		if(!request.getParameter("trACnt").isEmpty() && !request.getParameter("trACnt").equals("undefined")) {
-			trACnt = Integer.parseInt(request.getParameter("trACnt")); //최대 1
-		}
-		String erp_date = "";
-		String erp_user = "";
-		String erp_stext = "";
-		String erp_authority ="";
-		String erp_division = "";
-	
-		for(int i=0; i < trACnt; i++) { 
-			String a = "erp_date";
-			erp_date += request.getParameter(a+(i)) + "\r\n";
-			String b = "erp_user";
-			erp_user += request.getParameter(b+(i)) + "\r\n";
-			String c = "erp_stext";
-			erp_stext += request.getParameter(c+(i)) + "\r\n";
-			String d = "erp_authority";
-			erp_authority += request.getParameter(d+(i)) + "\r\n";
-			String e = "erp_division";
-			erp_division += request.getParameter(e+(i)) + "\r\n";
-		} 
-		
-		
-		//bbscontent를 활용해 connum, nummlist 활용하기
-		//num, numlist를 가공해야함 (만약 기존 data가 사라진다면, 해당 num 또한 제거)
-		int num = bbscontent.size(); //가공된 list의 크기
-		int nnum = bbsncontent.size(); //가공된 list의 크기
-		String numl = "";
-		String nnuml = "";
-		
-		
-		for(int i=0; i < bbscontent.size(); i++) {
-			numl += Integer.toString(bbscontent.get(i).split("\r\n").length-1) + "&";
-		}
-		for(int i=0; i < bbsncontent.size(); i++) {
-			nnuml += Integer.toString(bbsncontent.get(i).split("\r\n").length-1) + "&";
-		}
-		
-		ArrayList<String> numli = new ArrayList<String>(Arrays.asList(numl.split("&")));
-		ArrayList<String> nnumli = new ArrayList<String>(Arrays.asList(nnuml.split("&")));
-		//nnumlist 저장
-		numli.removeAll(Arrays.asList("",null));
-		nnumli.removeAll(Arrays.asList("",null));
-		String numlist = String.join("&",numli);
-		String nnumlist = String.join("&",nnumli);
-		
-		
-	%>
-<%-- 	<a><%= bbscontent.size() %></a><br>
-	<a><%= numl %></a><br>
-	<textarea><%= numlist %></textarea>
-	<br><br> --%>
-	<%
-		for(int i=0; i < bbscontent.size(); i++) {
-	%>
-	<textarea><%= bbscontent.get(i) %></textarea><br><br>
-	<% } %>
-		<form id="post_item" method="post" action="mainActionComplete.jsp">
-			<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px; display:none" >
-				<tbody id="tbody">
-					<tr id="tr">
-						<td><textarea class="textarea" id="manager" name="manager" readonly><%= bbs.getBbsManager() %></textarea></td>
-						<td><textarea class="textarea" id="title" name="title" readonly><%= bbs.getBbsTitle() %></textarea></td>
-						<td><textarea class="textarea" id="bbsDeadline" name="bbsDeadline" readonly><%= bbs.getBbsDeadline() %></textarea></td>
-						<td><textarea class="textarea" id="getbbscontent" name="getbbscontent" readonly><%= getbbscontent %></textarea></td>
-						<td><textarea class="textarea" id="getbbsstart" name="getbbsstart" readonly><%= getbbsstart %></textarea></td>
-						<td><textarea class="textarea" id="getbbstarget" name="getbbstarget" readonly><%= getbbstarget %></textarea></td>
-						<td><textarea class="textarea" id="getbbsend" name="getbbsend" readonly><%= getbbsend %></textarea></td>
-						<td><textarea class="textarea" id="getbbsncontent" name="getbbsncontent" readonly><%= getbbsncontent %></textarea></td>
-						<td><textarea class="textarea" id="getbbsnstart" name="getbbsnstart" readonly><%= getbbsnstart %></textarea></td>
-						<td><textarea class="textarea" id="getbbsntarget" name="getbbsntarget" readonly><%= getbbsntarget %></textarea></td>
+				
+				//bbsend - 진행율/완료일
+				String d = "bbsEnd";
+				String bbsend = "";
+				if(request.getParameter(a+i) != null) {
+					if(request.getParameter(d+i).isEmpty() || request.getParameter(d+i) == null) {
+						bbsend = "[보류]";
 						
-						<td><textarea class="textarea" id="erp_date" name="erp_date" readonly><%= erp_date %></textarea></td>
-						<td><textarea class="textarea" id="erp_user" name="erp_user" readonly><%= erp_user %></textarea></td>
-						<td><textarea class="textarea" id="erp_stext" name="erp_stext" readonly><%= erp_stext %></textarea></td>
-						<td><textarea class="textarea" id="erp_authority" name="erp_authority" readonly><%= erp_authority %></textarea></td>
-						<td><textarea class="textarea" id="erp_division" name="erp_division" readonly><%= erp_division %></textarea></td>
-						<td><textarea style="display:none" name="num"><%= num %></textarea>
-						<textarea style="display:none" name="nnum"><%= nnum %></textarea>
-						<textarea style="display:none" name="numlist"><%= numlist %></textarea>
-						<textarea style="display:none" name="nnumlist"><%= nnumlist %></textarea></td>
-						<!-- <button id="save" onclick="handleButtonOnclick()"> + </button> -->
-					</tr>
-				</tbody>
-			</table>
-			<button type="button" id="save" style="margin-bottom:15px; margin-right:30px; display:none" onclick="addRow()" class="btn btn-primary"> + </button>
-		</form>
-
-	
-	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-	<script src="css/js/bootstrap.js"></script>
- 	
-	<%
-	// <<<<<<<<<<<<< 금주 컨텐츠 >>>>>>>>>>>>>>>>>>>
-	List<String> b = new ArrayList<String>();
-	String finalb="";
-	for(int i=5; i < Integer.parseInt(trCnt);  i++) {
-		String a = "bbsContent";
-		b.add(request.getParameter(a+i));
-		b.removeAll(Arrays.asList("",null));
-		finalb = String.join("§",b);
-		//finalb = finalb.replace("\r\n","/r/n");
+					} else {
+						bbsend = request.getParameter(d+i);	
+					}
+					
+					//줄바꿈 제거(임의 변경을 최소화 하기 위함)
+					bbsend = bbsend.replaceAll("\r\n", "");
+				}
+				
+				
+				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
+					// write_rms_this
+					int numlist = rms.write_rms_this(id, bbsDeadline, bbsTitle, date, bbscontent, bbsstart, bbstarget, bbsend);
+					if(numlist == -1) { //데이터 저장 오류
+						//데이터 삭제
+						int tdel = rms.tdelete(id, bbsDeadline);
+						PrintWriter script = response.getWriter();
+						script.println("<script>");
+						script.println("alert('(금주)데이터 저장에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
+						script.println("history.back();");
+						script.println("</script>");
+						n = -1;
+					}
+				}
+			} 
+			
+			
+			// << 차주 데이터 저장 >> - rms_last
+			for(int i=0; i < trNCnt+ncon; i++) {
+				String a = "bbsNContent";
+				String jobs = "njobs";
+				//줄바꿈 세기
+				int num = 0;
+				
+				//bbscontent
+				String bbscontent = "";
+				if(request.getParameter(a+i) != null) {
+					if(request.getParameter(a+i) != null && request.getParameter(jobs+i) != null) { // 값이 비어있지 않다면,
+						if(!request.getParameter(jobs+i).contains("시스템") && !request.getParameter(jobs+i).contains("기타")) { //시스템이나 기타가 아니라면,
+							bbscontent = "- ["+ request.getParameter(jobs+i) +"] " + request.getParameter(a+i);
+							//줄바꿈 세기
+							num = bbscontent.split("\r\n").length-1;
+						}else {
+							bbscontent = "- " + request.getParameter(a+i);
+							//줄바꿈 세기
+							num = bbscontent.split("\r\n").length-1;
+						}
+					} else { //job 선택이 없는 경우!
+						if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
+							bbscontent = request.getParameter(a+i);
+						} else {
+							bbscontent = "- " + request.getParameter(a+i);
+						}
+						//줄바꿈 세기
+						num = bbscontent.split("\r\n").length-1;
+					}
+				}
+				
+				//bbsstart - 접수일 
+				String b = "bbsNStart";
+				String bbsstart ="";
+				if(request.getParameter(a+i) != null) {
+					bbsstart = request.getParameter(b+i);
+				}
+				
+				//bbstarget - 완료목표일 (null 이라면 [보류])
+				String c = "bbsNTarget";
+				String bbstarget = "";
+				if(request.getParameter(a+i) != null) {
+					if(request.getParameter(c+i).isEmpty() || request.getParameter(c+i) == null) {
+						bbstarget = "";
+					} else {
+						bbstarget = request.getParameter(c+i);	
+					}
+				}
+				
+				// 저장에 오류가 없는지 확인!
+				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
+					// write_rms_last
+					int numlist = rms.write_rms_next(id, bbsDeadline, bbscontent, bbsstart, bbstarget, pluser);
+					if(numlist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
+						//데이터 삭제
+						int ldel = rms.ldelete(id, bbsDeadline);
+						PrintWriter script = response.getWriter();
+						script.println("<script>");
+						script.println("alert('(차주)데이터 저장에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
+						script.println("history.back();");
+						script.println("</script>");
+						nn = -1;
+					} 
+				}
+			}
+			
+			//<< erp data 처리 >>
+			String a="erp_date";
+			String b="erp_user";
+			String c="erp_stext";
+			String d="erp_authority";
+			String e="erp_division";
+			//ERP 데이터가 있다면,
+			
+			for(int i=0; i< trACnt; i++){
+				//edate 처리
+				if(request.getParameter(a+i).length() != 0) {	//데이터가 존재한다면, 모두 포함되어 있음!
+					String edate=request.getParameter(a+i);
+					String euser=request.getParameter(b+i);
+					String etext=request.getParameter(c+i);
+					String eau=request.getParameter(d+i);
+					String ediv=request.getParameter(e+i);
+					//erp 테이블에 저장
+					int numelist = rms.write_erp(id, bbsDeadline, edate, euser, etext, eau, ediv);
+					if(numelist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
+						//데이터 삭제
+						int ldel = rms.edelete(id, bbsDeadline);
+						PrintWriter script = response.getWriter();
+						script.println("<script>");
+						script.println("alert('(erp)데이터 저장에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
+						script.println("history.back();");
+						script.println("</script>");
+						an = -1;
+					} 
+				}
+			}
+			
+			
+			
+			if(n != -1 && nn != -1) {
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('제출이 완료되었습니다.')");
+				script.println("location.href='../bbs.jsp'");
+				script.println("</script>");
+			} 
+		}
 	}
 	%>
-	<c:set var="content" value="<%= finalb %>"/>
-	<input type="hidden" id="value" value="<c:out value='${content}' />">
-	
 
-	
-	
-	<%
-	// <<<<<<<<<<<<<< 차주 컨텐츠 >>>>>>>>>>>>>>.
-	String finald = "";
-	List<String> c = new ArrayList<String>();
-	for(int i=2; i < Integer.parseInt(trNCnt);  i++) {
-		String d = "bbsNContent";
-		c.add(request.getParameter(d+i));
-		c.removeAll(Arrays.asList("",null));
-		finald = String.join("§",c);
-		//finald = finald.replace("\r\n","/r/n");
-	}
-	%>
-	<c:set var="ncontent" value="<%= finald %>"/>
-	<input type="hidden" id="nvalue" value="<c:out value='${ncontent}' />">
-	
-
-
-	<script>
-	$(window).on('load', function() {
-		document.getElementById("save").click();
-		
-	});
-	
-	function addRow() {
-		$('#post_item').submit();
-	} 
-	</script> 
 
 
 </body>

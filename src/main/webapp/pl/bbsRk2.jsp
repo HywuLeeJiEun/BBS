@@ -1,36 +1,52 @@
-<%@page import="rms.rms_next"%>
-<%@page import="rms.rms_this"%>
-<%@page import="rms.RmsDAO"%>
-<%@page import="user.User"%>
+<%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
+<%@page import="user.User"%>
+<%@page import="java.util.Date"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="user.UserDAO"%>
-<%@page import="org.mariadb.jdbc.internal.failover.tools.SearchFilter"%>
+<%@page import="java.util.Locale"%>
+<%@page import="java.util.Calendar"%>
+<%@page import="java.time.LocalDate"%>
+<%@page import="java.time.format.DateTimeFormatter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.PrintWriter" %>
+<%@ page import="bbs.BbsDAO" %>
+<%@ page import="bbs.Bbs" %>
 <%@ page import="java.util.ArrayList" %>
 <% request.setCharacterEncoding("utf-8"); %>
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
 <!-- // 폰트어썸 이미지 사용하기 -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<link rel="stylesheet" href="../css/index.css">
 <meta charset="UTF-8">
 <!-- 화면 최적화 -->
 <!-- <meta name="viewport" content="width-device-width", initial-scale="1"> -->
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
+<link rel="stylesheet" href="css/css/bootstrap.css">
+<link rel="stylesheet" href="css/index.css">
+
 <title>RMS</title>
 </head>
 
 <body>
 	<%
-		UserDAO userDAO = new UserDAO();
-	
+		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
 			id = (String)session.getAttribute("id");
+		}
+		int pageNumber = 1; //기본은 1 페이지를 할당
+		// 만약 파라미터로 넘어온 오브젝트 타입 'pageNumber'가 존재한다면
+		// 'int'타입으로 캐스팅을 해주고 그 값을 'pageNumber'변수에 저장한다
+		if(request.getParameter("pageNumber") != null){
+			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
 		}
 		if(id == null){
 			PrintWriter script = response.getWriter();
@@ -39,116 +55,144 @@
 			script.println("location.href='../login.jsp'");
 			script.println("</script>");
 		}
-		int pageNumber = 1; //기본은 1 페이지를 할당
-		// 만약 파라미터로 넘어온 오브젝트 타입 'pageNumber'가 존재한다면
-		// 'int'타입으로 캐스팅을 해주고 그 값을 'pageNumber'변수에 저장한다
-		if(request.getParameter("pageNumber") != null){
-			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
-		}		
 		
-		String name = userDAO.getName(id);
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
-		
-		// ********** 담당자를 가져오기 위한 메소드 *********** 
-		String workSet;
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-		List<String> works = new ArrayList<String>();
-		
-		if(code == null) {
-			workSet = "";
-		} else {
-			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
-				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-			}
-			
-			workSet = String.join("/",works);
-			
-		}
-
 	
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+				String workSet;
+				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+				List<String> works = new ArrayList<String>();
+				
+				if(code == null) {
+					workSet = "";
+				} else {
+					for(int i=0; i < code.size(); i++) {
+						
+						String number = code.get(i);
+						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
+						String manager = userDAO.getManager(number);
+						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+					}
+					
+					workSet = String.join("/",works);
+					
+				}
+				
+		String name = userDAO.getName(id);
+		
 		// 사용자 정보 담기
 		User user = userDAO.getUser(name);
 		String password = user.getPassword();
 		String rank = user.getRank();
 		//이메일  로직 처리
 		String Staticemail = user.getEmail();
-		String[] email;
-		email = Staticemail.split("@");
-		//요약본 처리를 위한 Deadline 
-		//ArrayList<Bbs> listbbs = bbsDAO.getDeadLineList(); 
+		String[] email = Staticemail.split("@");
+		
+		
+		//(월요일) 제출 날짜 확인
+		String mon = "";
+		String day ="";
+		
+		Calendar cal = Calendar.getInstance(); 
+		Calendar cal2 = Calendar.getInstance(); //오늘 날짜 구하기
+		SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
+		
+		cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+		//cal.add(Calendar.DATE, 7); //일주일 더하기
+		
+		 // 비교하기 cal.compareTo(cal2) => 월요일이 작을 경우 -1, 같은 날짜 0, 월요일이 더 큰 경우 1 
+		 if(cal.compareTo(cal2) == -1) {
+			 //월요일이 해당 날짜보다 작다.
+			 cal.add(Calendar.DATE, 7);
+			 
+			 mon = dateFmt.format(cal.getTime());
+			day = dateFmt.format(cal2.getTime());
+		 } else { // 월요일이 해당 날짜보다 크거나, 같다 
+			 mon = dateFmt.format(cal.getTime());
+			day = dateFmt.format(cal2.getTime());
+		 }
+		 
+		 String bbsDeadline = mon;
+		
+		 
+		//pl 리스트 확인
+		String work = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
+		ArrayList<String> plist = userDAO.getpluser(work); //pl 관련 유저의 아이디만 출력
+		//제출한 사람만 남기기
+		
+		String[] pllist = plist.toArray(new String[plist.size()]); //해당 pllist를 바꿔야함! (제출한 사람만)
+		
+		
+		BbsDAO bbsDAO = new BbsDAO(); // 인스턴스 생성
+		ArrayList<Bbs> list = bbsDAO.getList(pageNumber, bbsDeadline, pllist);
+		// 다음 버튼 활성화를 위한 list
+		ArrayList<Bbs> aflist = bbsDAO.getList(pageNumber+1, bbsDeadline, pllist);
+		//제출자 확인을 위한 리스트
+		ArrayList<Bbs> fulllist = bbsDAO.getListfull(bbsDeadline, pllist);
+		
+		if(work.equals("") || work == null) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('PL(파트리더) 권한이 없습니다. 관리자에게 문의바랍니다.')");
+			script.println("history.back();");
+			script.println("</script>");
+		}
+		
+		if(list.size() == 0) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('제출된 주간보고가 없습니다.')");
+			//script.println("history.back();");
+			script.println("</script>");
+		}
+		
+		// 미제출자 인원 계산
+		int psize = plist.size();
+		int lsize = fulllist.size();
+		int noSub =  psize - lsize;
+		
+		//해당 인원 전원 불러오기
+		ArrayList<String> username = new ArrayList<String>();
+		for(int i=0; i<plist.size(); i++) {
+			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
+			username.add(userName);	
+		}
+		String[] usernamedata = username.toArray(new String[username.size()]);
+		Arrays.sort(usernamedata);
+		
+		String userdata = String.join(", ", usernamedata);
+		
+		
+		//미제출자 인원
+		ArrayList<String> noSubname = new ArrayList<String>();
+		ArrayList<String> Subname = new ArrayList<String>();
+		// 넘기기 위한 bbsID
+		ArrayList<String> bbsId = new ArrayList<String>();
+		//제출한 bbsID 찾기
+		for(int i=0; i<fulllist.size(); i++) {
+			Subname.add(fulllist.get(i).getUserID()); //제출한 user id 도출. (일반 list(10개 제한이 걸림)가 아닌, 모든 제출자를 확인해야함!)
+			bbsId.add(Integer.toString(fulllist.get(i).getBbsID()));
+		}
+		for(int i=0; i<Subname.size(); i++) {
+			plist.remove(Subname.get(i));
+		}
+		//제출 안한 인원 찾기
+		for(int i=0; i<plist.size(); i++) {
+			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
+			noSubname.add(userName);	
+		}
+		
+		String[] nousernamedata = noSubname.toArray(new String[noSubname.size()]);
+		Arrays.sort(nousernamedata);
+		
+		String nouserdata = String.join(", ", nousernamedata);
+		
+		//bbsID string으로 변환
+		String bbsID = String.join(",",bbsId);
 		
 		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
-		
-		//검색을 위한 설정
-		String category = request.getParameter("searchField");
-		String str = request.getParameter("searchText");
-		if(category == null) {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('검색 내용이 비어있습니다.')");
-			script.println("location.href='/BBS/user/bbs.jsp'");
-			script.println("</script>");
-		}
-		
-		if(category.equals("bbsDeadline")) {
-			int len = str.length();
-			
-			// 2글자 이상이며 -을 포함하지 않는다면, 
-			if(len > 2 && str.contains("-") == false && len <4) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('날짜 형식은 - 을 갖추어야 합니다.')");
-				script.println("location.href='/BBS/user/bbs.jsp'");
-				script.println("</script>");
-			}
-		}
-		
-		// 검색 결과 조회
-		RmsDAO rms = new RmsDAO();
-		ArrayList<rms_this> tlist =  rms. getthisSearch(pageNumber, id, category,
-				request.getParameter("searchText"));
-		
-			if (tlist.size() == 0) {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('검색결과가 없습니다.')");
-			script.println("location.href='/BBS/user/bbs.jsp'");
-			script.println("</script>");
-		} 
-		
-		//다음 페이지가 있는지,
-		ArrayList<rms_this> next_tlist =  rms. getthisSearch(pageNumber+1, id, category,
-				request.getParameter("searchText"));
-			
-		// 검색 결과를 바탕으로 llist 조회
-		String[] bbsDeadline = new String[tlist.size()];
-			//조회를 위한 bbsDeadline list 생성
-			for(int i=0; i < tlist.size(); i++) {
-				bbsDeadline[i] = tlist.get(i).getBbsDeadline();
-			}
-		ArrayList<rms_next> llist = rms.getlastSearch(pageNumber, id, bbsDeadline);
-		
-			
-		//미승인 -> 미제출로 변경
-		String[] sign = new String[llist.size()];
-		for(int i=0; i < llist.size(); i++) {
-			if(llist.get(i).getSign().equals("미승인")) {
-				sign[i] = "미제출";
-			} else if(llist.get(i).getSign().equals("승인")){
-				sign[i] = "제출";						
-			} else {
-				sign[i] = llist.get(i).getSign();						
-			}
-		}
-		
-		
 	%>
-	
-	      <!-- ************ 상단 네비게이션바 영역 ************* -->
+		
+	    <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -172,7 +216,7 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li  class="active"><a href="/BBS/user/bbs.jsp">조회</a></li>
+							<li><a href="/BBS/user/bbs.jsp">조회</a></li>
 							<li><a href="/BBS/user/bbsUpdate.jsp">작성</a></li>
 							<li><a href="/BBS/user/bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
@@ -189,10 +233,10 @@
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
 								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
-								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
+								<li class="active"><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
-								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
+								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp?bbsID=<%=bbsID%>">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
 								<li id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
@@ -256,7 +300,10 @@
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
 	
-		<!-- 모달 영역! -->
+	
+		
+	
+	<!-- 모달 영역! -->
 	   <div class="modal fade" id="UserUpdateModal" role="dialog">
 		   <div class="modal-dialog">
 		    <div class="modal-content">
@@ -381,45 +428,87 @@
 		   </div>
 	  </div>
 	</div>
+
 		
-		
-	<!-- ***********검색바 추가 ************* -->
-	<div class="container">
-		<div class="row">
-		<table class="pull-left" style="text-align: center; cellpadding:50px; width:60%" >
+	<div class="container area" style="cursor:pointer;" id="jb-title">
+		<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
 			<thead>
 				<tr>
-					<th style=" text-align: left" data-toggle="tooltip" data-html="true" data-placement="bottom" title=""> 
-					<br><i class="glyphicon glyphicon-triangle-right" id="icon"  style="left:5px;"></i> 주간보고 목록 (개인)
-				</th>
+				</tr>
+				<tr>
+					<th colspan="5" style=" text-align: center;" data-toggle="tooltip" data-placement="bottom" title="클릭시, 상세 정보가 노출됩니다."> <%= work %> 업무 담당자 목록 
+					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
 				</tr>
 			</thead>
-			</table>
-			<form method="post" name="search" id="search" action="/BBS/user/searchbbs.jsp">
-				<table class="pull-right">
-					<tr>
-						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
-								<option value="bbsDeadline" <%= category.equals("bbsDeadline")?"selected":""%>>제출일</option>
-								<option value="bbsTitle" <%= category.equals("bbsTitle")?"selected":""%>>제목</option>
-						</select></td>
-						<td>
-							<input type="text" class="form-control"
-							placeholder="" name="searchText" maxlength="100" value="<%= request.getParameter("searchText") %>"></td>
-						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="/BBS/user/searchbbs.jsp">검색</button></td>
-						<!-- <td><button type="submit" class="btn btn-warning pull-right" formaction="gathering.jsp" onclick="return submit2(this.form)">취합</button></td> -->
-					</tr>
-
-				</table>
-			</form>
-		</div>
+		</table>
 	</div>
+	
+	<div class="container" id="jb-text" style="height:10%; width:20%; display:inline-flex; float:left; margin-left: 41%; display:none; position:absolute">
+		<table class="table" style="text-align: center; border:1px solid #444444 ; background-color:white" >
+			 <tr>
+			 	<td id="plist">업무 담당자 인원 : <span style="color:blue; text-decoration:underline"><%= psize %></span></td>
+			 </tr> 
+			 <tr>
+			 	<% if(noSub != 0)  {%>
+			 	<td id="noSublist">미제출자 인원 : <span style="color:blue; text-decoration:underline"><%= noSub %></span></td>
+			 	<% } %>
+			 </tr> 
+			 <%-- <tr>
+			 	<td>업무 담당자 인원 : <%= plist.size() %></td>
+			 </tr> --%> 
+		 </table>
+	 </div>
+	 
+	 <div class="container" id="plist_list" style="height:10%; width:20%; display:flex; margin-left: 62%; position:absolute; display:none; ">
+		<table  class="table" style="text-align: center; border:1px solid #444444; background-color:white; " >
+			 <tr>
+			 	<td style="background-color:#444444; color:#ffffff"> <%= userdata %></td>
+			 </tr> 
+		 </table>
+	 </div>
+	 
+	 <div class="container" id="noSublist_list" style="height:10%; width:20%; display:flex; margin-left: 62%; margin-top:2.5%; position:absolute; display:none; ">
+		<table  class="table" style="text-align: center; border:1px solid #444444; background-color:white; " >
+			 <tr>
+			 	<td style="background-color:#444444; color:#ffffff"> <%= nouserdata %> </td>
+			 </tr> 
+		 </table>
+	 </div>
 	<br>
 	
 	
-	<!-- # <검색된게시판 메인 페이지 영역 시작 -->
+	<%
+	if(list.isEmpty()) {
+		/* PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('모든 보고가 승인(또는 마감)처리 되었습니다.')");
+		script.println("location.href='bbs.jsp'");
+		script.println("history.back()");
+		script.println("</script>"); */
+	%>
+	<div class="container">
+		<table class="table" style="text-align: center; cellpadding:50px;" >
+			<thead>
+				<tr valign="top" style="height:150px">
+				</tr>
+				<tr valign="bottom" style="height:150px">
+					<%-- <th colspan="5" style=" text-align: center; color:black "><%= bbsDeadline %> <br><br><br><br></th> --%>
+					<th colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-placement="bottom" title="<%= bbsDeadline %>" >해당일로 제출된 주간보고가 없습니다. <br><br><br><br></th>
+				</tr>
+
+			</thead>
+		</table>
+		<!-- <button style="margin:5px" class="btn btn-primary pull-right" onclick="location.href='/BBS/user/bbs.jsp'">목록</button> -->
+	</div>
+	
+	<% 
+	} else {
+	%>
+	
+	<!-- 게시판 메인 페이지 영역 시작 -->
 	<div class="container">
 		<div class="row">
-			<table class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
+			<table id="bbsTable" class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
 						<!-- <th style="background-color: #eeeeee; text-align: center;">번호</th> -->
@@ -427,28 +516,53 @@
 						<th style="background-color: #eeeeee; text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
-						<th style="background-color: #eeeeee; text-align: center;">담당</th>
-						<th style="background-color: #eeeeee; text-align: center;">상태</th>
+						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
+						<th style="background-color: #eeeeee; text-align: center;">승인</th>
 					</tr>
 				</thead>
 				<tbody>
 					<%
 						
+						
+						for(int i = 0; i < list.size(); i++){
+							
+							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
+							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+							
+							String dl = bbsDAO.getDLS(list.get(i).getBbsID());
+							Date time = new Date();
+							String timenow = dateFormat.format(time);
 
-						for(int i = 0; i < tlist.size(); i++){
+							Date dldate = dateFormat.parse(dl);
+							Date today = dateFormat.parse(timenow);
 					%>
-					<tr>
-						<td><%= tlist.get(i).getBbsDeadline() %></td>
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
+					<tr>
+						<td> <%= list.get(i).getBbsDeadline() %> </td>
+
+						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/user/update.jsp?bbsDeadline=<%= tlist.get(i).getBbsDeadline() %>">
-							<%= tlist.get(i).getBbsTitle() %></a></td>
-						<td><%= name %></td>
-						<td><%= tlist.get(i).getBbsDate().substring(0, 11) + tlist.get(i).getBbsDate().substring(11, 13) + "시"
-							+ tlist.get(i).getBbsDate().substring(14, 16) + "분" %></td>	
-						<td><%= llist.get(i).getPluser() %></td>		
-						<td><%= sign[i] %></td>
+						<a href="/BBS/pl/signOnReportRk.jsp?bbsID=<%= list.get(i).getBbsID() %>">
+							<%= list.get(i).getBbsTitle() %></a></td>
+						<td><%= list.get(i).getUserName() %></td>
+						<td><%= list.get(i).getBbsDate().substring(0, 11) + list.get(i).getBbsDate().substring(11, 13) + "시"
+							+ list.get(i).getBbsDate().substring(14, 16) + "분" %></td>
+						<td><%= list.get(i).getBbsUpdate() %></td>
+						<!-- 승인/미승인/마감 표시 -->
+						<td>
+						<%
+						String sign = null;
+						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
+							sign = list.get(i).getSign();
+						} else {
+							sign="마감";
+							// 데이터베이스에 마감처리 진행
+							int a = bbsDAO.getSignDeadLine(list.get(i).getBbsID());
+						}
+						%>
+						<%= sign %>
+						</td>
 					</tr>
 					<%
 						}
@@ -460,29 +574,46 @@
 			<%
 				if(pageNumber != 1){
 			%>
-				<a href="/BBS/user/searchbbs.jsp?pageNumber=<%=pageNumber - 1 %>&searchField=<%= category %>&searchText=<%= str %>"
+				<a href="/BBS/pl/bbsRk.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(next_tlist.size() != 0){
+				}if(aflist.size() != 0){
 			%>
-				<a href="/BBS/user/searchbbs.jsp?pageNumber=<%=pageNumber + 1 %>&searchField=<%= category %>&searchText=<%= str %>"
+				<a href="/BBS/pl/bbsRk.jsp?pageNumber=<%=pageNumber + 1 %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>
 			<%
 				}
 			%>
-			
-			
-			<a href="/BBS/user/bbs.jsp" class="btn btn-primary pull-right">목록</a> 
+			<% if(pl.equals("ERP")) {%>
+			<a href="/BBS/pl/pptx/ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> pptx</a>
+			<% }  %>
+			<% if(pl.equals("WEB")) {%>
+			<a href="/BBS/pl/pptx/ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> pptx</a>
+			<% }  %>
+			<a href="/BBS/pl/bbsRkwrite.jsp?bbsID=<%=bbsID%>" style="width:100px; margin-right:20px" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> Summary</a>
 		</div>
 	</div>
-	<!-- 게시판 메인 페이지 영역 끝 -->
 	
+	<%
+	}
+	%>
+	
+	
+	<!-- 게시판 메인 페이지 영역 끝 -->
 	
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="../css/js/bootstrap.js"></script>
+	<script>
+		function ChangeValue() {
+			var value_str = document.getElementById('searchField');
+			
+		}
+		
 	
-	 <!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
+	</script>
+	
+    <!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
 	<script>
 	var trCnt = $('#bbsTable tr').length; 
 	
@@ -531,6 +662,105 @@
 			location.reload();
 		}
 	}
+	</script>
+	
+	<script>
+	$("#jb-title").on('click', function() {
+		var con = document.getElementById("jb-text");
+		if(con.style.display=="none"){
+			con.style.display = 'block';
+		} else {
+			con.style.display = 'none';
+		}
+	});
+	$(document).on('click',function(e) {
+		var container = $("#jb-title");
+		if(!container.is(event.target) && !container.has(event.target).length) {
+			document.getElementById("jb-text").style.display = 'none';
+		}
+	});
+
+	
+	$("#plist").on('mouseover', function() {
+		var con = document.getElementById("plist_list");
+			con.style.display = 'block';
+	});
+	$("#plist").on('mouseout', function() {
+		var con = document.getElementById("plist_list");
+			con.style.display = 'none';	
+	});
+	
+	
+	$("#noSublist").on('mouseover', function() {
+		var con = document.getElementById("noSublist_list");
+			con.style.display = 'block';
+	});
+	$("#noSublist").on('mouseout', function() {
+		var con = document.getElementById("noSublist_list");
+			con.style.display = 'none';
+	});
+	</script>
+	
+	
+	<script>
+		// 자동 높이 확장 (textarea)
+		$("textarea").on('input keyup keydown focusin focusout blur mousemove', function() {
+			var offset = this.offsetHeight - this.clientHeight;
+			var resizeTextarea = function(el) {
+				$(el).css('height','auto').css('height',el.scrollHeight + offset);
+			};
+			$(this).on('keyup input keydown focusin focusout blur mousemove', Document ,function() {resizeTextarea(this); });
+			
+		});
+	</script>	
+	
+	<script>
+	//$("#pptx").find('[type="button"]').trigger('click') {
+	$("#pptx").on('mousedown', function() {
+		//noSub -> 미제출자
+		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
+			var go;
+			go = confirm("미제출자가 있습니다. 출력 하시겠습니까?");
+			
+			if(go) { //출력 o
+				document.getElementById("pptx").click();
+			} else { //출력 x
+				
+			}
+		
+		}
+	});
+	
+	
+	$("#summary").on('mousedown', function() {
+		//noSub -> 미제출자
+		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
+			var go;
+			go = confirm("미제출자가 있습니다. 작성 페이지로 넘어가시겠습니까?");
+			
+			if(go) { //출력 o
+				document.getElementById("summary").click();
+			} else { //출력 x
+				
+			}
+		
+		}
+	});
+	
+	$("#summary_nav").on('mousedown', function() {
+		//noSub -> 미제출자
+		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
+			var go;
+			go = confirm("미제출자가 있습니다. 작성 페이지로 넘어가시겠습니까?");
+			
+			if(go) { //출력 o
+				document.getElementById("summary").click();
+			} else { //출력 x
+				
+			}
+		
+		}
+	});
 	</script>
 </body>
 </html>

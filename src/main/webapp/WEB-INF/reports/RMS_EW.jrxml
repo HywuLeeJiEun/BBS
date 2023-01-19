@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="MariaDB"/>
 	<property name="net.sf.jasperreports.export.pdf.force.linebreak.policy" value="true"/>
-	<property name="com.jaspersoft.studio.data.sql.tables" value="YmJzICwzMCwzMCw2YmM1OWVmMi00OGUwLTQxOTktOGU0Yy00ZGY0ZTJhMWViZmI7"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="deadLine" class="java.lang.String">
 		<parameterDescription><![CDATA[제출마감일]]></parameterDescription>
 	</parameter>
@@ -20,102 +20,76 @@
 	<parameter name="logo" class="java.lang.String"/>
 	<queryString>
 		<![CDATA[SELECT *
-FROM (select * from bbs where sign="마감" or sign="승인") as b
-WHERE 
-	 b.bbsDeadline =  $P{deadLine} 
-	 and
-	 b.pluser =  $P{pluser} 
-ORDER BY b.bbsDeadline DESC]]>
+FROM rms.rms
+WHERE rms.bbsDeadline =  $P{deadLine} 
+and
+rms.pluser = $P{pluser}
+ORDER BY rms.bbsDeadline DESC]]>
 	</queryString>
-	<field name="bbsID" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="bbsID"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsID"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsManager" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsManager"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsManager"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsTitle" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsTitle"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsTitle"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
 	<field name="userID" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="userID"/>
 		<property name="com.jaspersoft.studio.field.label" value="userID"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="userName" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="userName"/>
-		<property name="com.jaspersoft.studio.field.label" value="userName"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsDate" class="java.sql.Timestamp">
-		<property name="com.jaspersoft.studio.field.name" value="bbsDate"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsDate"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsContent" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsContent"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsContent"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsStart" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsStart"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsStart"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsTarget" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsTarget"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsTarget"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsEnd" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsEnd"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsEnd"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsNContent" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsNContent"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsNContent"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsNStart" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsNStart"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsNStart"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsNTarget" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsNTarget"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsNTarget"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
-	</field>
-	<field name="bbsAvailable" class="java.lang.Integer">
-		<property name="com.jaspersoft.studio.field.name" value="bbsAvailable"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsAvailable"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
 	</field>
 	<field name="bbsDeadline" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="bbsDeadline"/>
 		<property name="com.jaspersoft.studio.field.label" value="bbsDeadline"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
 	</field>
-	<field name="bbsUpdate" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsUpdate"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsUpdate"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
+	<field name="bbsTitle" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="bbsTitle"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsTitle"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
 	</field>
-	<field name="sign" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="sign"/>
-		<property name="com.jaspersoft.studio.field.label" value="sign"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
+	<field name="bbsDate" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="bbsDate"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsDate"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	</field>
+	<field name="bbsManager" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="bbsManager"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsManager"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	</field>
+	<field name="bbsContent" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="bbsContent"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsContent"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	</field>
+	<field name="bbsStart" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="bbsStart"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsStart"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	</field>
+	<field name="bbsTarget" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="bbsTarget"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsTarget"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	</field>
+	<field name="bbsEnd" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="bbsEnd"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsEnd"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	</field>
+	<field name="bbsNContent" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="bbsNContent"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsNContent"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	</field>
+	<field name="bbsNStart" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="bbsNStart"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsNStart"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	</field>
+	<field name="bbsNTarget" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="bbsNTarget"/>
+		<property name="com.jaspersoft.studio.field.label" value="bbsNTarget"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
 	</field>
 	<field name="pluser" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="pluser"/>
 		<property name="com.jaspersoft.studio.field.label" value="pluser"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="b"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>

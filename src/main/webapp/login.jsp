@@ -5,11 +5,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+<!-- // 폰트어썸 이미지 사용하기 -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="css/index.css">
 <meta charset="UTF-8">
-<% request.setCharacterEncoding("utf-8"); %>
-
+<!-- 화면 최적화 -->
+<!-- <meta name="viewport" content="width-device-width", initial-scale="1"> -->
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
-<link rel="stylesheet" href="css/css/bootstrap.css">
 <title>RMS</title>
 </head>
 

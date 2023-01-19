@@ -2,7 +2,8 @@ package Sumad;
 
 public class Sumad {
 
-	private String sumad_id;
+	private String userID;
+	private String bbsDeadline;
 	private String e_content;
 	private String e_end;
 	private String e_progress;
@@ -20,14 +21,19 @@ public class Sumad {
 	private String w_ntarget;
 	private String w_nnote;
 	private String sign;
-	private String bbsDeadline;
 	private String sumadDate;
 	private String sumadUpdate;
-	public String getSumad_id() {
-		return sumad_id;
+	public String getUserID() {
+		return userID;
 	}
-	public void setSumad_id(String sumad_id) {
-		this.sumad_id = sumad_id;
+	public void setUserID(String userID) {
+		this.userID = userID;
+	}
+	public String getBbsDeadline() {
+		return bbsDeadline;
+	}
+	public void setBbsDeadline(String bbsDeadline) {
+		this.bbsDeadline = bbsDeadline;
 	}
 	public String getE_content() {
 		return e_content;
@@ -131,12 +137,6 @@ public class Sumad {
 	public void setSign(String sign) {
 		this.sign = sign;
 	}
-	public String getBbsDeadline() {
-		return bbsDeadline;
-	}
-	public void setBbsDeadline(String bbsDeadline) {
-		this.bbsDeadline = bbsDeadline;
-	}
 	public String getSumadDate() {
 		return sumadDate;
 	}
@@ -149,6 +149,9 @@ public class Sumad {
 	public void setSumadUpdate(String sumadUpdate) {
 		this.sumadUpdate = sumadUpdate;
 	}
+	
+	
+	
 	
 	
 	
