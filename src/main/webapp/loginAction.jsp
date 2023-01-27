@@ -1,19 +1,14 @@
-<%@page import="rms.RmsDAO"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="java.io.PrintWriter"%>
-<%@page import="user.UserDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <% request.setCharacterEncoding("utf-8"); %>
-<jsp:useBean id="user" class="user.User" scope="page" />
-<!-- login post로부터 받아옴. -->
-<jsp:setProperty name="user" property="id" />
-<jsp:setProperty name="user" property="password" />
-<%-- <jsp:setProperty name="user" property="name" /> --%>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>baynex-login</title>
+<title>RMS</title>
 </head>
 <body>
 	<%
@@ -34,13 +29,13 @@
 	
 		
 		// ************** 로그인을 담당하는 JSP 페이지 ***************
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		RmsDAO rms = new RmsDAO();
+		RmsuserDAO userDAO = new RmsuserDAO(); //인스턴스 userDAO 생성
 		
-		String rk = userDAO.getRank(id);
+		String user_id = request.getParameter("id");
+		String user_pwd = request.getParameter("password");
 		
 		// DAO 내의 메소드를 실행시킴.
-		int result = userDAO.login(user.getId(), user.getPassword());
+		int result = userDAO.login(user_id, user_pwd);
 		// bbs 이력을 확인해 보이는 페이지를 다르게 함.
 		// int confirm = bbsDAO.getBbsRecord(session.getAttribute("id"));
 		
@@ -48,7 +43,7 @@
 		// 로그인 결과에 따른 반환값 설정 (1 - 성공, 0 - 틀림, -1 - 존재하지 않음. -2 - DB에러)
 		if(result == 1){
 			// 로그인에 성공하면 세션을 부여한다. 
-			session.setAttribute("id", user.getId());
+			session.setAttribute("id", user_id);
 			//session.setMaxInactiveInterval(60 * 60); 
 			PrintWriter script = response.getWriter();
 			script.println("<script>");

@@ -1,3 +1,7 @@
+<%@page import="rmsrept.rmsrept"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="rms.rms"%>
 <%@page import="rms.rms_next"%>
 <%@page import="rms.RmsDAO"%>
@@ -35,10 +39,9 @@
 
 <body>
 	<%
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		RmsDAO rms = new RmsDAO();
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
 		
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -57,51 +60,52 @@
 			script.println("location.href='../login.jsp'");
 			script.println("</script>");
 		}
-		if(!rk.equals("실장") && !rk.equals("관리자")) {
+	
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+		String workSet;
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
+		List<String> works = new ArrayList<String>();
+		
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
+			workSet = "";
+		} else {
+			//2. 담당 업무가 있는 경우
+			for(int i=0; i < code.size(); i++) {
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			workSet = String.join("/",works);
+		}
+		
+		// 사용자 정보 담기
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
+		//이메일  로직 처리
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
+		
+		if(!au.equals("관리자")) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("location.href='/BBS/user/bbs.jsp'");
 			script.println("</script>");
 		}
-	
-		// ********** 담당자를 가져오기 위한 메소드 *********** 
-		String workSet;
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
-			workSet = "";
-		} else {
-			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
-				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-			}
-			
-			workSet = String.join("/",works);
-			
-		}
-				
-		String name = userDAO.getName(id);
-		
-		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
-		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
-		
-		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
-		
-		//리스트 가져오기
-		ArrayList<rms> rmslist =  rms.getRmsAdmin(pageNumber);
-		
-		//다음 리스트 조회
-		ArrayList<rms> afrmslist =  rms.getRmsAdmin(pageNumber+1);
+		//기존 데이터 불러오기 (가장 최근에 작성된 rms 조회)
+		ArrayList<rmsrept> list = rms.getrmsAll(pageNumber);
+		//다음 페이지가 있는지 확인!
+		ArrayList<rmsrept> aflist = rms.getrmsAll(pageNumber+1);
 	%>
 	
 		
@@ -135,11 +139,9 @@
 							<li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
+
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
-						%>
-						<%
-						 if (pl.equals("WEB") || pl.equals("ERP")) {
+						 if (au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -155,10 +157,7 @@
 						%>
 							</li>
 						<%
-							}
-						%>
-						<%
-							if(rk.equals("실장") || rk.equals("관리자")) {
+							if(au.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -166,10 +165,9 @@
 								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="/BBS/admin/summaryadRk.jsp">조회</a></li>
-								<li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
-								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li>
-								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
+								<li><a href="/BBS/admin/summaryadRk.jsp">조회 및 승인</a></li>
+								<!-- <li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
+								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li> -->
 							</ul>
 							</li>
 						<%
@@ -356,10 +354,10 @@
 				<table class="pull-right">
 					<tr>
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
-								<option value="bbsDeadline">제출일</option>
-								<option value="bbsTitle">제목</option>
-								<option value="userID">작성자</option>
-								<option value="pluser">담당</option>
+								<option value="rms_dl">제출일</option>
+								<option value="rms_title">제목</option>
+								<option value="user_id">작성자</option>
+								<!-- <option value="user_fd">담당</option> -->
 						</select></td>
 						<td><input type="text" class="form-control"
 							placeholder="검색어 입력" name="searchText" maxlength="100"></td>
@@ -384,29 +382,27 @@
 						<th style="background-color: #eeeeee; text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;제목</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
-						<th style="background-color: #eeeeee; text-align: center;">업무 파트</th>
+						<th style="background-color: #eeeeee; text-align: center;">담당</th>
 					</tr>
 				</thead>
 				<tbody>
 					<%		
-						for(int i = 0; i < rmslist.size(); i++){
-							String userName = userDAO.getName(rmslist.get(i).getUserID());
+						for(int i = 0; i < list.size(); i++){
+							String userName = userDAO.getName(list.get(i).getUser_id());
 
 					%>
 
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 					<tr>
-						<td> <%= rmslist.get(i).getBbsDeadline() %> </td>
-
-						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
+						<td> <%= list.get(i).getRms_dl() %> </td>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/user/update.jsp?userID=<%= rmslist.get(i).getUserID() %>&bbsDeadline=<%= rmslist.get(i).getBbsDeadline() %>">
-							<%= rmslist.get(i).getBbsTitle() %></a></td>
+						<a href="/BBS/user/update.jsp?user_id=<%= list.get(i).getUser_id() %>&rms_dl=<%= list.get(i).getRms_dl() %>">
+							<%= list.get(i).getRms_title() %></a></td>
 						<td><%= userName %></td>
-						<td><%= rmslist.get(i).getBbsDate().substring(0, 11) + rmslist.get(i).getBbsDate().substring(11, 13) + "시"
-							+ rmslist.get(i).getBbsDate().substring(14, 16) + "분" %></td>
-						<td><%= rmslist.get(i).getPluser() %></td>
+						<td><%= list.get(i).getRms_time().substring(0, 11) + list.get(i).getRms_time().substring(11, 13) + "시"
+							+ list.get(i).getRms_time().substring(14, 16) + "분" %></td>
+						<td><%= userDAO.getFD(list.get(i).getUser_id()) %></td>
 					</tr>
 					<%
 						}
@@ -421,7 +417,7 @@
 				<a href="/BBS/admin/bbsAdmin.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(afrmslist.size() != 0){
+				}if(aflist.size() != 0){
 			%>
 				<a href="/BBS/admin/bbsAdmin.jsp?pageNumber=<%=pageNumber + 1 %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>

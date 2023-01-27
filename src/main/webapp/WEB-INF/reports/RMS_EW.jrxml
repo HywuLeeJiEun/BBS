@@ -19,90 +19,91 @@
 	<parameter name="pluser" class="java.lang.String"/>
 	<parameter name="logo" class="java.lang.String"/>
 	<queryString>
-		<![CDATA[SELECT *
-FROM rms.rms
-WHERE rms.bbsDeadline =  $P{deadLine} 
-and
-rms.pluser = $P{pluser}
-ORDER BY rms.bbsDeadline DESC]]>
+		<![CDATA[select  p.*, np.RMS_CON as RMS_NCON, np.RMS_STR as RMS_NSTR, np.RMS_TAR as RMS_NTAR, u.USER_FD
+from  (select * from rms.pptxrms where rms_div="N") np,
+(select * from rms.pptxrms where rms_div="T") p
+left join  rms.rmsuser u 
+on p.user_id = u.user_id
+where p.user_id = np.user_id and
+p.rms_dl =  $P{deadLine} and
+np.rms_dl =  $P{deadLine} 
+and user_fd =  $P{pluser}]]>
 	</queryString>
-	<field name="userID" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="userID"/>
-		<property name="com.jaspersoft.studio.field.label" value="userID"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="USER_ID" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="USER_ID"/>
+		<property name="com.jaspersoft.studio.field.label" value="USER_ID"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="p"/>
 	</field>
-	<field name="bbsDeadline" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsDeadline"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsDeadline"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_DL" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_DL"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_DL"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="p"/>
 	</field>
-	<field name="bbsTitle" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsTitle"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsTitle"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_TITLE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_TITLE"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_TITLE"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="p"/>
 	</field>
-	<field name="bbsDate" class="java.sql.Timestamp">
-		<property name="com.jaspersoft.studio.field.name" value="bbsDate"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsDate"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_MGRS" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_MGRS"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_MGRS"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="p"/>
 	</field>
-	<field name="bbsManager" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsManager"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsManager"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_CON" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_CON"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_CON"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="p"/>
 	</field>
-	<field name="bbsContent" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsContent"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsContent"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_STR" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_STR"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_STR"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="p"/>
 	</field>
-	<field name="bbsStart" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsStart"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsStart"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_TAR" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_TAR"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_TAR"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="p"/>
 	</field>
-	<field name="bbsTarget" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsTarget"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsTarget"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_END" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_END"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_END"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="p"/>
 	</field>
-	<field name="bbsEnd" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsEnd"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsEnd"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_DIV" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_DIV"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_DIV"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="p"/>
 	</field>
-	<field name="bbsNContent" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsNContent"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsNContent"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_SIGN" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_SIGN"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_SIGN"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="p"/>
 	</field>
-	<field name="bbsNStart" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsNStart"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsNStart"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_NCON" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_CON"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_NCON"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="np"/>
 	</field>
-	<field name="bbsNTarget" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="bbsNTarget"/>
-		<property name="com.jaspersoft.studio.field.label" value="bbsNTarget"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_NSTR" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_STR"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_NSTR"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="np"/>
 	</field>
-	<field name="pluser" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="pluser"/>
-		<property name="com.jaspersoft.studio.field.label" value="pluser"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rms"/>
+	<field name="RMS_NTAR" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="RMS_TAR"/>
+		<property name="com.jaspersoft.studio.field.label" value="RMS_NTAR"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="np"/>
+	</field>
+	<field name="USER_FD" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="USER_FD"/>
+		<property name="com.jaspersoft.studio.field.label" value="USER_FD"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="rmsuser"/>
 	</field>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
 	<pageHeader>
 		<band height="75" splitType="Stretch">
-			<staticText>
-				<reportElement x="-10" y="3" width="408" height="30" uuid="d65e83e6-4ac4-4943-8677-9d08988f6489"/>
-				<textElement textAlignment="Left">
-					<font fontName="맑은 고딕" size="18" isBold="true"/>
-				</textElement>
-				<text><![CDATA[3. 주간업무 실적 및 계획(①Baynex - WEB)]]></text>
-			</staticText>
 			<staticText>
 				<reportElement mode="Opaque" x="-6" y="43" width="435" height="30" backcolor="#C7CDFD" uuid="76580c2b-6e27-46d2-b139-487102ed9c9f"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -120,6 +121,13 @@ ORDER BY rms.bbsDeadline DESC]]>
 			<line>
 				<reportElement x="-10" y="33" width="810" height="1" uuid="bc4fde99-1ba8-4c2d-9dd0-2991c9684d7e"/>
 			</line>
+			<textField>
+				<reportElement x="-6" y="0" width="470" height="30" uuid="33cf4f95-76ef-4bf2-88c3-05037dc9bb7d"/>
+				<textElement>
+					<font fontName="맑은 고딕" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["3. 주간업무 실적 및 계획(①Baynex - "+$P{pluser}+")"]]></textFieldExpression>
+			</textField>
 		</band>
 	</pageHeader>
 	<columnHeader>
@@ -259,7 +267,7 @@ ORDER BY rms.bbsDeadline DESC]]>
 				<textElement textAlignment="Center">
 					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$F{bbsNTarget}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["\n"+$F{RMS_NTAR}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="707" y="0" width="50" height="120" uuid="0018c13a-f054-485f-857d-0ecd0e2d0639"/>
@@ -272,7 +280,7 @@ ORDER BY rms.bbsDeadline DESC]]>
 				<textElement textAlignment="Center">
 					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$F{bbsNStart}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["\n"+$F{RMS_NSTR}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="483" y="0" width="224" height="120" uuid="ef7696ba-57f4-41be-9175-6da4d26e4855"/>
@@ -285,7 +293,7 @@ ORDER BY rms.bbsDeadline DESC]]>
 				<textElement textAlignment="Left">
 					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$F{bbsNContent}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["\n"+$F{RMS_NCON}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="433" y="0" width="50" height="120" uuid="30ad4989-d781-4e9f-89db-5d174194f6c5"/>
@@ -298,7 +306,7 @@ ORDER BY rms.bbsDeadline DESC]]>
 				<textElement textAlignment="Center">
 					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$F{bbsManager}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["\n"+$F{RMS_MGRS}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="-7" y="0" width="47" height="120" uuid="21354f16-4994-4e00-99fb-b0be5f940536"/>
@@ -311,7 +319,7 @@ ORDER BY rms.bbsDeadline DESC]]>
 				<textElement textAlignment="Center" markup="styled">
 					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$F{bbsManager}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["\n"+$F{RMS_MGRS}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="40" y="0" width="237" height="120" uuid="30eac1b9-cb43-446b-9b3c-ad3cafc0b777">
@@ -327,7 +335,7 @@ ORDER BY rms.bbsDeadline DESC]]>
 				<textElement textAlignment="Left">
 					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$F{bbsContent}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["\n"+$F{RMS_CON}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="327" y="0" width="50" height="120" uuid="4f0f4c6e-5f50-4a63-becc-57890fbc3cbf"/>
@@ -340,7 +348,7 @@ ORDER BY rms.bbsDeadline DESC]]>
 				<textElement textAlignment="Center">
 					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$F{bbsTarget}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["\n"+$F{RMS_TAR}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="377" y="0" width="50" height="120" uuid="6112df65-0eea-4391-a4bc-4c974c4b0d1e"/>
@@ -353,7 +361,7 @@ ORDER BY rms.bbsDeadline DESC]]>
 				<textElement textAlignment="Center">
 					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$F{bbsEnd}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["\n"+$F{RMS_END}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="277" y="0" width="50" height="120" uuid="265f0c4b-eccb-4803-afc5-597ae3f15777"/>
@@ -366,7 +374,7 @@ ORDER BY rms.bbsDeadline DESC]]>
 				<textElement textAlignment="Center">
 					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$F{bbsStart}]]></textFieldExpression>
+				<textFieldExpression><![CDATA["\n"+$F{RMS_STR}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

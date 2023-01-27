@@ -1,4 +1,3 @@
-<%@page import="user.UserDAO"%>
 <%@page import="java.io.OutputStream"%>
 <%@page import="net.sf.jasperreports.swing.JRViewer"%>
 <%@page import="javax.swing.JFrame"%>
@@ -36,17 +35,11 @@
 
 <%
 
-	String bbsDeadline = request.getParameter("bbsDeadline");
+	String rms_dl = request.getParameter("rms_dl");
 	String pluser = request.getParameter("pluser"); // 해당되는 pluser가 나옴(web, erp)
 	String templatePath = null;
 	String newfile = null;
-	/* if(pluser.equals("WEB")) {
-		templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_WEB.jrxml";
-		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\web_sample.pptx";
-	} else if (pluser.equals("ERP")) {
-		templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_ERP.jrxml";
-		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\erp_sample.pptx";
-	} */
+
 	templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_EW.jrxml";
 	if(pluser.equals("WEB")) {
 		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\web_sample.pptx";
@@ -73,7 +66,7 @@
 	 String logo = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
 	 Map<String,Object> paramMap = new HashMap<String,Object>();
 	
-	 paramMap.put("deadLine",bbsDeadline);	  
+	 paramMap.put("deadLine",rms_dl);	  
 	 paramMap.put("logo",logo);
 	 paramMap.put("pluser",pluser);
 	

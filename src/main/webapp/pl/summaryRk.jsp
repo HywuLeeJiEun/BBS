@@ -1,3 +1,8 @@
+<%@page import="rmssumm.rmssumm"%>
+<%@page import="rmssumm.RmssummDAO"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="rms.RmsDAO"%>
 <%@page import="rms.rms_next"%>
 <%@page import="sum.Sum"%>
@@ -37,9 +42,10 @@
 
 <body>
 	<%
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		RmsDAO rms = new RmsDAO();
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+		RmssummDAO sumDAO = new RmssummDAO(); //요약본 목록 (v2.-)
+
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -62,33 +68,37 @@
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
 			workSet = "";
 		} else {
+			//2. 담당 업무가 있는 경우
 			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
 				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 			}
-			
 			workSet = String.join("/",works);
-			
 		}
-				
-		String name = userDAO.getName(id);
 		
 		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
 		
 		
 		//(월요일) 제출 날짜 확인
@@ -114,21 +124,16 @@
 			day = dateFmt.format(cal2.getTime());
 		 }
 		 
-		 //String bbsDeadline = mon;
-		String bbsDeadline = "2023-01-16";
-		 
-		//pl 리스트 확인
-		String work = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		 String rms_dl = mon;
+		//String bbsDeadline = "2023-01-16";
 
-		
-		// 데이터 불러오기
-		SumDAO sumDAO = new SumDAO();
-		ArrayList<Sum> sumlist = sumDAO.getlistSumAll(work, pageNumber);
-		//다음 리스트가 있는지 확인
-		ArrayList<Sum> next_sumlist = sumDAO.getlistSumAll(work, pageNumber+1);
-		
-		if(work.equals("") || work == null) {
+		//현재 사용자의 담당 업무 보기
+		String user_fd = "";
+		//1. user_au -> pl인지 확인하기
+		if(au.equals("PL")) {
+			//2. user_fd -> 담당 업무 확인하기
+			user_fd = userDAO.getFD(id); //ERP 또는 WEB ... 
+		} else {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('PL(파트리더) 권한이 없습니다. 관리자에게 문의바랍니다.')");
@@ -136,50 +141,14 @@
 			script.println("</script>");
 		}
 		
-		
-		ArrayList<String> plist = userDAO.getpluser(work); //pl 관련 유저의 아이디만 출력
-		//제출한 사람만 남기기
-		
-		String[] pllist = plist.toArray(new String[plist.size()]); //해당 pllist를 바꿔야함! (제출한 사람만)
-		ArrayList<rms_next> flist = rms.getlastSignRkfull(bbsDeadline, work);
-		// 검색 결과를 바탕으로 llist 조회
-		String[] userID = new String[flist.size()];
-		
-		for(int i=0; i < flist.size(); i++) {
-			userID[i] = flist.get(i).getUserID();
-		}
-		// 미제출자 인원 계산 ()
-		int psize = plist.size(); //pl 담당 유저
-		int lsize = userID.length;
-		int noSub =  psize - lsize;
-				
-		//미제출자 인원
-		ArrayList<String> noSubname = new ArrayList<String>();
-		ArrayList<String> Subname = new ArrayList<String>();
-
-		//제출한 RMS 도출
-		for(int i=0; i<flist.size(); i++) {
-			Subname.add(flist.get(i).getUserID()); //제출한 user id 도출. (일반 list(10개 제한이 걸림)가 아닌, 모든 제출자를 확인해야함!)
-			//bbsId.add(Integer.toString(flist.get(i).getBbsID()));
-		}
-		for(int i=0; i<Subname.size(); i++) {
-			plist.remove(Subname.get(i));
-		}
-		//제출 안한 인원 찾기
-		for(int i=0; i<plist.size(); i++) {
-			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
-			noSubname.add(userName);	
-		}
-		
-		String[] nousernamedata = noSubname.toArray(new String[noSubname.size()]);
-		Arrays.sort(nousernamedata);
-		
-		String nouserdata = String.join(", ", nousernamedata);
+		// 데이터 불러오기
+		ArrayList<rmssumm> sumlist = sumDAO.getSumAll(user_fd, pageNumber);
+		//다음 리스트가 있는지 확인
+		ArrayList<rmssumm> afsumlist = sumDAO.getSumAll(user_fd, pageNumber+1);
 				
 		String str = "작성된 요약본을 <br>";
 		str += "확인할 수 있습니다.";
 	%>
-
 
 		
 	  <!-- ************ 상단 네비게이션바 영역 ************* -->
@@ -426,7 +395,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center;" data-toggle="tooltip" data-html="true" data-placement="bottom" title="<%= str %>"> <%= work %> 요약본 
+					<th colspan="5" style=" text-align: center;" data-toggle="tooltip" data-html="true" data-placement="bottom" title="<%= str %>"> <%= pl %> 요약본 
 					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
 				</tr>
 			</thead>
@@ -458,7 +427,7 @@
 							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 							
 							//bbsDeadline 찾아오기
-							String dl = sumlist.get(i).getBbsDeadline();
+							String dl = sumlist.get(i).getRms_dl();
 							Date time = new Date();
 							String timenow = dateFormat.format(time);
 
@@ -472,22 +441,22 @@
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/pl/summaryRkUpdate.jsp?bbsDeadline=<%= sumlist.get(i).getBbsDeadline() %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
+						<a href="/BBS/pl/summaryRkUpdate.jsp?rms_dl=<%= sumlist.get(i).getRms_dl() %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
 							[<%= pl %>] - summary (<%= dl %>)</a></td>
 						<td><%= name %></td>
-						<td><%= sumlist.get(i).getSummaryDate().substring(0, 11) + sumlist.get(i).getSummaryDate().substring(11, 13) + "시"
-							+ sumlist.get(i).getSummaryDate().substring(14, 16) + "분" %></td>
-						<td><%= sumlist.get(i).getSummaryUpdate() %></td>
+						<td><%= sumlist.get(i).getSum_time().substring(0, 11) + sumlist.get(i).getSum_time().substring(11, 13) + "시"
+							+ sumlist.get(i).getSum_time().substring(14, 16) + "분" %></td>
+						<td><%= userDAO.getName(sumlist.get(i).getSum_updu()) %></td>
 						<!-- 승인/미승인/마감 표시 -->
 						<td data-toggle="tooltip" data-html="true" data-placement="right" title="관리자의 승인 이후, <br>상태가 변경됩니다.">
 						<%
 						String sign = null;
 						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
-							sign = sumlist.get(i).getSign();
+							sign = sumlist.get(i).getSum_sign();
 						} else {
 							sign="마감";
 							// 데이터베이스에 마감처리 진행
-							int a = sumDAO.sumSign(sumlist.get(i).getBbsDeadline());
+							int a = sumDAO.sumSign(sumlist.get(i).getRms_dl());
 						}
 						%>
 						<%= sign %>
@@ -506,7 +475,7 @@
 				<a href="/BBS/pl/summaryRk.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(next_sumlist.size() != 0){
+				}if(afsumlist.size() != 0){
 			%>
 				<a href="/BBS/pl/summaryRk.jsp?pageNumber=<%=pageNumber + 1 %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>
@@ -600,54 +569,6 @@
 			
 		});
 	</script>	
-	
-	<script>
-	//$("#pptx").find('[type="button"]').trigger('click') {
-	$("#pptx").on('mousedown', function() {
-		//noSub -> 미제출자
-		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
-			var go;
-			go = confirm("미제출자가 있습니다. 출력 하시겠습니까?");
-			
-			if(go) { //출력 o
-				document.getElementById("pptx").click();
-			} else { //출력 x
-				
-			}
-		
-		}
-	});
-	
-	
-	$("#summary").on('mousedown', function() {
-		//noSub -> 미제출자
-		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
-			var go;
-			go = confirm("미제출자가 있습니다. 작성 페이지로 넘어가시겠습니까?");
-			
-			if(go) { //출력 o
-				document.getElementById("summary").click();
-			} else { //출력 x
-				
-			}
-		
-		}
-	});
-	
-	$("#summary_nav").on('mousedown', function() {
-		//noSub -> 미제출자
-		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
-			var go;
-			go = confirm("미제출자가 있습니다. 작성 페이지로 넘어가시겠습니까?");
-			
-			if(go) { //출력 o
-				document.getElementById("summary").click();
-			} else { //출력 x
-				
-			}
-		
-		}
-	});
-	</script>
+
 </body>
 </html>

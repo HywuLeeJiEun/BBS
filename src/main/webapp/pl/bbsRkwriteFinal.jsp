@@ -1,13 +1,12 @@
-<%@page import="sum.Sum"%>
-<%@page import="sum.SumDAO"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.util.Calendar"%>
-<%@page import="user.User"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -29,7 +28,8 @@
 </head>
 <body>
 <% 
-	UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+	RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+	RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
 	
 	// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 	String id = null;
@@ -43,39 +43,41 @@
 		script.println("location.href='../login.jsp'");
 		script.println("</script>");
 	}
-	String rk = userDAO.getRank((String)session.getAttribute("id"));
+	
 	
 	// ********** 담당자를 가져오기 위한 메소드 *********** 
 	String workSet;
-	ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+	ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 	List<String> works = new ArrayList<String>();
 	
-	if(code == null) {
+	if(code.size() == 0) {
+		//1. 담당 업무가 없는 경우,
 		workSet = "";
 	} else {
+		//2. 담당 업무가 있는 경우
 		for(int i=0; i < code.size(); i++) {
-			
-			String number = code.get(i);
-			// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-			String manager = userDAO.getManager(number);
+			//task_num을 받아옴.
+			String task_num = code.get(i);
+			// task_num을 통해 업무명을 가져옴.
+			String manager = userDAO.getManager(task_num);
 			works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 		}
-		
 		workSet = String.join("/",works);
-		
 	}
 	
-	String name = userDAO.getName(id);
-	String pl = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
-	
 	// 사용자 정보 담기
-	User user = userDAO.getUser(name);
-	String password = user.getPassword();
-	String rank = user.getRank();
+	ArrayList<rmsuser> ulist = userDAO.getUser(id);
+	String password = ulist.get(0).getUser_pwd();
+	String name = ulist.get(0).getUser_name();
+	String rank = ulist.get(0).getUser_rk();
 	//이메일  로직 처리
-	String Staticemail = user.getEmail();
-	String[] email = Staticemail.split("@");
-
+	String Staticemail = ulist.get(0).getUser_em();
+	String[] email;
+	email = Staticemail.split("@");
+	String pl = ulist.get(0).getUser_fd();
+	String rk = ulist.get(0).getUser_rk();
+	//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+	String au = ulist.get(0).getUser_au();
 
 
 	// 선택된 데이터 정보
@@ -83,13 +85,15 @@
 	String end = request.getParameter("end");
 	String ncontent = request.getParameter("ncontent");
 	String ntarget = request.getParameter("ntarget");
-	String bbsDeadline = request.getParameter("bbsDeadline");
+	String rms_dl = request.getParameter("rms_dl");
 
+	//데이터 가공
 	content = content.replaceAll("§","\r\n");
     end = end.replaceAll("§","\r\n");
 	ncontent = ncontent.replaceAll("§","\r\n");
 	ntarget = ntarget.replaceAll("§","\r\n");
-	bbsDeadline = bbsDeadline.replaceAll("§","\r\n");
+	rms_dl = rms_dl.replaceAll("§","\r\n"); 
+
 
 	
 
@@ -151,8 +155,7 @@
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(pl !="" || !pl.isEmpty()) {
+							if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -171,11 +174,10 @@
 							</ul>
 							</li>
 						<%
-								}
 							}
 						%>
 						<%
-							if(rk.equals("실장") || rk.equals("관리자")) {
+							if(au.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -183,9 +185,9 @@
 								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="/BBS/admin/summaryadRk.jsp">조회</a></li>
-								<li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
-								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<li><a href="/BBS/admin/summaryadRk.jsp">조회 및 승인</a></li>
+								<!-- <li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
+								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li> -->
 								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
@@ -206,7 +208,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
+					if(au.equals("관리자") || au.equals("PL")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="/BBS/admin/work/workChange.jsp">담당업무 변경</a></li>
@@ -364,7 +366,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th id="summary" colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-placement="bottom" title="제출일 : <%= bbsDeadline %>"> 요약본 작성 </th>
+					<th id="summary" colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-placement="bottom" title="제출일 : <%= rms_dl %>"> 요약본 작성 </th>
 				</tr>
 			</thead>
 		</table>
@@ -397,7 +399,7 @@
 				<table id="Table" class="table" style="text-align: center;">
 					<thead>
 						<tr>
-							<td><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= bbsDeadline %></textarea> </td>
+							<td><textarea id="rms_dl" name="rms_dl" style="display:none"><%= rms_dl %></textarea> </td>
 							<td><textarea id="pl" name="pl" style="display:none"><%= pl %></textarea> </td>
 						</tr>
 						<tr>
@@ -425,7 +427,15 @@
 							<!-- 완료일 -->
 							<td style="text-align: center; border: 1px solid"><textarea required name="end" id="end" style="resize: none; width:100%; height:100px"><%= end %></textarea></td>
 							<!-- 진행율 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="progress" id="progress" style="resize: none; width:100%; height:100px"></textarea></td>
+							<td style="text-align: center; border: 1px solid">
+								<select name="progress" id="progress" style="height:45px; width:95px; text-align-last:center;" onchange="selectPro()">
+														<option> [선택] </option>
+														 <option> 완료 </option>
+														 <option> 진행중 </option>
+														 <option> 미완료 </option>
+													 </select>
+								<!-- <textarea required name="progress" id="progress" style="resize: none; width:100%; height:100px"></textarea> -->
+							</td>
 							<!-- 상태 -->
 							<td style="text-align: center; border: 1px solid;" id="state"></td>
 							<!-- 비고 -->
@@ -574,13 +584,25 @@
 	$("#incomplete").on('click', function() {
 		con.style.backgroundColor = "#ff0000";
 	});
-	
-	// con.style.backgroundColor = ''; 이라면, 설정하시오! (경고)
-	if(con.style.backgroundColor = '') {
-		
-	}
 	</script>
 	
+	
+	<script>
+	//진행율(progess)선택을 통한 상태 변경
+	function selectPro() {
+		var con = document.getElementById("state");
+		var select = document.getElementById("progress").value;
+		if(select == "완료") {
+			con.style.backgroundColor = "#00ff00";
+		}else if(select == "진행중") {
+			con.style.backgroundColor = "#ffff00";
+		}else if(select == "미완료") {
+			con.style.backgroundColor = "#ff0000";
+		}else {
+			con.style.backgroundColor = "#ffffff";
+		}
+	}
+	</script>
 	
 	<script>
 	function save() {
@@ -590,8 +612,8 @@
 			if(document.getElementById("end").value == '' || document.getElementById("end").value == null) {
 				alert("금주 업무 실적의 '완료일'이 작성되지 않았습니다.");
 			} else {
-				if(document.getElementById("progress").value == '' || document.getElementById("progress").value == null) {
-					alert("금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
+				if(document.getElementById("progress").value.indexOf("선택") > -1) {
+					alert("금주 업무 실적의 '진행율'이 선택되지 않았습니다.");
 				} else {
 					if(con.style.backgroundColor == '' || con.style.backgroundColor == null) {
 						alert("금주 업무 실적의 '상태'가 선택되지 않았습니다.");

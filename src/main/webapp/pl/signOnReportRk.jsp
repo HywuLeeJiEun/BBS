@@ -1,13 +1,12 @@
-<%@page import="rms.rms"%>
-<%@page import="rms.erp"%>
-<%@page import="rms.rms_next"%>
-<%@page import="rms.rms_this"%>
-<%@page import="rms.RmsDAO"%>
-<%@page import="user.User"%>
+<%@page import="rmsrept.pptxrms"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsrept.rmsedps"%>
+<%@page import="rmsrept.rmsrept"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.util.List"%>
-<%@page import="user.UserDAO"%>
 <%@page import="org.mariadb.jdbc.internal.failover.tools.SearchFilter"%>
 <%@page import="java.util.ArrayList"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -31,8 +30,8 @@
 
 <%
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
-		UserDAO userDAO = new UserDAO();
-		RmsDAO rms = new RmsDAO();
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
 		
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -47,74 +46,76 @@
 		}	
 				
 		// 만약 넘어온 데이터가 없다면
-		String bbsDeadline = request.getParameter("bbsDeadline");
-		if(bbsDeadline == null || bbsDeadline.isEmpty()){
+		String rms_dl = request.getParameter("rms_dl");
+		String user_id = request.getParameter("user_id");
+		
+		if(rms_dl == null || user_id == null){
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('유효하지 않은 글입니다')");
 			script.println("history.back();");
 			script.println("</script");
 		}
-		String userID = request.getParameter("userID");
 		
-		//rms
-		ArrayList<rms> rmslist = rms.getRmsAll(bbsDeadline, userID);
+		//RMEREPT 내용 조회 (금주, 차주 나눠서 조회!)
+		//금주
+		ArrayList<pptxrms> tlist = rms.getPptxRmsData(rms_dl, user_id, "T");
+		//차주
+		ArrayList<pptxrms> nlist = rms.getPptxRmsData(rms_dl, user_id, "n");
+		
+		//erp_data
+		ArrayList<rmsedps> erp = rms.geterp(rms_dl);
 		
 		// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			
-		if(rmslist.size() == 0) { //삭제 되어 비어있다면,
+		if(tlist.size() == 0) { //삭제 되어 비어있다면,
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('게시글이 제거되거나 수정되었을 수 있습니다. 확인하여 주십시오.')");
 			script.println("history.back()");
 			script.println("</script>");
 		}
+		
 		Date time = new Date();
 		String timenow = dateFormat.format(time);
 
-		Date dldate = dateFormat.parse(bbsDeadline);
+		Date dldate = dateFormat.parse(rms_dl);
 		Date today = dateFormat.parse(timenow);
 			
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
-		
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
 			workSet = "";
 		} else {
+			//2. 담당 업무가 있는 경우
 			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
-				works.add(manager); //즉, work 리스트에 모두 담겨 저장됨
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 			}
-			
 			workSet = String.join("/",works);
-
-
 		}
-		String name = userDAO.getName(id);
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		
 		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
-		
-		//erp_data
-		ArrayList<erp> erp = rms.geterp(bbsDeadline, rmslist.get(0).getUserID());
-		
-		String pl = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
-		
-		//담당자 정보 찾기 (userid -> name)
-		String userName = userDAO.getName(rmslist.get(0).getUserID());
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
 	
 	%>
 	
@@ -150,8 +151,7 @@
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(pl !="" || !pl.isEmpty()) {
+							if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -170,11 +170,10 @@
 							</ul>
 							</li>
 						<%
-								}
 							}
 						%>
 						<%
-							if(rk.equals("실장") || rk.equals("관리자")) {
+							if(au.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -182,9 +181,9 @@
 								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="/BBS/admin/summaryadRk.jsp">조회</a></li>
-								<li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
-								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<li><a href="/BBS/admin/summaryadRk.jsp">조회 및 승인</a></li>
+								<!-- <li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
+								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li> -->
 								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
@@ -205,7 +204,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
+					if(au.equals("관리자") || au.equals("PL")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="/BBS/admin/work/workChange.jsp">담당업무 변경</a></li>
@@ -388,7 +387,7 @@
 <td>
 </td>
 <td colspan="14" style="text-indent: 0px; text-align: left;">
-<span style="font-family: 맑은 고딕; color: #000000; font-size: 24px; line-height: 2; font-weight: bold;"><%= rmslist.get(0).getBbsTitle() %></span></td>
+<span style="font-family: 맑은 고딕; color: #000000; font-size: 24px; line-height: 2; font-weight: bold;"><%= tlist.get(0).getRms_title() %></span></td>
 <td colspan="10">
 </td>
 </tr>
@@ -454,39 +453,39 @@
 	<td colspan="2">
 	</td>
    	 <td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea" readonly id="bbsManager" name="bbsManager" style="resize:none; height:180px; width:100%; border:none; overflow:auto; vertical-align:top; text-align: center;" placeholder="구분/담당자"  readonly><%= rmslist.get(0).getBbsManager() %></textarea></td>
+	<textarea class="textarea" readonly id="bbsManager" name="bbsManager" style="resize:none; height:180px; width:100%; border:none; overflow:auto; vertical-align:top; text-align: center;" placeholder="구분/담당자"  readonly><%= tlist.get(0).getRms_mgrs() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
-	<textarea class="textarea" readonly id="bbsContent" required style="resize:none; height:180px;width:100%; border:none;  " placeholder="업무내용" name="bbsContent"><%= rmslist.get(0).getBbsContent() %></textarea></td>
+	<textarea class="textarea" readonly id="bbsContent" required style="resize:none; height:180px;width:100%; border:none;  " placeholder="업무내용" name="bbsContent"><%= tlist.get(0).getRms_con() %></textarea></td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea" readonly id="bbsStart" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsStart"><%= rmslist.get(0).getBbsStart() %></textarea></td>
+	<textarea class="textarea" readonly id="bbsStart" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsStart"><%= tlist.get(0).getRms_str() %></textarea></td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
 	<textarea class="textarea" readonly id="bbsTarget" required style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="완료목표일" name="bbsTarget" oninput="this.value = this.value
 												.replace(/[^0-9./.\s.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
-												.replace(/(\..*)\./g, '$1');"><%= rmslist.get(0).getBbsTarget() %></textarea></td>
+												.replace(/(\..*)\./g, '$1');"><%= tlist.get(0).getRms_tar() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
 	<textarea class="textarea" readonly id="bbsEnd" required style="resize:none; height:180px; width:100%; border:none; text-align: center;"  placeholder="진행율/완료일" name="bbsEnd" oninput="this.value = this.value
 												.replace(/[^0-9./.\s.%.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
-												.replace(/(\..*)\./g, '$1');"><%= rmslist.get(0).getBbsEnd() %></textarea></td>
+												.replace(/(\..*)\./g, '$1');"><%= tlist.get(0).getRms_end() %></textarea></td>
 	<td>
 	</td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea"  readonly style="resize:none; height:180px; width:100%; border:none; overflow:auto; text-align: center;" placeholder="구분/담당자"   readonly><%= rmslist.get(0).getBbsManager() %></textarea></td>
+	<textarea class="textarea"  readonly style="resize:none; height:180px; width:100%; border:none; overflow:auto; text-align: center;" placeholder="구분/담당자"   readonly><%= nlist.get(0).getRms_mgrs() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
-	<textarea class="textarea" readonly required id="bbsNContent" style="resize:none; height:180px;width:100%; border:none; " placeholder="업무내용" name="bbsNContent"><%= rmslist.get(0).getBbsNContent() %></textarea></td>
+	<textarea class="textarea" readonly required id="bbsNContent" style="resize:none; height:180px;width:100%; border:none; " placeholder="업무내용" name="bbsNContent"><%= nlist.get(0).getRms_con() %></textarea></td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
 	<textarea class="textarea" readonly required id="bbsNStart" style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsNStart"  oninput="this.value = this.value
 												.replace(/[^0-9./.\s.-]/g, '')
-												.replace(/(\..*)\./g, '$1');"><%= rmslist.get(0).getBbsNStart() %></textarea></td>
+												.replace(/(\..*)\./g, '$1');"><%= nlist.get(0).getRms_str() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
 	<textarea class="textarea" readonly required id="bbsNTarget" style="resize:none; height:180px; width:100%; border:none; text-align: center; " placeholder="완료목표일" name="bbsNTarget" oninput="this.value = this.value
 												.replace(/[^0-9./.\s.-]/g, '')
-												.replace(/(\..*)\./g, '$1');"><%= rmslist.get(0).getBbsNTarget() %></textarea></td>
+												.replace(/(\..*)\./g, '$1');"><%= nlist.get(0).getRms_tar() %></textarea></td>
 	<td colspan="2">
 	
 	</td>
 </tr>
 <%
-	if(erp.size() == 0) {
+	if(erp.size() == 0 || pl.equals("WEB")) {
 %>
 <tr  style="height:80px">
 	<td colspan="16" style="margin-right:50px;">
@@ -505,7 +504,7 @@
 
 
 <%
-	if(erp.size() != 0) { //erp가 비어있지 않다면, 하단 출력
+	if(erp.size() != 0 && pl.equals("ERP")) { //erp가 비어있지 않다면, 하단 출력
 	%>
 <div class="container-fluid" style="margin-top:50px;">
 <table style="margin-left:20%">
@@ -526,15 +525,15 @@
 	<tr>
 		<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
 		  <textarea class="textarea" style="display:none" name="erp_size"><%= erp.size() %></textarea>
-		  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp.get(0).getE_date() %></textarea></td>
+		  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp.get(0).getErp_date() %></textarea></td>
 	  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-		  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp.get(0).getE_user() %></textarea></td>
+		  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>"><%= erp.get(0).getErp_user() %></textarea></td>
 	  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-		  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp.get(0).getE_text() %></textarea></td>
+		  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>"><%= erp.get(0).getErp_text() %></textarea></td>
 	  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-		  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp.get(0).getE_authority() %></textarea></td>
+		  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp.get(0).getErp_anum() %></textarea></td>
 	  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-		  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp.get(0).getE_division() %></textarea></td>
+		  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp.get(0).getErp_div() %></textarea></td>
 	  	
 	</tr>
 	<%

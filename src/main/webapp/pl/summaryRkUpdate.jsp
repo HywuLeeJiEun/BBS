@@ -1,17 +1,16 @@
-<%@page import="rms.erp"%>
-<%@page import="rms.RmsDAO"%>
-<%@page import="rms.rms"%>
-<%@page import="sum.Sum"%>
-<%@page import="sum.SumDAO"%>
+<%@page import="rmsrept.rmsedps"%>
+<%@page import="rmssumm.rmssumm"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmssumm.RmssummDAO"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="java.text.Format"%>
 <%@page import="net.sf.jasperreports.engine.type.CalculationEnum"%>
 <%@page import="java.time.LocalDateTime"%>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
-<%@page import="user.User"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.SimpleDateFormat"%>
-<%@page import="user.UserDAO"%>
 <%@page import="java.util.Locale"%>
 <%@page import="java.util.Calendar"%>
 <%@page import="java.time.LocalDate"%>
@@ -49,11 +48,11 @@
 
 <body>
 	<%
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		SumDAO sumDAO = new SumDAO();
-		RmsDAO rms = new RmsDAO();
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+		RmssummDAO sumDAO = new RmssummDAO(); //요약본 목록 (v2.-)
+
 		
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -76,40 +75,52 @@
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
 			workSet = "";
 		} else {
+			//2. 담당 업무가 있는 경우
 			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
 				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 			}
-			
 			workSet = String.join("/",works);
-			
 		}
-				
-		String name = userDAO.getName(id);
 		
 		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
-
-		
-		 String pl = userDAO.getpl(id); 
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
 		 
 		//받아온 bbsDeadline을 사용함!
-		String bbsDeadline = request.getParameter("bbsDeadline");
-		ArrayList<Sum> list = sumDAO.getlistSum(bbsDeadline, pl);
+		String rms_dl = request.getParameter("rms_dl");
+		if(request.getParameter("rms_dl") == null) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('잘못된 접근입니다. 해당 요약본을 찾을 수 없습니다.')");
+			script.println("history.back();");
+			script.println("</script>");
+		}
+		
+		//금주데이터
+		ArrayList<rmssumm> tlist = sumDAO.getSumDiv(pl, rms_dl, "T");
+		//차주데이터
+		ArrayList<rmssumm> nlist = sumDAO.getSumDiv(pl, rms_dl, "N");
 		
 		if(pl.equals("") || pl == null) {
 			PrintWriter script = response.getWriter();
@@ -125,15 +136,11 @@
 		
 		
 		//erp 데이터가 있는지 확인
-		//id -> erp 작성을 담당하는 user의 ID를 가져와야함!
-		String jobs = userDAO.getJobsCode("계정관리");
-		String erp_id = userDAO.getIDManger(jobs);
-		
-		ArrayList<erp> erp = rms.geterp(bbsDeadline, erp_id);
-		
+		//erp_data
+		ArrayList<rmsedps> erp = rms.geterpData(rms_dl);
 		
 		//전체 리스트에서 미승인이 있는지 확인
-		ArrayList<Sum> sum = sumDAO.getlistSumSign(pl); //미승인 상태만 불러옴!
+		ArrayList<rmssumm> sum = sumDAO.getSumSgin(pl, "미승인", pageNumber); //미승인 상태만 불러옴!
 	
 		%>
 	
@@ -168,8 +175,7 @@
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(pl !="" || !pl.isEmpty()) {
+							if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -188,11 +194,10 @@
 							</ul>
 							</li>
 						<%
-								}
 							}
 						%>
 						<%
-							if(rk.equals("실장") || rk.equals("관리자")) {
+							if(au.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -223,7 +228,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
+					if(au.equals("관리자") || au.equals("PL")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="/BBS/admin/work/workChange.jsp">담당업무 변경</a></li>
@@ -392,7 +397,7 @@
 	<!-- 메인 게시글 영역 -->
 	<%
 	// 즉, summary가 없다면, 
-	if(list.isEmpty() || list == null) {
+	if(tlist.isEmpty() || tlist == null) {
 	%>
 	<br><br><br>
 	<div class="container">
@@ -413,7 +418,7 @@
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		
 		//bbsDeadline 찾아오기
-		String dl = bbsDeadline;
+		String dl = rms_dl;
 		Date time = new Date();
 		String timenow = dateFormat.format(time);
 
@@ -448,12 +453,12 @@
 						<tr>			
 							<td style="background-color:#f9f9f9;" colspan="1" style="align:left;" >요약본</td>
 							<td style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title=""> [<%= pl %>] - summary (<%= dl %>)</td>
-							<td colspan="2"  style="background-color:#f9f9f9;"><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= list.get(0).getBbsDeadline() %></textarea>
-								<textarea id="pl" name="pl" style="display:none"><%= list.get(0).getPluser() %></textarea> 
-								<textarea id="sign" name="sign" style="display:none"><%= list.get(0).getSign() %></textarea>
-								<textarea id="state_value" name="state_value" style="display:none"><%= list.get(0).getState() %></textarea></td>
-							<td  style="background-color:#f9f9f9;" colspan="1" style="txet:center">승인</td>
-							<td  style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" ><%= list.get(0).getSign() %></td>
+							<td colspan="2"  style="background-color:#f9f9f9;"><textarea id="rms_dl" name="rms_dl" style="display:none"><%= tlist.get(0).getRms_dl() %></textarea>
+								<textarea id="pl" name="pl" style="display:none"><%= tlist.get(0).getUser_fd() %></textarea> 
+								<textarea id="sign" name="sign" style="display:none"><%= tlist.get(0).getSum_sign() %></textarea>
+								<textarea id="state_value" name="state_value" style="display:none"><%= tlist.get(0).getSum_sta() %></textarea></td>
+							<td  style="background-color:#f9f9f9;" colspan="1" style="txet:center">상태</td>
+							<td  style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" ><%= tlist.get(0).getSum_sign() %></td>
 						</tr>
 						<tr>
 							<td></td>
@@ -474,17 +479,24 @@
 						
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid"><%= list.get(0).getPluser() %></td>
+							<td style="text-align: center; border: 1px solid"><%= tlist.get(0).getUser_fd() %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="content" id="content" style="resize: none; width:100%; height:100px"><%= list.get(0).getBbsContent() %></textarea></td>
+							<td style=" border: 1px solid"><textarea required name="content" id="content" style="resize: none; width:100%; height:100px"><%= tlist.get(0).getSum_con() %></textarea></td>
 							<!-- 완료일 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="end" id="end" style="resize: none; width:100%; height:100px"><%= list.get(0).getBbsEnd() %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="end" id="end" style="resize: none; width:100%; height:100px"><%= tlist.get(0).getSum_enta() %></textarea></td>
 							<!-- 진행율 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="progress" id="progress" style="resize: none; width:100%; height:100px"><%= list.get(0).getProgress() %></textarea></td>
+							<td style="text-align: center; border: 1px solid">
+								<select name="progress" id="progress" style="height:45px; width:95px; text-align-last:center;" onchange="selectPro()">
+									 <option <%= tlist.get(0).getSum_pro().equals("완료")?"selected":"" %>> 완료 </option>
+									 <option <%= tlist.get(0).getSum_pro().equals("진행중")?"selected":"" %>> 진행중 </option>
+									 <option <%= tlist.get(0).getSum_pro().equals("미완료")?"selected":"" %>> 미완료 </option>
+								</select>	
+								<!-- <textarea required name="progress" id="progress" style="resize: none; width:100%; height:100px"></textarea> -->
+							</td>
 							<!-- 상태 -->
 							<td style="text-align: center; border: 1px solid;" id="state"></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea  name="note" id="note" style="resize: none; width:100%; height:100px"><%= list.get(0).getNote() %></textarea></td>
+							<td style=" border: 1px solid"><textarea  name="note" id="note" style="resize: none; width:100%; height:100px"><%= tlist.get(0).getSum_note() %></textarea></td>
 						</tr>
 						<tr>
 							<td></td>
@@ -512,13 +524,13 @@
 						
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid"><textarea id="pl" name="pl" style="display:none"><%= list.get(0).getPluser() %></textarea><%= list.get(0).getPluser() %></td>
+							<td style="text-align: center; border: 1px solid"><textarea id="pl" name="pl" style="display:none"><%= nlist.get(0).getUser_fd() %></textarea><%= nlist.get(0).getUser_fd() %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="ncontent" id="ncontent" style="resize: none; width:100%; height:100px"><%= list.get(0).getBbsNContent() %></textarea></td>
+							<td style=" border: 1px solid"><textarea required name="ncontent" id="ncontent" style="resize: none; width:100%; height:100px"><%= nlist.get(0).getSum_con() %></textarea></td>
 							<!-- 완료예정 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="ntarget" id="ntarget" style="resize: none; width:100%; height:100px"><%= list.get(0).getBbsNTarget() %></textarea></td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="ntarget" id="ntarget" style="resize: none; width:100%; height:100px"><%= nlist.get(0).getSum_enta() %></textarea></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea name="nnote" id="nnote" style="resize: none; width:100%; height:100px"><%= list.get(0).getNnote() %></textarea></td>
+							<td style=" border: 1px solid"><textarea name="nnote" id="nnote" style="resize: none; width:100%; height:100px"><%= nlist.get(0).getSum_note() %></textarea></td>
 						</tr>
 					</tbody>
 				</table>
@@ -534,7 +546,7 @@
 							<th colspan="5" style="background-color: #ccffcc; border:none" align="center" data-toggle="tooltip" title="해당 데이터는 수정이 불가합니다!">ERP 디버깅 권한 신청 처리 현황</th>
 						</tr>
 						<tr style="background-color: #FF9933; border: 1px solid">
-							<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date <textarea class="textarea" id="erp_id" style="display:none" name="erp_id"><%= list.get(0) %></textarea></th>
+							<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date</th>
 							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
 							<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
 							<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
@@ -546,15 +558,15 @@
 						<tr>
 							<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
 							  <textarea class="textarea" style="display:none" name="erp_size"><%= erp.size() %></textarea>
-							  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>" readonly><%= erp.get(i).getE_date() %></textarea></td>
+							  <textarea class="textarea" id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date<%= i %>" readonly><%= erp.get(i).getErp_date() %></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-							  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>" readonly><%= erp.get(i).getE_user() %></textarea></td>
+							  <textarea class="textarea" id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%= i %>" readonly><%= erp.get(i).getErp_user() %></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-							  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>" readonly><%= erp.get(i).getE_text() %></textarea></td>
+							  <textarea class="textarea" id="erp_stext<%= i %>" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%= i %>" readonly><%= erp.get(i).getErp_text() %></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-							  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>" readonly><%= erp.get(i).getE_authority() %></textarea></td>
+							  <textarea class="textarea" id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%= i %>" readonly><%= erp.get(i).getErp_anum() %></textarea></td>
 						  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-							  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>" readonly><%= erp.get(i).getE_division() %></textarea></td>
+							  <textarea class="textarea" id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%= i %>" readonly><%= erp.get(i).getErp_div() %></textarea></td>
 						</tr>
 						<%
 						}
@@ -587,10 +599,10 @@
 				<button type="button" class="btn btn-primary pull-right" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="location.href='/BBS/pl/summaryUpdateDelete.jsp'">목록</button> 
 			<% } %>
 			<%
-			if(list.get(0).getSign().equals("미승인")) {
+			if(tlist.get(0).getSum_sign().equals("미승인")) {
 				//if(sumad_id == null || sumad_id.isEmpty()) { //sumad가 생기면, 삭제가 불가함!
 			%>
-				<button type="button" class="btn btn-danger pull-right" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="location.href='/BBS/pl/action/bbsRkDelete.jsp?bbsDeadline=<%= bbsDeadline %>&pluser=<%= pl %>'" class="form-control" data-toggle="tooltip" data-placement="bottom" title="관리자가 요약본을 저장할 경우, 삭제가 불가합니다.">삭제</button> 
+				<button type="button" class="btn btn-danger pull-right" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="if(confirm('삭제하시겠습니까?')){location.href='/BBS/pl/action/bbsRkDelete.jsp?rms_dl=<%= rms_dl %>&pluser=<%= pl %>'}" class="form-control" data-toggle="tooltip" data-placement="bottom" title="관리자가 요약본을 저장할 경우, 삭제가 불가합니다.">삭제</button> 
 			<% //} %>
 				<button type="button" class="btn btn-info pull-right" style="width:50px; text-align:center; align:center" id="update" name="update" onclick="update()">수정</button> 
 			<%
@@ -707,10 +719,22 @@
 	$("#incomplete").on('click', function() {
 		con.style.backgroundColor = "#ff0000";
 	});
+	</script>
 	
-	// con.style.backgroundColor = ''; 이라면, 설정하시오! (경고)
-	if(con.style.backgroundColor = '') {
-		
+	<script>
+	//진행율(progess)선택을 통한 상태 변경
+	function selectPro() {
+		var con = document.getElementById("state");
+		var select = document.getElementById("progress").value;
+		if(select == "완료") {
+			con.style.backgroundColor = "#00ff00";
+		}else if(select == "진행중") {
+			con.style.backgroundColor = "#ffff00";
+		}else if(select == "미완료") {
+			con.style.backgroundColor = "#ff0000";
+		}else {
+			con.style.backgroundColor = "#ffffff";
+		}
 	}
 	</script>
 	
@@ -719,15 +743,32 @@
 	//$("#update").find('[type="submit"]').trigger('click') {
 	//function update() {
 	$("#update").on('click', function () {
-		if(document.getElementById("progress").value == '' || document.getElementById("progress").value == null) {
-			alert("금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
+		if(document.getElementById("content").value == '' || document.getElementById("content").value == null) {
+			alert("금주 업무 실적의 '업무 내용'이 작성되지 않았습니다.");
 		} else {
-			if(con.style.backgroundColor == '' || con.style.backgroundColor == null) {
-				alert("금주 업무 실적의 '상태'가 선택되지 않았습니다.");
+			if(document.getElementById("end").value == '' || document.getElementById("end").value == null) {
+				alert("금주 업무 실적의 '완료일'이 작성되지 않았습니다.");
 			} else {
+				if(document.getElementById("progress").value.indexOf("선택") > -1) {
+					alert("금주 업무 실적의 '진행율'이 선택되지 않았습니다.");
+				} else {
+					if(con.style.backgroundColor == '' || con.style.backgroundColor == null) {
+						alert("금주 업무 실적의 '상태'가 선택되지 않았습니다.");
+					} else {
+						//차주
+						if(document.getElementById("ncontent").value == '' || document.getElementById("ncontent").value == null) {
+							alert("차주 업무 계획의 '업무 내용'이 작성되지 않았습니다.");
+						} else {
+							if(document.getElementById("ntarget").value == '' || document.getElementById("ntarget").value == null) {
+								alert("차주 업무 계획의 '완료예정'이 작성되지 않았습니다.");
+							} else {
 			var innerHtml = '<tr><td><textarea class="textarea" id="color" name="color" style="display:none">'+con.style.backgroundColor+'</textarea></td></tr>';
 			$('#Table > tbody > tr:last').append(innerHtml);
 			$('#bbsRk').submit();
+			}
+						}
+					}
+				}
 			}
 		}
 	});

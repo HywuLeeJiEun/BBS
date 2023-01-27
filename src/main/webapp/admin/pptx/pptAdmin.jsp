@@ -1,9 +1,13 @@
+<%@page import="rmssumm.rmssumm"%>
+<%@page import="rmsrept.rmsedps"%>
+<%@page import="rmssumm.RmssummDAO"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="user.UserDAO"%>
 <%@page import="rms.erp"%>
 <%@page import="user.User"%>
 <%@page import="rms.RmsDAO"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="bbs.BbsDAO"%>
 <%@page import="java.io.OutputStream"%>
 <%@page import="net.sf.jasperreports.swing.JRViewer"%>
 <%@page import="javax.swing.JFrame"%>
@@ -33,15 +37,19 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>RMS</title>
 <!-- 루트 폴더에 부트스트랩을 참조하는 링크 -->
 <link rel="stylesheet" href="css/css/bootstrap.css">
 </head>
 <body>
 
 <%
-	// sumad_id에 해당하는 bbsDeadline
-	String bbsDeadline = request.getParameter("bbsDeadline");
+	RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+	RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+	RmssummDAO sumDAO = new RmssummDAO(); //요약본 목록 (v2.-)
+
+	// RMSSUMM에 해당하는 rms_dl
+	String rms_dl = request.getParameter("rms_dl");
 	//e_state, w_state => 색상표
 	//String e_color = request.getParameter("ecolor");
 	//String w_color = request.getParameter("wcolor");
@@ -49,24 +57,25 @@
 	String w_state = request.getParameter("wcolor");//"#ffff00";
 	
 	// erp_bbs가 있다면, 데이터를 저장함!
-	UserDAO userDAO = new UserDAO();
-	RmsDAO rms = new RmsDAO();
 	//erp 데이터가 있는지 확인
-	//id -> erp 작성을 담당하는 user의 ID를 가져와야함!
-	String jobs = userDAO.getJobsCode("계정관리");
-	String erp_id = userDAO.getIDManger(jobs);
-	ArrayList<erp> erp_list = rms.geterp(bbsDeadline, erp_id);
-	//데이터가 여러개 있다면 쪼개어 저장함
-
+	ArrayList<rmsedps> erp_list = rms.geterp(rms_dl);
+	
+	//summary 데이터를 불러옴.
+	//rms_dl로 검색하여 해당 데이터를 가져옴.
+	//ERP
+		//금주
+	ArrayList<rmssumm> etlist = sumDAO.getSumDiv("ERP", rms_dl, "T");
+		//차주
+	ArrayList<rmssumm> enlist = sumDAO.getSumDiv("ERP", rms_dl, "N");
+	
+	//WEB
+		//금주
+	ArrayList<rmssumm> wtlist = sumDAO.getSumDiv("WEB", rms_dl, "T");
+		//차주
+	ArrayList<rmssumm> wnlist = sumDAO.getSumDiv("WEB", rms_dl, "N");
+	
 	
 	String templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\SummaryAD.jrxml";
-	//String templatePath = "D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
-	//String templatePath = "D:\\workspace\\sample\\sample_bbs.jrxml";
-	//String templatePath2 = "D:\\workspace\\sample\\sample_bbs.jasper";
-	//String templatePath = "D:\\workspace\\BBS_test_backup\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
-	// 출력할 PDF 파일 경로
-	//String destPath = "C:\\1.pptx";
-	
 	Connection conn = null;
 	
 	try {
@@ -79,7 +88,7 @@
 	 String logo = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
 	 Map<String,Object> paramMap = new HashMap<String,Object>();
 	
-	 paramMap.put("deadLine",bbsDeadline);	  
+	 paramMap.put("deadLine",rms_dl);	  
 	 paramMap.put("logo",logo);
 	 paramMap.put("e_state",e_state);
 	 paramMap.put("w_state",w_state);
@@ -93,11 +102,11 @@
 	 
 	 if(erp_list.size() != 0) {
 		 for(int i=0; i < erp_list.size(); i++) {
-			 paramMap.put(a+i,erp_list.get(i).getE_date());	  
-			 paramMap.put(b+i,erp_list.get(i).getE_user());	  
-			 paramMap.put(c+i,erp_list.get(i).getE_text());	  
-			 paramMap.put(d+i,erp_list.get(i).getE_authority());  
-			 paramMap.put(e+i,erp_list.get(i).getE_division());	  
+			 paramMap.put(a+i,erp_list.get(i).getErp_date());	  
+			 paramMap.put(b+i,erp_list.get(i).getErp_user());	  
+			 paramMap.put(c+i,erp_list.get(i).getErp_text());	  
+			 paramMap.put(d+i,erp_list.get(i).getErp_anum());  
+			 paramMap.put(e+i,erp_list.get(i).getErp_div());	  
 		 }
 	 } else { //만약, erp 데이터가 없다면!
 		 paramMap.put(a+0," ");	  
@@ -111,6 +120,27 @@
 		 paramMap.put(d+1," ");  
 		 paramMap.put(e+1," ");	
 	 }
+	 
+	 //sum - erp데이터 저장
+	 paramMap.put("etsum_con",etlist.get(0).getSum_con());
+	 paramMap.put("etsum_enta",etlist.get(0).getSum_enta());
+	 paramMap.put("etsum_pro",etlist.get(0).getSum_pro());
+	 paramMap.put("etsum_note",etlist.get(0).getSum_note());
+	 
+	 paramMap.put("ensum_con",enlist.get(0).getSum_con());
+	 paramMap.put("ensum_enta",enlist.get(0).getSum_enta());
+	 paramMap.put("ensum_note",enlist.get(0).getSum_note());
+	 
+	 //sum - web데이터 저장
+	 paramMap.put("wtsum_con",wtlist.get(0).getSum_con());
+	 paramMap.put("wtsum_enta",wtlist.get(0).getSum_enta());
+	 paramMap.put("wtsum_pro",wtlist.get(0).getSum_pro());
+	 paramMap.put("wtsum_note",wtlist.get(0).getSum_note());
+	 
+	 paramMap.put("wnsum_con",wnlist.get(0).getSum_con());
+	 paramMap.put("wnsum_enta",wnlist.get(0).getSum_enta());
+	 paramMap.put("wnsum_note",wnlist.get(0).getSum_note());
+	 
 	 
 	 // (3)데이타소스 생성
 	 Class.forName("org.mariadb.jdbc.Driver");

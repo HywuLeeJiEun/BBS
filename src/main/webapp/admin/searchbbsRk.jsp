@@ -1,3 +1,7 @@
+<%@page import="rmsrept.rmsrept"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="rms.rms"%>
 <%@page import="rms.rms_next"%>
 <%@page import="rms.rms_this"%>
@@ -26,7 +30,8 @@
 
 <body>
 	<%
-		UserDAO userDAO = new UserDAO();
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
 	
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
@@ -47,42 +52,40 @@
 			pageNumber = Integer.parseInt(request.getParameter("pageNumber"));
 		}		
 		
-		String name = userDAO.getName(id);
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
 		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
 			workSet = "";
 		} else {
+			//2. 담당 업무가 있는 경우
 			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
 				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 			}
-			
 			workSet = String.join("/",works);
-			
 		}
-
-	
+		
 		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
+		String Staticemail = ulist.get(0).getUser_em();
 		String[] email;
 		email = Staticemail.split("@");
-		//요약본 처리를 위한 Deadline 
-		//ArrayList<Bbs> listbbs = bbsDAO.getDeadLineList(); 
-		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
 		
 		//검색을 위한 설정
 		String category = request.getParameter("searchField");
@@ -95,9 +98,8 @@
 			script.println("</script>");
 		}
 		
-		if(category.equals("bbsDeadline")) {
+		if(category.equals("rms_dl")) {
 			int len = str.length();
-			
 			// 2글자 이상이며 -을 포함하지 않는다면, 
 			if(len > 2 && str.contains("-") == false && len <4) {
 				PrintWriter script = response.getWriter();
@@ -109,15 +111,14 @@
 		}
 		
 		//작성자명 검색시,
-		if(category.equals("userID")) {
+		if(category.equals("user_id")) {
 			str = userDAO.getId(request.getParameter("searchText"));
 		}
 		
 		// 검색 결과 조회
-		RmsDAO rms = new RmsDAO();
-		ArrayList<rms> rmslist =  rms.getRmsAdminSearch(pageNumber, category, str);
+		ArrayList<rmsrept> list =  rms.getRmsAdminSearch(pageNumber, category, str);
 		
-			if (rmslist.size() == 0) {
+		if (list.size() == 0) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('검색결과가 없습니다.')");
@@ -126,7 +127,7 @@
 		} 
 		
 		//다음 페이지가 있는지,
-		ArrayList<rms> afrmslist =  rms.getRmsAdminSearch(pageNumber+1, category, str);
+		ArrayList<rmsrept> aflist =  rms.getRmsAdminSearch(pageNumber+1, category, str);
 		
 	%>
 	
@@ -162,7 +163,7 @@
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(pl !="" || !pl.isEmpty()) {
+								if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -185,7 +186,7 @@
 							}
 						%>
 						<%
-							if(rk.equals("실장") || rk.equals("관리자")) {
+							if(au.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -372,24 +373,24 @@
 			<thead>
 				<tr>
 					<th style=" text-align: left" data-toggle="tooltip" data-html="true" data-placement="bottom" title=""> 
-					<br><i class="glyphicon glyphicon-triangle-right" id="icon"  style="left:5px;"></i> 주간보고 목록 (개인)
+					<br><i class="glyphicon glyphicon-triangle-right" id="icon"  style="left:5px;"></i> 주간보고 목록 (WEB / ERP)
 				</th>
 				</tr>
 			</thead>
 			</table>
-			<form method="post" name="search" id="search" action="/BBS/user/searchbbs.jsp">
+			<form method="post" name="search" id="search" action="/BBS/admin/searchbbsRk.jsp">
 				<table class="pull-right">
 					<tr>
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
-								<option value="bbsDeadline" <%= category.equals("bbsDeadline")?"selected":""%>>제출일</option>
-								<option value="bbsTitle" <%= category.equals("bbsTitle")?"selected":""%>>제목</option>
-								<option value="bbsTitle" <%= category.equals("userID")?"selected":""%>>작성자</option>
-								<option value="bbsTitle" <%= category.equals("pluser")?"selected":""%>>업무 파트</option>
+								<option value="rms_dl" <%= category.equals("rms_dl")?"selected":""%>>제출일</option>
+								<option value="rms_title" <%= category.equals("rms_title")?"selected":""%>>제목</option>
+								<option value="user_id" <%= category.equals("user_id")?"selected":""%>>작성자</option>
+								<%-- <option value="user_fd" <%= category.equals("user_fd")?"selected":""%>>업무 파트</option> --%>
 						</select></td>
 						<td>
 							<input type="text" class="form-control"
 							placeholder="" name="searchText" maxlength="100" value="<%= request.getParameter("searchText") %>"></td>
-						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="/BBS/user/searchbbs.jsp">검색</button></td>
+						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="/BBS/admin/searchbbsRk.jsp">검색</button></td>
 						<!-- <td><button type="submit" class="btn btn-warning pull-right" formaction="gathering.jsp" onclick="return submit2(this.form)">취합</button></td> -->
 					</tr>
 
@@ -418,20 +419,20 @@
 					<%
 						
 
-						for(int i = 0; i < rmslist.size(); i++){
-							String userName = userDAO.getName(rmslist.get(i).getUserID());
+						for(int i = 0; i < list.size(); i++){
+							String userName = userDAO.getName(list.get(i).getUser_id());
 					%>
 					<tr>
-						<td><%= rmslist.get(i).getBbsDeadline() %></td>
+						<td><%= list.get(i).getRms_dl() %></td>
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/user/update.jsp?bbsDeadline=<%= rmslist.get(i).getBbsDeadline() %>&userID=<%= rmslist.get(i).getUserID() %>">
-							<%= rmslist.get(i).getBbsTitle() %></a></td>
+						<a href="/BBS/user/update.jsp?rms_dl=<%= list.get(i).getRms_dl() %>&user_id=<%= list.get(i).getUser_id() %>">
+							<%= list.get(i).getRms_title() %></a></td>
 						<td><%= userName %></td>
-						<td><%= rmslist.get(i).getBbsDate().substring(0, 11) + rmslist.get(i).getBbsDate().substring(11, 13) + "시"
-							+ rmslist.get(i).getBbsDate().substring(14, 16) + "분" %></td>	
-						<td><%= rmslist.get(i).getPluser() %></td>		
+						<td><%= list.get(i).getRms_time().substring(0, 11) + list.get(i).getRms_time().substring(11, 13) + "시"
+							+ list.get(i).getRms_time().substring(14, 16) + "분" %></td>	
+						<td><%= userDAO.getFD(list.get(i).getUser_id()) %></td>	
 					</tr>
 					<%
 						}
@@ -443,19 +444,19 @@
 			<%
 				if(pageNumber != 1){
 			%>
-				<a href="/BBS/user/searchbbs.jsp?pageNumber=<%=pageNumber - 1 %>&searchField=<%= category %>&searchText=<%= str %>"
+				<a href="/BBS/admin/searchbbsRk.jsp?pageNumber=<%=pageNumber - 1 %>&searchField=<%= category %>&searchText=<%= str %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(afrmslist.size() != 0){
+				}if(aflist.size() != 0){
 			%>
-				<a href="/BBS/user/searchbbs.jsp?pageNumber=<%=pageNumber + 1 %>&searchField=<%= category %>&searchText=<%= str %>"
+				<a href="/BBS/admin/searchbbsRk.jsp?pageNumber=<%=pageNumber + 1 %>&searchField=<%= category %>&searchText=<%= str %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>
 			<%
 				}
 			%>
 			
 			
-			<a href="/BBS/user/bbs.jsp" class="btn btn-primary pull-right">목록</a> 
+			<a href="/BBS/admin/bbsAdmin.jsp" class="btn btn-primary pull-right">목록</a> 
 		</div>
 	</div>
 	<!-- 게시판 메인 페이지 영역 끝 -->

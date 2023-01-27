@@ -1,12 +1,12 @@
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
 <%@page import="java.time.LocalDate"%>
-<%@page import="user.User"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.stream.Collectors"%>
 <%@page import="java.util.List"%>
 <%@page import="org.apache.tomcat.util.buf.StringUtils"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -29,6 +29,8 @@
 <body>
 	<!--  ********* 세션(session)을 통한 클라이언트 정보 관리 *********  -->
 	<%
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+	
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -44,38 +46,37 @@
 		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
-		
-		UserDAO userDAO = new UserDAO();
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
 			workSet = "";
 		} else {
+			//2. 담당 업무가 있는 경우
 			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
 				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 			}
-			
 			workSet = String.join("/",works);
-			
 		}
 		
-		String name = userDAO.getName(id);
-		
 		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
-		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
 		
 		//현재날짜 구하기
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -118,8 +119,7 @@
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(pl !="" || !pl.isEmpty()) {
+							if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -138,11 +138,10 @@
 							</ul>
 							</li>
 						<%
-								}
 							}
 						%>
 						<%
-							if(rk.equals("실장") || rk.equals("관리자")) {
+							if(au.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -173,7 +172,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
+					if(au.equals("관리자")||au.equals("PL")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="/BBS/admin/work/workChange.jsp">담당업무 변경</a></li>
@@ -346,7 +345,7 @@
 									<td colspan="2"> 
 									주간보고 명세서 <input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50"></td>
 									<td colspan="1"></td>
-									<td colspan="2">  주간보고 제출일 <input type="date" max="9999-12-31" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value=""></td>
+									<td colspan="2">  주간보고 제출일 <input type="date" max="9999-12-31" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" id="bbsDeadline" value=""></td>
 							</tr>
 									<tr>
 										<th colspan="5" style="background-color: #D4D2FF;" align="center">금주 업무 실적</th>
@@ -750,15 +749,17 @@
 		</script>
 	
 	<script>
-	/* document.main.addEventListener("keydown", evt => {
-		if((evt.keyCode || evt.which) === 13) {
-			evt.preventDefault();
-		}
-	}); */
-	// 데이터 보내기 (몇줄을 사용하는지!) <trCnt, trNCnt>
-   // $(document).on('click', "#id" ,function(){
-	//$("#save").on('click',function(){
+	//날짜 요일 구하기
+	const week = ["일","월","화","수","목","금","토"];
+	
 	function saveData() {
+		/* //주간보고 제출일이 월요일이 아닌 경우,
+		var day = document.getElementById("bbsDeadline").value;
+		var sday = day.split("-");
+		var date = new Date(Number(sday[0]), Number(sday[1])-1, Number(sday[2]));
+		//요일 추출
+		var wday = week[date.getDay()];
+		if(wday == week[1]) { */
 		var innerHtml = "";
 		innerHtml += '<tr style="display:none">';
 		innerHtml += '<td><textarea class="textarea" id="trCnt" name="trCnt" readonly>'+trCnt+'</textarea></td>';
@@ -770,8 +771,10 @@
 		innerHtml += '</tr>';
         $('#bbsNTable > tbody> tr:last').append(innerHtml);
         
-        //document.getElementById('save_sub').click;
         $("#save_sub").trigger("click");
+		/* }else {
+			alert("제출일은 [월요일]"); //공휴일을 제외 ....
+		} */
     }
 	</script>
 	

@@ -1,15 +1,14 @@
-<%@page import="rms.rms_next"%>
-<%@page import="rms.RmsDAO"%>
-<%@page import="rms.rms_this"%>
+<%@page import="rmsrept.rmsrept"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
 <%@page import="java.time.LocalDate"%>
-<%@page import="user.User"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.stream.Collectors"%>
 <%@page import="java.util.List"%>
 <%@page import="org.apache.tomcat.util.buf.StringUtils"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -32,6 +31,9 @@
 <body>
 	<!--  ********* 세션(session)을 통한 클라이언트 정보 관리 *********  -->
 	<%
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+	
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -47,39 +49,37 @@
 		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
-		
-		UserDAO userDAO = new UserDAO();
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
 			workSet = "";
 		} else {
+			//2. 담당 업무가 있는 경우
 			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
 				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 			}
-			
 			workSet = String.join("/",works);
-			
 		}
 		
-		String name = userDAO.getName(id);
-		
 		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
-		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
-		
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
 		
 		//현재날짜 구하기
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -88,25 +88,26 @@
 		
 		
 		//기존 데이터 불러오기 (가장 최근에 작성된 rms 조회)
-		RmsDAO rms = new RmsDAO();
-		String bbsDeadline = rms.getMaxbbsDeadline(id);
-		if(bbsDeadline == null || bbsDeadline.isEmpty()){ //만약, bbsDeadline이 비어있다면, -> 작성한 글이 없음!
+		String rms_dl = rms.getMaxDL(id);
+		if(rms_dl == null || rms_dl.isEmpty()){ //만약, bbsDeadline이 비어있다면, -> 작성한 글이 없음!
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("location.href='/BBS/user/main.jsp'");
 			script.println("</script>");
 		}
-		//rms_this
-		ArrayList<rms_this> tlist = rms.gettrms(bbsDeadline, id);
-		//rms_last
-		ArrayList<rms_next> llist = rms.getlrms(bbsDeadline, id);
+		
+		//RMEREPT 내용 조회 (금주, 차주 나눠서 조회!)
+		//금주
+		ArrayList<rmsrept> tlist = rms.getRmsOne(rms_dl, id,"T");
+		//차주
+		ArrayList<rmsrept> nlist = rms.getRmsOne(rms_dl, id,"N");
+
 		
 		// 7일 더하기
-		String DDline = tlist.get(0).getBbsDeadline();
+		String DDline = tlist.get(0).getRms_dl();
 		LocalDate date = LocalDate.parse(DDline, formatter);
 		date = date.plusWeeks(1); //일주일을 더하는 것.
 	%>
-
 	<c:set var="works" value="<%= works %>" />
 	<input type="hidden" id="work" value="<c:out value='${works}'/>">
 	
@@ -141,8 +142,7 @@
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(pl !="" || !pl.isEmpty()) {
+							if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -161,11 +161,10 @@
 							</ul>
 							</li>
 						<%
-								}
 							}
 						%>
 						<%
-							if(rk.equals("실장") || rk.equals("관리자")) {
+							if(au.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -173,9 +172,9 @@
 								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="/BBS/admin/summaryadRk.jsp">조회</a></li>
-								<li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
-								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<li><a href="/BBS/admin/summaryadRk.jsp">조회 및 승인</a></li>
+								<!-- <li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
+								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li> -->
 								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
@@ -196,7 +195,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
+					if(au.equals("관리자")||au.equals("PL")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="/BBS/admin/work/workChange.jsp">담당업무 변경</a></li>
@@ -367,7 +366,7 @@
 						<tbody id="tbody">
 							<tr>
 									<td colspan="2"> 
-									주간보고 명세서 <input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50" value="<%= tlist.get(0).getBbsTitle() %>"></td>
+									주간보고 명세서 <input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50" value="<%= tlist.get(0).getRms_title() %>"></td>
 									<td colspan="1"></td>
 									<td colspan="2">  주간보고 제출일 <input type="date" max="9999-12-31" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value="<%= date %>"></td>
 							</tr>
@@ -392,11 +391,11 @@
 									%>
 									<tr>
 										 <td>
-											<textarea class="textarea con" wrap="hard" id="bbsContent" required style="height:45px;width:80%; border:none; resize:none " placeholder="업무내용" name="bbsContent<%=i%>"><%= tlist.get(i).getBbsContent() %></textarea>
+											<textarea class="textarea con" wrap="hard" id="bbsContent" required style="height:45px;width:80%; border:none; resize:none " placeholder="업무내용" name="bbsContent<%=i%>"><%= tlist.get(i).getRms_con() %></textarea>
 										 </td>
-										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart<%=i%>" value="<%= tlist.get(i).getBbsStart() %>" ></td>
-										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget<%=i%>" value="<%= tlist.get(i).getBbsTarget() %>" ></td>		
-										 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none; resize:none"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd<%=i%>" ><%= tlist.get(i).getBbsEnd() %></textarea></td>
+										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart<%=i%>" value="<%= tlist.get(i).getRms_str() %>" ></td>
+										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget<%=i%>" value="<%= tlist.get(i).getRms_tar() %>" ></td>		
+										 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none; resize:none"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd<%=i%>" ><%= tlist.get(i).getRms_end() %></textarea></td>
 										 <td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button></td>
 									</tr>
 									<%
@@ -426,15 +425,15 @@
 								<th></th>
 							</tr>
 							<%
-							if(llist.size() != 0){
-								for(int i=0; i<llist.size(); i++) {
+							if(nlist.size() != 0){
+								for(int i=0; i<nlist.size(); i++) {
 							%>
 							<tr>
 								 <td>
-									 <textarea class="textarea ncon" wrap="hard" id="bbsNContent" required style="height:45px;width:80%; border:none; resize:none " placeholder="업무내용" name="bbsNContent<%=i%>"><%= llist.get(i).getBbsNContent() %></textarea>
+									 <textarea class="textarea ncon" wrap="hard" id="bbsNContent" required style="height:45px;width:80%; border:none; resize:none " placeholder="업무내용" name="bbsNContent<%=i%>"><%= nlist.get(i).getRms_con()%></textarea>
 								 </td>
-								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart<%=i%>" value="<%= llist.get(i).getBbsNStart() %>" ></td>
-								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget2" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget<%=i%>" value="<%= llist.get(i).getBbsNTarget() %>"></td>	
+								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart<%=i%>" value="<%= nlist.get(i).getRms_str() %>" ></td>
+								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget2" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget<%=i%>" value="<%= nlist.get(i).getRms_tar() %>"></td>	
 								 <td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delNRow" name="delNRow" class="btn btn-danger"> 삭제 </button></td>	
 							</tr>
 							<%
@@ -584,7 +583,7 @@
 	
 	<script>
 	var ncon = 0;
-	var trNCnt = <%= llist.size() %>;
+	var trNCnt = <%= nlist.size() %>;
 		function addNRow() {
 			var work = "";
 			var strworks ="";
