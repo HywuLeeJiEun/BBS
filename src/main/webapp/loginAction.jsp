@@ -1,3 +1,4 @@
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="rms.RmsDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@page import="user.UserDAO"%>
@@ -13,7 +14,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>baynex-login</title>
+<title>RMS</title>
 </head>
 <body>
 	<%
@@ -34,10 +35,7 @@
 	
 		
 		// ************** 로그인을 담당하는 JSP 페이지 ***************
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		RmsDAO rms = new RmsDAO();
-		
-		String rk = userDAO.getRank(id);
+		RmsuserDAO userDAO = new RmsuserDAO(); //인스턴스 userDAO 생성
 		
 		// DAO 내의 메소드를 실행시킴.
 		int result = userDAO.login(user.getId(), user.getPassword());

@@ -1,3 +1,8 @@
+<%@page import="rmssumm.rmssumm"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsuser.RmsuserDAO"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmssumm.RmssummDAO"%>
 <%@page import="Sumad.Sumad"%>
 <%@page import="Sumad.SumadDAO"%>
 <%@page import="sum.Sum"%>
@@ -7,7 +12,6 @@
 <%@page import="user.User"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.SimpleDateFormat"%>
-<%@page import="user.UserDAO"%>
 <%@page import="java.util.Locale"%>
 <%@page import="java.util.Calendar"%>
 <%@page import="java.time.LocalDate"%>
@@ -37,8 +41,10 @@
 
 <body>
 	<%
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+		RmssummDAO sumDAO = new RmssummDAO(); //요약본 목록 (v2.-)
+	
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -61,71 +67,47 @@
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
 			workSet = "";
 		} else {
+			//2. 담당 업무가 있는 경우
 			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
 				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 			}
-			
 			workSet = String.join("/",works);
-			
 		}
 		
-		String name = userDAO.getName(id);
-		
 		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
+	
+
+		//RMSSUMM - 해당 테이블에서 데이터를 가져옴 (승인상태(미승인,승인,마감...)에 상관없이 데이터를 받아오되, 해당 rms_dl에 T,N이 모두 있는지 확인 -> 있다면 등록?)		 
+		//Admin 테이블 없이, rmssumm으로 통일하여 사용함!
+			//1. 작성된 rms_dl(제출일)를 가져옴
+			ArrayList<String> dllist = sumDAO.getSumDlAll(pageNumber); //dl 개수로 표시하기
+			//2. 제출일에 해당되는 erp, web 데이터를 가져옴 -> rms_dl 개수로 반복 ... 
 		
-		
-		//(월요일) 제출 날짜 확인
-		String mon = "";
-		String day ="";
-		
-		Calendar cal = Calendar.getInstance(); 
-		Calendar cal2 = Calendar.getInstance(); //오늘 날짜 구하기
-		SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
-		
-		cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-		//cal.add(Calendar.DATE, 7); //일주일 더하기
-		
-		 // 비교하기 cal.compareTo(cal2) => 월요일이 작을 경우 -1, 같은 날짜 0, 월요일이 더 큰 경우 1 
-		 if(cal.compareTo(cal2) == -1) {
-			 //월요일이 해당 날짜보다 작다.
-			 cal.add(Calendar.DATE, 7);
-			 
-			 mon = dateFmt.format(cal.getTime());
-			day = dateFmt.format(cal2.getTime());
-		 } else { // 월요일이 해당 날짜보다 크거나, 같다 
-			 mon = dateFmt.format(cal.getTime());
-			day = dateFmt.format(cal2.getTime());
-		 }
-		 
-		 String bbsDeadline = mon;
-		 //String bbsDeadline = "2023-01-30";
-		
-		 
-		//Admin의 작성 리스트 확인 (summary_admin)
-		SumadDAO sumadDAO = new SumadDAO();
-		
-		ArrayList<Sumad> sumad = sumadDAO.getlistSumAlllist(pageNumber); //승인상태 상관없이 모두 불러옴!
-		//다음  페이지가 있는지 확인
-		ArrayList<Sumad> afsumad = sumadDAO.getlistSumAlllist(pageNumber+1); //승인상태 상관없이 모두 불러옴!
-		
-		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		//다음페이지가 있는지 확인하기
+		ArrayList<String> afdllist = sumDAO.getSumDlAll(pageNumber+1); //dl 개수로 표시하기
 		
 		String str = "작성된 [ERP/WEB] 요약본을 <br>";
 		str += "확인할 수 있습니다.";
@@ -164,10 +146,7 @@
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자") || rk.equals("실장")) {
-						%>
-						<%
-						 if (pl.equals("WEB") || pl.equals("ERP")) {
+						 if (au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -183,10 +162,7 @@
 						%>
 							</li>
 						<%
-							}
-						%>
-						<%
-							if(rk.equals("실장") || rk.equals("관리자")) {
+							if(au.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -194,9 +170,9 @@
 								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li class="active"><a href="/BBS/admin/summaryadRk.jsp">조회</a></li>
-								<li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
-								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<li class="active"><a href="/BBS/admin/summaryadRk.jsp">조회 및 승인</a></li>
+								<!-- <li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
+								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li> -->
 								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
@@ -388,30 +364,84 @@
 			<table id="bbsTable" class="table table-striped" style="text-align: center; border: 1px solid #dddddd">
 				<thead>
 					<tr>
-						<!-- <th style="background-color: #eeeeee; text-align: center;">번호</th> -->
 						<th style="background-color: #eeeeee; text-align: center;">제출일</th>
 						<th style="background-color: #eeeeee; text-align: center; text-align: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;요약본 상세정보</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
+						<!-- <th style="background-color: #eeeeee; text-align: center;">작성자</th> -->
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
 						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
-						<th style="background-color: #eeeeee; text-align: center;" data-toggle="tooltip" data-html="true" data-placement="right" title="관리자의 승인 이후, <br>상태가 변경됩니다.">승인</th>
+						<th style="background-color: #eeeeee; text-align: center;">상태</th>
+						<th style="background-color: #eeeeee; text-align: center;" data-toggle="tooltip" data-html="true" data-placement="right" title="승인 후, <br>pptx로 출력할 수 있습니다.">승인</th>
 					</tr>
 				</thead>
 				<tbody>
 					<%
-					if(sumad.size() != 0) {
-						for(int i = 0; i < sumad.size(); i++){
+					if(dllist.size() != 0) {
+						for(int i = 0; i < dllist.size(); i++){
+							
+							//ERP
+							ArrayList<rmssumm> elist = sumDAO.getSumDiv("ERP", dllist.get(i), "T");
+							//WEB
+							ArrayList<rmssumm> wlist = sumDAO.getSumDiv("WEB", dllist.get(i), "T");
 							
 							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
 							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 							
 							//bbsDeadline 찾아오기
-							String dl = sumad.get(i).getBbsDeadline();
+							String dl = dllist.get(i);
 							Date time = new Date();
 							String timenow = dateFormat.format(time);
 
 							Date dldate = dateFormat.parse(dl);
 							Date today = dateFormat.parse(timenow);
+							
+							//상세정보 타이틀 작성
+							String etitle = "";
+							String wtitle = "";
+							String plus = "";
+							
+							//작성일(수정일) 및 작성자 구분을 위한 로직
+							SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+							Date edate = null;
+							Date wdate = null;
+							String date ="";
+							String writer = "";
+							
+							//승인 상태 확인용 
+							String getSign = "";
+							
+							if(wlist.size() != 0) { //web이 있다면,
+								wtitle = "WEB";
+								edate = dateFmt.parse(wlist.get(0).getSum_time());
+								getSign = wlist.get(0).getSum_sign();
+							}
+							if(elist.size() != 0) { //erp가 있다면,
+								etitle = "ERP";
+								plus = "/";
+								wdate = dateFmt.parse(elist.get(0).getSum_time());
+								getSign = elist.get(0).getSum_sign();
+							}
+							
+							if(edate != null && wdate != null) {
+								//날짜 데이터가 둘다 있을 경우,
+								if(edate.before(wdate)) {
+									//erp가 web 보다 작다면(이전에 수정함),
+									date = dateFmt.format(wdate);
+									writer = userDAO.getName(wlist.get(0).getSum_updu());
+								} else {
+									date = dateFmt.format(edate);
+									writer = userDAO.getName(elist.get(0).getSum_updu());
+								}
+							//둘중, 하나만 데이터가 없다면
+							} else if(edate == null) {
+								date = dateFmt.format(wdate);
+								writer = userDAO.getName(wlist.get(0).getSum_updu());
+							} else if(wdate == null) {
+								date = dateFmt.format(edate);
+								writer = userDAO.getName(elist.get(0).getSum_updu());
+							}
+							
+							
+						
 					%>
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 					<tr>
@@ -420,25 +450,18 @@
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/admin/summaryadRkUpdate.jsp?bbsDeadline=<%= bbsDeadline %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
-							[WEB/ERP] - summary (<%= dl %>)</a></td>
-						<td><%= name %></td>
-						<td><%= sumad.get(i).getSumadDate().substring(0, 11) + sumad.get(i).getSumadDate().substring(11, 13) + "시"
-							+ sumad.get(i).getSumadDate().substring(14, 16) + "분" %></td>
-						<td><%= sumad.get(i).getSumadUpdate() %></td>
+						<a href="/BBS/admin/summaryadRkUpdate.jsp?rms_dl=<%= dl %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
+							[<%= wtitle+plus+etitle %>] - summary (<%= dl %>)</a></td>
+						<td><%= date.substring(0, 11) + date.substring(11, 13) +"시"+ date.substring(14, 16)+"분" %></td>
+						<td><%= writer %></td>
 						<!-- 승인/미승인/마감 표시 -->
-						<td data-toggle="tooltip" data-html="true" data-placement="right" title="승인 상태시, <br>수정이 불가합니다.">
-						<%
-						String sign = null;
-						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
-							sign = sumad.get(i).getSign();
-						} else {
-							sign="마감";
-							// 데이터베이스에 마감처리 진행
-							int a = sumadDAO.sumadSign(bbsDeadline);
-						}
-						%>
-						<%= sign %>
+						<td><%= getSign %></td>
+						<td data-toggle="tooltip" data-html="true" data-placement="right" title="승인 시, <br>수정이 불가합니다.">
+						<% if(getSign.equals("미승인")) { %>
+							<a class="btn btn-success" style="font-size:12px" href="/BBS/admin/action/summaryadsignOnAction.jsp?rms_dl=<%= dl %>"> 승인 </a>
+						<% }else { //승인, 마감 상태라면 %>
+							완료
+						<% } %>
 						</td>
 					</tr>
 					<%
@@ -447,7 +470,7 @@
 					%>
 						<tr valign="top" style="height:100px; border:none">
 						</tr>
-						<tr valign="bottom" style="height:120px; border:none" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= bbsDeadline %>,<br>해당 날짜로 작성된 요약본이<br>없습니다.">
+						<tr valign="bottom" style="height:120px; border:none" data-html="true" data-toggle="tooltip" data-placement="bottom">
 							<th colspan="6" style=" text-align: center; color:black  ; border:none">작성된 요약본 목록이 없습니다. <br><br><br><br></th>
 						</tr>
 					<%
@@ -463,7 +486,7 @@
 				<a href="/BBS/admin/summaryadRk.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(afsumad.size() != 0){
+				}if(afdllist.size() != 0){
 			%>
 				<a href="/BBS/admin/summaryadRk.jsp?pageNumber=<%=pageNumber + 1 %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>
@@ -471,7 +494,7 @@
 				}
 			%>
 			<%-- <a href="ppt.jsp?bbsDeadline=<%=list.get(0).getBbsDeadline()%>&pluser=<%= work %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력" id="pptx" type="button"> 요약 pptx</a> --%>
-			<a href="/BBS/admin/summaryadAdmin.jsp" style="width:50px;" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="[ERP/WEB] 요약본 작성" id="summary"> 작성 </a>
+			<!-- <a href="/BBS/admin/summaryadAdmin.jsp" style="width:50px;" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="[ERP/WEB] 요약본 작성" id="summary"> 작성 </a> -->
 		</div>
 	</div>
 	

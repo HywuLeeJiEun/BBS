@@ -1,9 +1,8 @@
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
-<%@page import="bbs.BbsDAO"%>
-<%@page import="bbs.Bbs"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <% request.setCharacterEncoding("utf-8"); %>
@@ -11,10 +10,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Baynex-worksDeleteActionSh</title>
+<title>RMS</title>
 </head>
 <body>
 	<%
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		
 		// 현재 세션 상태를 체크한다
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -29,17 +30,14 @@
 			script.println("</script>");
 		}
 		
-		//user 정보를 불러옴. (이름)
-		String name = request.getParameter("user");
-		//name을 통해 id를 가져옴.
-		UserDAO user = new UserDAO();
-		String userid = user.getId(name);
+		//user 정보를 가져옴.
+		String user_id = request.getParameter("user_id");
 		//돌아간 페이지에 정보를 남기기 위함.
-		request.setAttribute("searchText", name);
+		request.setAttribute("searchText", userDAO.getName(user_id));
 		
 		//userid를 통해 manager를 불러옴. 배열형태로 받아와짐.
 		String workSet;
-		ArrayList<String> code = user.getCode(userid); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(user_id); //코드 리스트 출력
 		List<String> works = new ArrayList<String>();
 		if(code == null) {
 			workSet = "";
@@ -54,41 +52,28 @@
 		
 		// 제거할 work가 있는지 확인. 또한 이에 대한 keycode를 파악.
 		String work = request.getParameter("work");
-		String workcode = user.getCodeOne(work);
+		String workcode = userDAO. getTaskNum(work);
 		
-		works.remove(workcode);
-		//★ manager 목록에서 work를 제거함.
-		//String str = codeNumber.replaceAll(workcode, "");
-		
-		
-		//코드번호를 하나의 스트링으로 연결함. (00,01,02 ...)
-		String codeNumber = String.join(",",works); 
-		
-		if(codeNumber.isEmpty()) { //manager에 null을 저장해주어야함!
-			codeNumber = null;
-		} 
-		
-			//update를 진행함.
-			int result = user.UpdateManager(codeNumber, name);
+		//RMSMGRS 목록에서 해당 업무를 제거함.
+		int num = userDAO.delMgrs(user_id, workcode);
 			
-			if(result == -1) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('데이터베이스 오류입니다.')");
-				script.println("history.back()");
-				script.println("</script>");
-			} else {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('정삭적으로 제거 되었습니다.')");
-				script.println("location.href='workChangesearch.jsp'");
-				script.println("</script>");
-				pageContext.forward("workChangesearch.jsp");
-			}  
+		if(num == -1) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('데이터베이스 오류입니다.')");
+			script.println("history.back()");
+			script.println("</script>");
+		} else {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('정삭적으로 제거 되었습니다.')");
+			script.println("location.href='workChangesearch.jsp'");
+			script.println("</script>");
+			pageContext.forward("workChangesearch.jsp");
+		}  
 
 	%>
 	
-	<td colspan="1"><input type=text style="border:0; width:50%; text-align:center" readonly value="<%= works + codeNumber %>"></td>
 	
 </body>
 </html>

@@ -1,3 +1,7 @@
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsrept.rmsrept"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="rms.rms_next"%>
 <%@page import="rms.rms_this"%>
 <%@page import="rms.RmsDAO"%>
@@ -33,8 +37,9 @@
 
 <body>
 	<%
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+		
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -53,58 +58,55 @@
 			script.println("location.href='../login.jsp'");
 			script.println("</script>");
 		}
-		if(rk.equals("실장") || rk.equals("관리자")) {
+	
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+		String workSet;
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
+		List<String> works = new ArrayList<String>();
+		
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
+			workSet = "";
+		} else {
+			//2. 담당 업무가 있는 경우
+			for(int i=0; i < code.size(); i++) {
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			workSet = String.join("/",works);
+		}
+		
+		// 사용자 정보 담기
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
+		//이메일  로직 처리
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
+		
+		//관리자의 권한을 가진 경우, admin으로 넘김
+		if(au.equals("관리자")) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("location.href='/BBS/admin/bbsAdmin.jsp'");
 			script.println("</script>");
 		}
-	
-		// ********** 담당자를 가져오기 위한 메소드 *********** 
-				String workSet;
-				ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
-				List<String> works = new ArrayList<String>();
-				
-				if(code == null) {
-					workSet = "";
-				} else {
-					for(int i=0; i < code.size(); i++) {
-						
-						String number = code.get(i);
-						// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-						String manager = userDAO.getManager(number);
-						works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
-					}
-					
-					workSet = String.join("/",works);
-					
-				}
-				
-		String name = userDAO.getName(id);
-		
-		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
-		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email;
-		email = Staticemail.split("@");
-		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
-	
 		
 		//기존 데이터 불러오기 (가장 최근에 작성된 rms 조회)
-		RmsDAO rms = new RmsDAO();
-		//rms_this -> 목록 불러오기 (사용자)
-		// [bbsDeadline, bbsTitle, bbsDate]
-		ArrayList<rms_this> tlist = rms.getthis(id, pageNumber);
-		//rms_last -> 목록 불러오기 (사용자)
-		// [bbsDeadline, sign, pluser]
-		ArrayList<rms_next> llist = rms.getlast(id, pageNumber);
+		ArrayList<rmsrept> list = rms.getrms(id, pageNumber);
 		
 		//다음 페이지가 있는지 확인!
-		ArrayList<rms_this> next_tlist = rms.getthis(id, pageNumber+1);
+		ArrayList<rmsrept> aflist = rms.getrms(id, pageNumber+1);
+		
 		
 	%>
 	
@@ -126,7 +128,7 @@
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav navbar-left">
-					<li class="dropdown">
+					<li class="dropdown ">
 						<a href="#" class="dropdown-toggle"
 							data-toggle="dropdown" role="button" aria-haspopup="true"
 							aria-expanded="false">주간보고<span class="caret"></span></a>
@@ -363,8 +365,8 @@
 				<table class="pull-right">
 					<tr>
 						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
-								<option value="bbsDeadline">제출일</option>
-								<option value="bbsTitle">제목</option>
+								<option value="rms_dl">제출일</option>
+								<option value="rms_title">제목</option>
 						</select></td>
 						<td><input type="text" class="form-control"
 							placeholder="검색어 입력" name="searchText" maxlength="100"></td>
@@ -395,11 +397,11 @@
 				</thead>
 				<tbody>
 					<%
-						for(int i = 0; i < tlist.size(); i++){
+						for(int i = 0; i < list.size(); i++){
 							
 							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
 							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-							String dl = tlist.get(i).getBbsDeadline();
+							String dl = list.get(i).getRms_dl();
 							Date time = new Date();
 							String timenow = dateFormat.format(time);
 
@@ -409,33 +411,34 @@
 
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 					<tr>
-						<td> <%= tlist.get(i).getBbsDeadline() %> </td>
+						<td> <%= list.get(i).getRms_dl() %> </td>
 
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/user/update.jsp?bbsDeadline=<%= tlist.get(i).getBbsDeadline() %>">
-							<%= tlist.get(i).getBbsTitle() %></a></td>
+						<a href="/BBS/user/update.jsp?rms_dl=<%= list.get(i).getRms_dl() %>">
+							<%= list.get(i).getRms_title() %></a></td>
 						<td><%= name %></td>
-						<td><%= tlist.get(i).getBbsDate().substring(0, 11) + tlist.get(i).getBbsDate().substring(11, 13) + "시"
-							+ tlist.get(i).getBbsDate().substring(14, 16) + "분" %></td>
-						<td><%= llist.get(i).getPluser() %></td>
+						<td><%= list.get(i).getRms_time().substring(0, 11) + list.get(i).getRms_time().substring(11, 13) + "시"
+							+ list.get(i).getRms_time().substring(14, 16) + "분" %></td>
+						<td><%= pl %></td>
 						<!-- 승인/미승인/마감 표시 -->
 						<td>
 						<%
 						String sign = null;
-						if(dldate.after(today) && llist.get(i).getSign().equals("승인")) { //현재 날짜가 마감일을 아직 넘지 않으면,
+						if(dldate.after(today) && list.get(i).getRms_sign().equals("승인")) { //현재 날짜가 마감일을 아직 넘지 않으면,
 							//sign = list.get(i).getSign();
 							sign="제출";
 							//rms에 통합 저장 진행
-							//1. rms에 저장되어 있는지 확인! (승인 -> 마감이 되는 경우 유의)
-							int rmsData = rms.getRms(tlist.get(i).getBbsDeadline(), id);
+							//1. rms(pptxrms)에 저장되어 있는지 확인! (승인 -> 마감이 되는 경우 유의)
+							int rmsData = rms.getPptxRms(list.get(i).getRms_dl(), id);
 							if(rmsData == 0) { //작성된 기록이 없다!
 								//2. rms 데이터 생성
 									//데이터 불러오기 (this, next)
-								ArrayList<rms_this> rms_this = rms.gettrms(tlist.get(i).getBbsDeadline(), id);
-								ArrayList<rms_next> rms_next = rms.getlrms(tlist.get(i).getBbsDeadline(), id);
-								
+									//금주
+									ArrayList<rmsrept> rms_this = rms.getRmsOne(list.get(i).getRms_dl(), id,"T");
+									//차주
+									ArrayList<rmsrept> rms_next = rms.getRmsOne(list.get(i).getRms_dl(), id,"N");
 									//데이터 가공하기
 									String bbsManager = workSet + name;
 									String bbsContent = "";
@@ -448,20 +451,20 @@
 									//금주 업무 (this)
 									for(int j=0; j < rms_this.size(); j++) {
 										//content, ncotent의 줄바꿈 개수만큼 추가함
-										int num = rms_this.get(j).getBbsContent().split("\r\n").length-1;
+										int num = rms_this.get(j).getRms_con().split("\r\n").length-1;
 										if(j < rms_this.size()-1) {
-											 bbsContent += rms_this.get(j).getBbsContent() + "\r\n";
-											 bbsStart += rms_this.get(j).getBbsStart().substring(5).replace("-","/") + "\r\n";
-											 if(rms_this.get(j).getBbsTarget() == null || rms_this.get(j).getBbsTarget().isEmpty()) {
+											 bbsContent += rms_this.get(j).getRms_con() + "\r\n";
+											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/") + "\r\n";
+											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
 											 	bbsTarget += "[보류]" + "\r\n";
 											 } else {
-												 if(rms_this.get(j).getBbsTarget().length() > 5) {
-												 bbsTarget += rms_this.get(j).getBbsTarget().substring(5).replace("-","/") + "\r\n";
+												 if(rms_this.get(j).getRms_tar().length() > 5) {
+												 bbsTarget += rms_this.get(j).getRms_tar().substring(5).replace("-","/") + "\r\n";
 												 }else {
 													 bbsTarget += "[보류]" + "\r\n";
 												 }
 											 }
-											 bbsEnd += rms_this.get(j).getBbsEnd() + "\r\n";
+											 bbsEnd += rms_this.get(j).getRms_end() + "\r\n";
 											
 											 for(int k=0;k < num; k ++) {
 												 bbsStart +="\r\n";
@@ -469,18 +472,18 @@
 												 bbsEnd +="\r\n";
 											 }
 										} else {
-											bbsContent += rms_this.get(j).getBbsContent();
-											 bbsStart += rms_this.get(j).getBbsStart().substring(5).replace("-","/");
-											 if(rms_this.get(j).getBbsTarget() == null || rms_this.get(j).getBbsTarget().isEmpty()) {
+											bbsContent += rms_this.get(j).getRms_con();
+											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/");
+											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
 												 bbsTarget += "[보류]";
 											 } else {
-												 if(rms_this.get(j).getBbsTarget().length() > 5) {
-												 bbsTarget += rms_this.get(j).getBbsTarget().substring(5).replace("-","/");
+												 if(rms_this.get(j).getRms_tar().length() > 5) {
+												 bbsTarget += rms_this.get(j).getRms_tar().substring(5).replace("-","/");
 												 } else { 
 													 bbsTarget += "[보류]";
 												 }
 											 }
-											 bbsEnd += rms_this.get(j).getBbsEnd();
+											 bbsEnd += rms_this.get(j).getRms_end();
 											 for(int k=0;k < num; k ++) {
 												 bbsStart +="\r\n";
 												 bbsTarget +="\r\n";
@@ -491,15 +494,15 @@
 									//차주 (next)
 									for(int j=0; j < rms_next.size(); j++) {
 										//content, ncotent의 줄바꿈 개수만큼 추가함
-										int nnum = rms_next.get(j).getBbsNContent().split("\r\n").length-1;
+										int nnum = rms_next.get(j).getRms_con().split("\r\n").length-1;
 										if(j < rms_next.size()-1) {
-											 bbsNContent += rms_next.get(j).getBbsNContent() + "\r\n";
-											 bbsNStart += rms_next.get(j).getBbsNStart().substring(5).replace("-","/") + "\r\n";
-											 if(rms_next.get(j).getBbsNTarget() == null || rms_next.get(j).getBbsNTarget().isEmpty()) {
+											 bbsNContent += rms_next.get(j).getRms_con() + "\r\n";
+											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/") + "\r\n";
+											 if(rms_next.get(j).getRms_tar() == null || rms_next.get(j).getRms_tar().isEmpty()) {
 												 bbsNTarget += "[보류]" + "\r\n";
 											 } else {
-												 if(rms_next.get(j).getBbsNTarget().length() > 5) {
-												 bbsNTarget += rms_next.get(j).getBbsNTarget().substring(5).replace("-","/") + "\r\n";
+												 if(rms_next.get(j).getRms_tar().length() > 5) {
+												 bbsNTarget += rms_next.get(j).getRms_tar().substring(5).replace("-","/") + "\r\n";
 												 } else {
 													 bbsNTarget += "[보류]" + "\r\n";
 												 }
@@ -509,13 +512,13 @@
 												 bbsNTarget += "\r\n";
 											 }
 										} else {
-											 bbsNContent += rms_next.get(j).getBbsNContent();
-											 bbsNStart += rms_next.get(j).getBbsNStart().substring(5).replace("-","/");
-											 if(rms_next.get(j).getBbsNTarget() == null || rms_next.get(j).getBbsNTarget().isEmpty()) {
+											 bbsNContent += rms_next.get(j).getRms_con();
+											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/");
+											 if(rms_next.get(j).getRms_tar() == null || rms_next.get(j).getRms_tar().isEmpty()) {
 												 bbsNTarget += "[보류]";
 											 } else {
-												 if(rms_next.get(j).getBbsNTarget().length() > 5){
-												 bbsNTarget += rms_next.get(j).getBbsNTarget().substring(5).replace("-","/");
+												 if(rms_next.get(j).getRms_tar().length() > 5){
+												 bbsNTarget += rms_next.get(j).getRms_tar().substring(5).replace("-","/");
 												 }else {
 													 bbsNTarget += "[보류]";
 												 }
@@ -527,24 +530,39 @@
 										}
 									}
 							//3. 데이터 저장하기
-							int rmsSuc = rms.rmswrite(rms_this.get(0).getUserID(), rms_this.get(0).getBbsDeadline(), rms_this.get(0).getBbsTitle(), rms_this.get(0).getBbsDate(), bbsManager, bbsContent, bbsStart, bbsTarget, bbsEnd, bbsNContent, bbsNStart, bbsNTarget, rms_next.get(0).getPluser());			
+							int rmsTSuc = rms.PptxRmsWrite(rms_this.get(0).getUser_id(), rms_this.get(0).getRms_dl(), rms_this.get(0).getRms_title(), bbsManager, bbsContent, bbsStart, bbsTarget, bbsEnd, "T", rms_this.get(0).getRms_sign());
+							int rmsNSuc = rms.PptxRmsWrite(rms_next.get(0).getUser_id(), rms_next.get(0).getRms_dl(), rms_next.get(0).getRms_title(), bbsManager, bbsNContent, bbsNStart, bbsNTarget, null, "N", rms_next.get(0).getRms_sign());
+							//(rms_this.get(0).getUserID(), rms_this.get(0).getBbsDeadline(), rms_this.get(0).getBbsTitle(), rms_this.get(0).getBbsDate(), bbsManager, bbsContent, bbsStart, bbsTarget, bbsEnd, bbsNContent, bbsNStart, bbsNTarget, rms_next.get(0).getPluser());			
+							
+								if(rmsTSuc == -1 || rmsNSuc == -1) {
+									PrintWriter script = response.getWriter();
+									script.println("<script>");
+									script.println("alert('최종 저장에 문제가 발생하였습니다. 관리자에게 문의 바랍니다.')");
+									script.println("location.href='../login.jsp'");
+									script.println("</script>");
+								}
 							}
-						} else if(dldate.after(today) && llist.get(i).getSign().equals("미승인")) {
+						} else if(dldate.after(today) && list.get(i).getRms_sign().equals("미승인")) {
 							//sign = list.get(i).getSign();
 							sign="미제출";
 						}else { // 미승인, 마감 상태일 경우엔 하단 진행.
-							sign="마감";
 							// 데이터베이스에 마감처리 진행
-							int a = rms.lastSign(id, "마감",llist.get(i).getBbsDeadline());
+							int a = rms.updateSign(id, "마감",list.get(i).getRms_dl());
+							if(a != -1) {
+								sign="마감";
+							} else {
+								sign="error"; //DB 마감 수정이 정상적으로 이뤄지지 않음!
+							}
 							//rms에 통합 저장 진행
-							//1. rms에 저장되어 있는지 확인! (승인 -> 마감이 되는 경우 유의)
-							int rmsData = rms.getRms(tlist.get(i).getBbsDeadline(), id);
+							//1. rms(pptxrms)에 저장되어 있는지 확인! (승인 -> 마감이 되는 경우 유의)
+							int rmsData = rms.getPptxRms(list.get(i).getRms_dl(), id);
 							if(rmsData == 0) { //작성된 기록이 없다!
 								//2. rms 데이터 생성
 									//데이터 불러오기 (this, next)
-								ArrayList<rms_this> rms_this = rms.gettrms(tlist.get(i).getBbsDeadline(), id);
-								ArrayList<rms_next> rms_next = rms.getlrms(tlist.get(i).getBbsDeadline(), id);
-								
+									//금주
+									ArrayList<rmsrept> rms_this = rms.getRmsOne(list.get(i).getRms_dl(), id,"T");
+									//차주
+									ArrayList<rmsrept> rms_next = rms.getRmsOne(list.get(i).getRms_dl(), id,"N");
 									//데이터 가공하기
 									String bbsManager = workSet + name;
 									String bbsContent = "";
@@ -557,20 +575,20 @@
 									//금주 업무 (this)
 									for(int j=0; j < rms_this.size(); j++) {
 										//content, ncotent의 줄바꿈 개수만큼 추가함
-										int num = rms_this.get(j).getBbsContent().split("\r\n").length-1;
+										int num = rms_this.get(j).getRms_con().split("\r\n").length-1;
 										if(j < rms_this.size()-1) {
-											 bbsContent += rms_this.get(j).getBbsContent() + "\r\n";
-											 bbsStart += rms_this.get(j).getBbsStart().substring(5).replace("-","/") + "\r\n";
-											 if(rms_this.get(j).getBbsTarget() == null || rms_this.get(j).getBbsTarget().isEmpty()) {
+											 bbsContent += rms_this.get(j).getRms_con() + "\r\n";
+											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/") + "\r\n";
+											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
 											 	bbsTarget += "[보류]" + "\r\n";
 											 } else {
-												 if(rms_this.get(j).getBbsTarget().length() > 5) {
-												 bbsTarget += rms_this.get(j).getBbsTarget().substring(5).replace("-","/") + "\r\n";
+												 if(rms_this.get(j).getRms_tar().length() > 5) {
+												 bbsTarget += rms_this.get(j).getRms_tar().substring(5).replace("-","/") + "\r\n";
 												 }else {
 													 bbsTarget += "[보류]" + "\r\n";
 												 }
 											 }
-											 bbsEnd += rms_this.get(j).getBbsEnd() + "\r\n";
+											 bbsEnd += rms_this.get(j).getRms_end() + "\r\n";
 											
 											 for(int k=0;k < num; k ++) {
 												 bbsStart +="\r\n";
@@ -578,18 +596,18 @@
 												 bbsEnd +="\r\n";
 											 }
 										} else {
-											bbsContent += rms_this.get(j).getBbsContent();
-											 bbsStart += rms_this.get(j).getBbsStart().substring(5).replace("-","/");
-											 if(rms_this.get(j).getBbsTarget() == null || rms_this.get(j).getBbsTarget().isEmpty()) {
+											bbsContent += rms_this.get(j).getRms_con();
+											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/");
+											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
 												 bbsTarget += "[보류]";
 											 } else {
-												 if(rms_this.get(j).getBbsTarget().length() > 5) {
-												 bbsTarget += rms_this.get(j).getBbsTarget().substring(5).replace("-","/");
+												 if(rms_this.get(j).getRms_tar().length() > 5) {
+												 bbsTarget += rms_this.get(j).getRms_tar().substring(5).replace("-","/");
 												 } else { 
 													 bbsTarget += "[보류]";
 												 }
 											 }
-											 bbsEnd += rms_this.get(j).getBbsEnd();
+											 bbsEnd += rms_this.get(j).getRms_end();
 											 for(int k=0;k < num; k ++) {
 												 bbsStart +="\r\n";
 												 bbsTarget +="\r\n";
@@ -600,15 +618,15 @@
 									//차주 (next)
 									for(int j=0; j < rms_next.size(); j++) {
 										//content, ncotent의 줄바꿈 개수만큼 추가함
-										int nnum = rms_next.get(j).getBbsNContent().split("\r\n").length-1;
+										int nnum = rms_next.get(j).getRms_con().split("\r\n").length-1;
 										if(j < rms_next.size()-1) {
-											 bbsNContent += rms_next.get(j).getBbsNContent() + "\r\n";
-											 bbsNStart += rms_next.get(j).getBbsNStart().substring(5).replace("-","/") + "\r\n";
-											 if(rms_next.get(j).getBbsNTarget() == null || rms_next.get(j).getBbsNTarget().isEmpty()) {
+											 bbsNContent += rms_next.get(j).getRms_con() + "\r\n";
+											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/") + "\r\n";
+											 if(rms_next.get(j).getRms_tar() == null || rms_next.get(j).getRms_tar().isEmpty()) {
 												 bbsNTarget += "[보류]" + "\r\n";
 											 } else {
-												 if(rms_next.get(j).getBbsNTarget().length() > 5) {
-												 bbsNTarget += rms_next.get(j).getBbsNTarget().substring(5).replace("-","/") + "\r\n";
+												 if(rms_next.get(j).getRms_tar().length() > 5) {
+												 bbsNTarget += rms_next.get(j).getRms_tar().substring(5).replace("-","/") + "\r\n";
 												 } else {
 													 bbsNTarget += "[보류]" + "\r\n";
 												 }
@@ -618,13 +636,13 @@
 												 bbsNTarget += "\r\n";
 											 }
 										} else {
-											 bbsNContent += rms_next.get(j).getBbsNContent();
-											 bbsNStart += rms_next.get(j).getBbsNStart().substring(5).replace("-","/");
-											 if(rms_next.get(j).getBbsNTarget() == null || rms_next.get(j).getBbsNTarget().isEmpty()) {
+											 bbsNContent += rms_next.get(j).getRms_con();
+											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/");
+											 if(rms_next.get(j).getRms_tar() == null || rms_next.get(j).getRms_tar().isEmpty()) {
 												 bbsNTarget += "[보류]";
 											 } else {
-												 if(rms_next.get(j).getBbsNTarget().length() > 5){
-												 bbsNTarget += rms_next.get(j).getBbsNTarget().substring(5).replace("-","/");
+												 if(rms_next.get(j).getRms_tar().length() > 5){
+												 bbsNTarget += rms_next.get(j).getRms_tar().substring(5).replace("-","/");
 												 }else {
 													 bbsNTarget += "[보류]";
 												 }
@@ -636,7 +654,17 @@
 										}
 									}
 							//3. 데이터 저장하기
-							int rmsSuc = rms.rmswrite(rms_this.get(0).getUserID(), rms_this.get(0).getBbsDeadline(), rms_this.get(0).getBbsTitle(), rms_this.get(0).getBbsDate(), bbsManager, bbsContent, bbsStart, bbsTarget, bbsEnd, bbsNContent, bbsNStart, bbsNTarget, rms_next.get(0).getPluser());			
+							int rmsTSuc = rms.PptxRmsWrite(rms_this.get(0).getUser_id(), rms_this.get(0).getRms_dl(), rms_this.get(0).getRms_title(), bbsManager, bbsContent, bbsStart, bbsTarget, bbsEnd, "T", rms_this.get(0).getRms_sign());
+							int rmsNSuc = rms.PptxRmsWrite(rms_next.get(0).getUser_id(), rms_next.get(0).getRms_dl(), rms_next.get(0).getRms_title(), bbsManager, bbsNContent, bbsNStart, bbsNTarget, null, "N", rms_next.get(0).getRms_sign());
+							//(rms_this.get(0).getUserID(), rms_this.get(0).getBbsDeadline(), rms_this.get(0).getBbsTitle(), rms_this.get(0).getBbsDate(), bbsManager, bbsContent, bbsStart, bbsTarget, bbsEnd, bbsNContent, bbsNStart, bbsNTarget, rms_next.get(0).getPluser());			
+							
+								if(rmsTSuc == -1 || rmsNSuc == -1) {
+									PrintWriter script = response.getWriter();
+									script.println("<script>");
+									script.println("alert('최종 저장에 문제가 발생하였습니다. 관리자에게 문의 바랍니다.')");
+									script.println("location.href='../login.jsp'");
+									script.println("</script>");
+								}
 							}
 						}
 						%>
@@ -650,15 +678,20 @@
 			</table>
 			
 			<!-- 페이징 처리 영역 -->
+			<!-- <div style="text-align:center"> -->
 			<%
 				if(pageNumber != 1){
 			%>
-				<a href="/BBS/user/bbs.jsp?pageNumber=<%=pageNumber - 1 %>"
+				<%-- <a href="/BBS/user/bbs.jsp?pageNumber=<%=pageNumber - 1 %>"
+					class="btn btn-success btn-arraw-left" style="display:inline-block">이전</a> --%>
+					<a href="/BBS/user/bbs.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(next_tlist.size() != 0){
+				}if(aflist.size() != 0){
 			%>
-				<a href="/BBS/user/bbs.jsp?pageNumber=<%=pageNumber + 1 %>"
+				<%-- <a href="/BBS/user/bbs.jsp?pageNumber=<%=pageNumber + 1 %>"
+					class="btn btn-success btn-arraw-left" id="next" style="display:inline-block">다음</a> --%>
+					<a href="/BBS/user/bbs.jsp?pageNumber=<%=pageNumber + 1 %>"
 					class="btn btn-success btn-arraw-left" id="next">다음</a>
 			<%
 				}
@@ -666,6 +699,7 @@
 			
 			<!-- 글쓰기 버튼 생성 -->
 			<a href="/BBS/user/bbsUpdate.jsp" class="btn btn-info pull-right" data-toggle="tooltip" data-html="true" data-placement="bottom" title="주간보고 작성">작성</a>
+			<!-- </div> -->
 		</div>
 	</div>
 	

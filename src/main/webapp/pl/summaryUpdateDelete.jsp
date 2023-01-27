@@ -1,3 +1,8 @@
+<%@page import="rmssumm.rmssumm"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmssumm.RmssummDAO"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="sum.Sum"%>
 <%@page import="sum.SumDAO"%>
 <%@page import="java.util.Arrays"%>
@@ -35,8 +40,10 @@
 
 <body>
 	<%
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+		RmssummDAO sumDAO = new RmssummDAO(); //요약본 목록 (v2.-)
+
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -59,33 +66,37 @@
 	
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
 			workSet = "";
 		} else {
+			//2. 담당 업무가 있는 경우
 			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
 				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 			}
-			
 			workSet = String.join("/",works);
-			
 		}
-				
-		String name = userDAO.getName(id);
 		
 		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
 		
 		
 		//(월요일) 제출 날짜 확인
@@ -112,15 +123,23 @@
 		 }
 		 
 		 String bbsDeadline = mon;
+		 
+		//현재 사용자의 담당 업무 보기
+		String user_fd = "";
+		//1. user_au -> pl인지 확인하기
+		if(au.equals("PL")) {
+			//2. user_fd -> 담당 업무 확인하기
+			user_fd = userDAO.getFD(id); //ERP 또는 WEB ... 
+		} else {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('PL(파트리더) 권한이 없습니다. 관리자에게 문의바랍니다.')");
+			script.println("history.back();");
+			script.println("</script>");
+		}
 		
 		 // 데이터 불러오기
-		SumDAO sumDAO = new SumDAO();
-		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
-		ArrayList<Sum> sum = sumDAO.getlistSumSign(pl); //미승인 상태만 불러옴!
-		
-		
-		
+		ArrayList<rmssumm> sum = sumDAO.getSumSgin(user_fd, "미승인", pageNumber); //미승인 상태만 불러옴!
 		
 		String str = "'미승인'된 ";
 		str += pl;
@@ -165,7 +184,7 @@
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(pl !="" || !pl.isEmpty()) {
+								if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -431,7 +450,7 @@
 							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 							
 							//bbsDeadline 찾아오기
-							String dl = sum.get(i).getBbsDeadline();
+							String dl = sum.get(i).getRms_dl();
 							Date time = new Date();
 							String timenow = dateFormat.format(time);
 
@@ -445,22 +464,22 @@
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/pl/summaryRkUpdate.jsp?bbsDeadline=<%= sum.get(i).getBbsDeadline() %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
+						<a href="/BBS/pl/summaryRkUpdate.jsp?rms_dl=<%= sum.get(i).getRms_dl() %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
 							[<%= pl %>] - summary (<%= dl %>)</a></td>
 						<td><%= name %></td>
-						<td><%= sum.get(i).getSummaryDate().substring(0, 11) + sum.get(i).getSummaryDate().substring(11, 13) + "시"
-							+ sum.get(i).getSummaryDate().substring(14, 16) + "분" %></td>
-						<td><%= sum.get(i).getSummaryUpdate() %></td>
+						<td><%= sum.get(i).getSum_time().substring(0, 11) + sum.get(i).getSum_time().substring(11, 13) + "시"
+							+ sum.get(i).getSum_time().substring(14, 16) + "분" %></td>
+						<td><%= userDAO.getName(sum.get(i).getSum_updu()) %></td>
 						<!-- 승인/미승인/마감 표시 -->
 						<td data-toggle="tooltip" data-html="true" data-placement="right" title="관리자의 승인 이후, <br>상태가 변경됩니다.">
 						<%
 						String sign = null;
 						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
-							sign = sum.get(i).getSign();
+							sign = sum.get(i).getSum_sign();
 						} else {
 							sign="마감";
 							// 데이터베이스에 마감처리 진행
-							int a = sumDAO.sumSign(sum.get(i).getBbsDeadline());
+							int a = sumDAO.sumSign(sum.get(i).getSum_sign());
 						}
 						%>
 						<%= sign %>

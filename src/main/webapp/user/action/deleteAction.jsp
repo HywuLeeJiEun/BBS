@@ -1,3 +1,6 @@
+<%@page import="rmsrept.rmsrept"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="rms.rms_this"%>
 <%@page import="rms.RmsDAO"%>
 <%@page import="java.util.List"%>
@@ -15,6 +18,9 @@
 </head>
 <body>
 	<%
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+	
 		// 현재 세션 상태를 체크한다
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -29,21 +35,20 @@
 			script.println("</script>");
 		}
 		
-		String bbsDeadline = request.getParameter("bbsDeadline");
-		if(bbsDeadline == null || bbsDeadline.isEmpty()){
+		String rms_dl = request.getParameter("rms_dl");
+		if(rms_dl == null || rms_dl.isEmpty()){
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('유효하지 않은 글입니다')");
 			script.println("location.href='/BBS/user/bbs.jsp'");
 			script.println("</script>");
 		}
-				
-				
-		RmsDAO rms = new RmsDAO();
-		ArrayList<rms_this> tlist = rms.gettrms(bbsDeadline, id);
-				
+			
+		//미승인된 rms를 찾아옴.		
+		ArrayList<rmsrept> list = rms.getrmsSign(id, 1);
+		
 		//작성자 확인
-		if(!id.equals(tlist.get(0).getUserID())) {
+		if(!id.equals(list.get(0).getUser_id())) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('삭제 권한이 없습니다. 사용자를 확인해주십시오.')");
@@ -51,11 +56,15 @@
 			script.println("</script>");
 		} else{
 			// 글 삭제 로직을 수행한다
-			int n = rms.tdelete(id, bbsDeadline);
-			int nn = rms.ldelete(id, bbsDeadline);
-			int an = rms.edelete(id, bbsDeadline);
+			// 데이터 삭제
+			int tdel = rms.Rmsdelete(id, rms_dl,"T");
+			int ndel = rms.Rmsdelete(id, rms_dl,"N");
+			int ldel = rms.edelete(id, rms_dl);		
 			
-			if(n == -1 && nn == -1 && an == -1) {
+			//미승인된 rms를 찾아옴.		
+			ArrayList<rmsrept> aflist = rms.getrmsSign(id, 1);
+			
+			if(tdel == -1 || ndel == -1 || ldel == -1) {
 					PrintWriter script = response.getWriter();
 					script.println("<script>");
 					script.println("alert('삭제가 정상적으로 이루어지지 않았습니다. 관리자에게 문의 바랍니다.')");
@@ -64,7 +73,7 @@
 				}
 				else {
 					// 수정 및 제출 가능한 list가 없다면,
-					if(tlist.size() == 0) {
+					if(aflist.size() == 0) {
 						PrintWriter script = response.getWriter();
 						script.println("<script>");
 						script.println("alert('정상적으로 보고가 제거 되었습니다.')");
@@ -78,11 +87,10 @@
 					script.println("location.href='/BBS/user/bbsUpdateDelete.jsp'");
 					script.println("</script>");
 					}
-				}
+				} 
 			}
-			
-	
-	
 	%>
+	<a><%= list.size() %></a>
+	
 </body>
 </html>

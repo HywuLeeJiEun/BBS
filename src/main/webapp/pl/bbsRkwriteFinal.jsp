@@ -1,3 +1,6 @@
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="sum.Sum"%>
 <%@page import="sum.SumDAO"%>
 <%@page import="java.text.SimpleDateFormat"%>
@@ -29,7 +32,8 @@
 </head>
 <body>
 <% 
-	UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
+	RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+	RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
 	
 	// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 	String id = null;
@@ -43,39 +47,41 @@
 		script.println("location.href='../login.jsp'");
 		script.println("</script>");
 	}
-	String rk = userDAO.getRank((String)session.getAttribute("id"));
+	
 	
 	// ********** 담당자를 가져오기 위한 메소드 *********** 
 	String workSet;
-	ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+	ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 	List<String> works = new ArrayList<String>();
 	
-	if(code == null) {
+	if(code.size() == 0) {
+		//1. 담당 업무가 없는 경우,
 		workSet = "";
 	} else {
+		//2. 담당 업무가 있는 경우
 		for(int i=0; i < code.size(); i++) {
-			
-			String number = code.get(i);
-			// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-			String manager = userDAO.getManager(number);
+			//task_num을 받아옴.
+			String task_num = code.get(i);
+			// task_num을 통해 업무명을 가져옴.
+			String manager = userDAO.getManager(task_num);
 			works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 		}
-		
 		workSet = String.join("/",works);
-		
 	}
 	
-	String name = userDAO.getName(id);
-	String pl = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
-	
 	// 사용자 정보 담기
-	User user = userDAO.getUser(name);
-	String password = user.getPassword();
-	String rank = user.getRank();
+	ArrayList<rmsuser> ulist = userDAO.getUser(id);
+	String password = ulist.get(0).getUser_pwd();
+	String name = ulist.get(0).getUser_name();
+	String rank = ulist.get(0).getUser_rk();
 	//이메일  로직 처리
-	String Staticemail = user.getEmail();
-	String[] email = Staticemail.split("@");
-
+	String Staticemail = ulist.get(0).getUser_em();
+	String[] email;
+	email = Staticemail.split("@");
+	String pl = ulist.get(0).getUser_fd();
+	String rk = ulist.get(0).getUser_rk();
+	//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+	String au = ulist.get(0).getUser_au();
 
 
 	// 선택된 데이터 정보
@@ -83,13 +89,15 @@
 	String end = request.getParameter("end");
 	String ncontent = request.getParameter("ncontent");
 	String ntarget = request.getParameter("ntarget");
-	String bbsDeadline = request.getParameter("bbsDeadline");
+	String rms_dl = request.getParameter("rms_dl");
 
+	//데이터 가공
 	content = content.replaceAll("§","\r\n");
     end = end.replaceAll("§","\r\n");
 	ncontent = ncontent.replaceAll("§","\r\n");
 	ntarget = ntarget.replaceAll("§","\r\n");
-	bbsDeadline = bbsDeadline.replaceAll("§","\r\n");
+	rms_dl = rms_dl.replaceAll("§","\r\n"); 
+
 
 	
 
@@ -152,7 +160,7 @@
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(pl !="" || !pl.isEmpty()) {
+								if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -364,7 +372,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th id="summary" colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-placement="bottom" title="제출일 : <%= bbsDeadline %>"> 요약본 작성 </th>
+					<th id="summary" colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-placement="bottom" title="제출일 : <%= rms_dl %>"> 요약본 작성 </th>
 				</tr>
 			</thead>
 		</table>
@@ -397,7 +405,7 @@
 				<table id="Table" class="table" style="text-align: center;">
 					<thead>
 						<tr>
-							<td><textarea id="bbsDeadline" name="bbsDeadline" style="display:none"><%= bbsDeadline %></textarea> </td>
+							<td><textarea id="rms_dl" name="rms_dl" style="display:none"><%= rms_dl %></textarea> </td>
 							<td><textarea id="pl" name="pl" style="display:none"><%= pl %></textarea> </td>
 						</tr>
 						<tr>

@@ -1,10 +1,9 @@
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
-<%@page import="bbs.BbsDAO"%>
-<%@page import="bbs.Bbs"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <% request.setCharacterEncoding("utf-8"); %>
@@ -12,11 +11,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Baynex-worksActionSh</title>
+<title>RMS</title>
 </head>
 <body>
 	<%
-	
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		
 		// 현재 세션 상태를 체크한다
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -32,46 +32,64 @@
 		}
 		
 		//user 정보를 불러옴. (이름)
-		String name = request.getParameter("user");
-		//name을 통해 id를 가져옴.
-		UserDAO user = new UserDAO();
-		String userid = user.getId(name);
+		String user_id = request.getParameter("user_id");
 		//돌아간 페이지에 정보를 남기기 위함.
-		request.setAttribute("searchText", name);
+		request.setAttribute("searchText", userDAO.getName(user_id));
 		
-		//userid를 통해 manager를 불러옴. 배열형태로 받아와짐.
-		String workSet;
-		ArrayList<String> code = user.getCode(userid); //코드 리스트 출력
-		List<String> works = new ArrayList<String>();
-		if(code == null) {
-			workSet = "";
-		} else {
-			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				works.add(number); //즉, work 리스트에 모두 담겨 저장됨
-			}
-		}
 		
+		// 업무 이름을 가져옴(TASK_WK)
 		String work = request.getParameter("workValue");
-		String codeNumber ="";
-		if(works.contains(work)) {
-			codeNumber = String.join(",",works); 
-			
+		String task_num = userDAO.getTaskNum(work);
+		
+		//업무가 이미 저장되어 있는지 확인!
+		int olp = userDAO.getMgrs(user_id, task_num);
+		
+		if(olp == 0) { //값이 나온다면,
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('이미 담당하고 있는 업무입니다.')");
-			script.println("location.href='workChangesearch.jsp'");
+			script.println("alert('현재 담당하고 있는 업무입니다.')");
+			script.println("history.back()");
 			script.println("</script>");
 		} else {
-			works.add(work);
-			codeNumber = String.join(",",works); 
-		}
+			//업무를 저장함 RMSMGRS에 insert
+			int num = userDAO.inMgrs(user_id, task_num);
+			
+			//업무 총 개수 세기
+			int count = userDAO.getCountMgrs(user_id);
+			
+			if(num == -1) {
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('데이터베이스 오류입니다.')");
+				script.println("history.back()");
+				script.println("</script>");
+			} else {
+				if(count != -1) {
+					if(count >= 10) {
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("alert('담당 업무는 최대 10개를 초과할 수 없습니다.')");
+					script.println("history.back()");
+					script.println("</script>");
+					} else {
+						PrintWriter script = response.getWriter();
+						script.println("<script>");
+						script.println("alert('정삭적으로 추가 되었습니다.')");
+						script.println("location.href='workChangesearch.jsp'");
+						script.println("</script>");
+						pageContext.forward("workChangesearch.jsp");
+					}
+				}
+			}
+		}		
 		
-		//update를 진행함.
-	 	int result = user.UpdateManager(codeNumber, name);
 		
-		if(result == -1) {
+			
+			
+		
+		
+		
+		/* if(result == -1) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('데이터베이스 오류입니다.')");
@@ -99,7 +117,7 @@
 			script.println("location.href='workChangesearch.jsp'");
 			script.println("</script>");
 			pageContext.forward("workChangesearch.jsp");
-		}   
+		}    */
 
 	%>
 

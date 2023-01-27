@@ -1,3 +1,5 @@
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="rms.rms_next"%>
 <%@page import="rms.rms_this"%>
 <%@page import="rms.RmsDAO"%>
@@ -19,13 +21,11 @@
 </head>
 <body>
 	<%
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
 	
 		// 현재 세션 상태를 체크한다
 		String id = null;
-		
-		String NContent = null;
-		String NStart = null;
-		String NTarget = null;
 		
 		//생성된 마지막 content의 수
 		int con = Integer.parseInt(request.getParameter("con"));
@@ -48,19 +48,18 @@
 			script.println("location.href='../../login.jsp'");
 			script.println("</script>");
 		} else {
-		UserDAO userDAO = new UserDAO();
+
 		String pluser = "";
-		if(userDAO.getpluserunder(id) != null) { // 비어있지 않다면,
-			pluser = userDAO.getpluserunder(id);
-		}
+		if(userDAO.getFD(id) != null) { // 비어있지 않다면,
+			pluser = userDAO.getFD(id);
+		} //비어있는 경우는 관리자 및 담당 업무가 없는 사용자
 		String name = userDAO.getName(id);
 		
 		
-		// 필요한 데이터 추출
-		RmsDAO rms = new RmsDAO();
 		
-		String bbsDeadline = request.getParameter("bbsDeadline");		
-		String bbsTitle = request.getParameter("bbsTitle");
+		//필요한 데이터 추출
+		String rms_dl = request.getParameter("bbsDeadline");		
+		String rms_title = request.getParameter("bbsTitle");
 		java.sql.Timestamp date = rms.getDateNow();
 		
 		int n = 0;
@@ -68,7 +67,7 @@
 		int an = 0;
 		
 		// 해당 날짜에 제출된 보고가 있는지 확인
-		String overlap = rms.getOverlap(bbsDeadline, id);
+		String overlap = rms.getOverlap(rms_dl, id);
 		if(overlap != "") { 
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
@@ -76,7 +75,6 @@
 			script.println("location.href='../bbs.jsp'");
 			script.println("</script>");
 		} else {
-				
 			// << 금주 데이터 저장 >> - rms_this
 			for(int i=0; i < trCnt+con; i++) {
 				String a = "bbsContent";
@@ -146,10 +144,10 @@
 				
 				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
 					// write_rms_this
-					int numlist = rms.write_rms_this(id, bbsDeadline, bbsTitle, date, bbscontent, bbsstart, bbstarget, bbsend);
+					int numlist = rms.writeRms(id, rms_dl, rms_title, bbscontent, bbsstart, bbstarget, bbsend, "T", date);
 					if(numlist == -1) { //데이터 저장 오류
 						//데이터 삭제
-						int tdel = rms.tdelete(id, bbsDeadline);
+						int tdel = rms.Rmsdelete(id, rms_dl,"T");
 						PrintWriter script = response.getWriter();
 						script.println("<script>");
 						script.println("alert('(금주)데이터 저장에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
@@ -213,10 +211,10 @@
 				// 저장에 오류가 없는지 확인!
 				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
 					// write_rms_last
-					int numlist = rms.write_rms_next(id, bbsDeadline, bbscontent, bbsstart, bbstarget, pluser);
+					int numlist = rms.writeRms(id, rms_dl, rms_title, bbscontent, bbsstart, bbstarget, null, "N", date);
 					if(numlist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
 						//데이터 삭제
-						int ldel = rms.ldelete(id, bbsDeadline);
+						int ndel = rms.Rmsdelete(id, rms_dl,"N");
 						PrintWriter script = response.getWriter();
 						script.println("<script>");
 						script.println("alert('(차주)데이터 저장에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
@@ -244,10 +242,10 @@
 					String eau=request.getParameter(d+i);
 					String ediv=request.getParameter(e+i);
 					//erp 테이블에 저장
-					int numelist = rms.write_erp(id, bbsDeadline, edate, euser, etext, eau, ediv);
+					int numelist = rms.write_erp(id, rms_dl, edate, euser, etext, eau, ediv);
 					if(numelist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
 						//데이터 삭제
-						int ldel = rms.edelete(id, bbsDeadline);
+						int ldel = rms.edelete(id, rms_dl);
 						PrintWriter script = response.getWriter();
 						script.println("<script>");
 						script.println("alert('(erp)데이터 저장에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");

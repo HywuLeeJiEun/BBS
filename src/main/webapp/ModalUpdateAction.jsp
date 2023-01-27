@@ -1,5 +1,5 @@
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="org.apache.catalina.UserDatabase"%>
-<%@page import="bbs.BbsDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@page import="user.UserDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -37,7 +37,7 @@
 		
 		
 		// ************** 변경 ***************
-		UserDAO userDAO = new UserDAO();
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
 		
 		int num = userDAO.UpdateUser(upwd, uname, uemail, id); 
 		

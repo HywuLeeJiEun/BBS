@@ -1,3 +1,7 @@
+<%@page import="rmsrept.rmsrept"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="rms.rms_next"%>
 <%@page import="rms.rms_this"%>
 <%@page import="rms.RmsDAO"%>
@@ -33,8 +37,9 @@
 
 <body>
 	<%
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -58,66 +63,55 @@
 		
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
-		
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
 			workSet = "";
 		} else {
+			//2. 담당 업무가 있는 경우
 			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
 				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 			}
-			
 			workSet = String.join("/",works);
-			
 		}
 		
-		String name = userDAO.getName(id);
-		
 		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
-		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
 				
 		//기존 데이터 불러오기 (미승인인 주간보고를 불러옴.)
-		RmsDAO rms = new RmsDAO();
-		//rms_last -> 목록 불러오기 (사용자)
-		// [bbsDeadline, sign, pluser]
-		ArrayList<rms_next> llist = rms.getlastSign(id,"미승인",pageNumber);
-		// 검색 결과를 바탕으로 llist 조회
-		String[] bbsDeadline = new String[llist.size()];
-			//조회를 위한 bbsDeadline list 생성
-			for(int i=0; i < llist.size(); i++) {
-				bbsDeadline[i] = llist.get(i).getBbsDeadline();
-			}
-		//rms_this -> 목록 불러오기 (사용자)
-		// [bbsDeadline, bbsTitle, bbsDate]
-		ArrayList<rms_this> tlist = rms.getthisSign(id, pageNumber, bbsDeadline);
+		//rmsrept에서 sign이 미승인인 데이터만 불러오기!
+		ArrayList<rmsrept> rmslist = rms.getrmsSign(id, pageNumber);
 		
 		//미승인 -> 미제출로 변경
-		String[] sign = new String[llist.size()];
-		for(int i=0; i < llist.size(); i++) {
-			if(llist.get(i).getSign().equals("미승인")) {
+		String[] sign = new String[rmslist.size()];
+		for(int i=0; i < rmslist.size(); i++) {
+			if(rmslist.get(i).getRms_sign().equals("미승인")) {
 				sign[i] = "미제출";
-			} else if(llist.get(i).getSign().equals("승인")){
+			} else if(rmslist.get(i).getRms_sign().equals("승인")){
 				sign[i] = "제출";						
 			} else {
-				sign[i] = llist.get(i).getSign();						
+				sign[i] = rmslist.get(i).getRms_sign();						
 			}
 		}
 		
 		// [bbsDeadline, sign, pluser] 다음 목록이 있는지 확인
-		ArrayList<rms_next> afllist = rms.getlastSign(id,"미승인",pageNumber);
+		ArrayList<rmsrept> afrmslist = rms.getrmsSign(id, pageNumber+1);
+		
 	%>	
 	    <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
@@ -356,7 +350,7 @@
 	
 	
 	<%
-	if(llist.isEmpty()) {
+	if(rmslist.isEmpty()) {
 		/* PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('모든 보고가 승인(또는 마감)처리 되었습니다.')");
@@ -429,12 +423,12 @@
 					<%
 						
 						// 미승인 (마감, 승인 제외)인 bbs만을 가져옴!
-						for(int i = 0; i < tlist.size(); i++){
+						for(int i = 0; i < rmslist.size(); i++){
 							
 							// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
 							SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 							
-							String dl = tlist.get(i).getBbsDeadline();
+							String dl = rmslist.get(i).getRms_dl();
 							Date time = new Date();
 							String timenow = dateFormat.format(time);
 
@@ -445,19 +439,20 @@
 
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 					<tr>
-						<td> <%= tlist.get(i).getBbsDeadline() %> </td>
-						<td style="text-align: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<a href="/BBS/user/update.jsp?bbsDeadline=<%= tlist.get(i).getBbsDeadline() %>">
-							<%= tlist.get(i).getBbsTitle() %></a></td>
+						<td> <%= rmslist.get(i).getRms_dl() %> </td>
+						<td style="text-align: left">
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<a href="/BBS/user/update.jsp?rms_dl=<%= rmslist.get(i).getRms_dl() %>">
+							<%= rmslist.get(i).getRms_title() %></a></td>
 						<td><%= name %></td>
-						<td><%= tlist.get(i).getBbsDate().substring(0, 11) + tlist.get(i).getBbsDate().substring(11, 13) + "시"
-							+ tlist.get(i).getBbsDate().substring(14, 16) + "분" %></td>
-						<td><%= llist.get(i).getPluser() %></td>
+						<td><%= rmslist.get(i).getRms_time().substring(0, 11) + rmslist.get(i).getRms_time().substring(11, 13) + "시"
+							+ rmslist.get(i).getRms_time().substring(14, 16) + "분" %></td>
+						<td><%= pl %></td>
 						<!-- 승인/미승인/마감 표시 -->
-						<td><%= sign[i] %></td>
+						<td><%= rmslist.get(i).getRms_sign() %></td>
 						<td data-toggle="tooltip" data-html="true" data-placement="right" title="제출시, <br>수정 및 삭제가 불가합니다.">
 							<%-- <button class="btn btn-success" style="font-size:12px" onclick="location.href='/BBS/user/action/signOnAction.jsp?bbsDeadline=<%= tlist.get(i).getBbsDeadline() %>&workset=<%= workSet %>'"> 제출 </button> --%>
-							<a class="btn btn-success" style="font-size:12px" href="/BBS/user/action/signOnAction.jsp?bbsDeadline=<%= tlist.get(i).getBbsDeadline() %>&workset=<%= workSet %>"> 제출 </a>
+							<a class="btn btn-success" style="font-size:12px" href="/BBS/user/action/signOnAction.jsp?rms_dl=<%= rmslist.get(i).getRms_dl() %>&workset=<%= workSet %>"> 제출 </a>
 						</td>
 					</tr>
 					<%
@@ -465,7 +460,7 @@
 					%>
 				</tbody>
 			</table>
-			
+
 			<!-- 페이징 처리 영역 -->
 			<%
 				if(pageNumber != 1){
@@ -473,7 +468,7 @@
 				<a href="/BBS/user/bbs.jsp?pageNumber=<%=pageNumber - 1 %>"
 					class="btn btn-success btn-arraw-left">이전</a>
 			<%
-				}if(afllist.size() != 0){
+				}if(afrmslist.size() != 0){
 			%>
 				<a href="/BBS/user/bbs.jsp?pageNumber=<%=pageNumber + 1 %>"
 					id="next" class="btn btn-success btn-arraw-left">다음</a>

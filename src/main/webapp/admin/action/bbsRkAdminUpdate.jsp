@@ -1,3 +1,6 @@
+<%@page import="rmssumm.RmssummDAO"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="sum.SumDAO"%>
 <%@page import="rms.RmsDAO"%>
 <%@page import="Sumad.Sumad"%>
@@ -19,10 +22,9 @@
 </head>
 <body>
 	<%
-	UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-	RmsDAO rms = new RmsDAO();
-	SumDAO sumDAO = new SumDAO();
-	SumadDAO sumadDAO = new SumadDAO();
+	RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+	RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+	RmssummDAO sumDAO = new RmssummDAO(); //요약본 목록 (v2.-)
 	
 	// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 	String id = null;
@@ -38,11 +40,9 @@
 	}
 		
 	// String 가져오기
-	String bbsDeadline = request.getParameter("bbsDeadline");
+	String rms_dl = request.getParameter("rms_dl");
 	String sign = request.getParameter("sign");
-	if(sign.equals("보류")) {
-		sign = "미승인";
-	} 
+
 	//ERP
 	String econtent = request.getParameter("econtent");
 	String eend = request.getParameter("eend");
@@ -79,68 +79,43 @@
 	String wntarget = request.getParameter("wntarget");
 	String wnnote = request.getParameter("wnnote");
 	java.sql.Timestamp summaryDate = rms.getDateNow();
-	String summaryUpdate = userDAO.getName(id);
 	
-	//이동을 위함
-	ArrayList<Sumad> afsumad = sumadDAO.getlistSumSign(); //미승인 상태만 불러옴!
 	
-	int erp = sumDAO.updateSum(bbsDeadline, "ERP", econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, sign, summaryDate, summaryUpdate);
-	int web = sumDAO.updateSum(bbsDeadline, "WEB", wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, summaryDate, summaryUpdate);
+	//데이터 수정하기 (erp)
+		//금주
+	int etupdate = sumDAO.updateSum(econtent, eend, eprogress, estate, enote, sign, summaryDate, id, "ERP", rms_dl, "T");
+		//차주
+	int enupdate = sumDAO.updateSum(encontent, entarget, null, null, ennote, sign, summaryDate, id, "ERP", rms_dl, "N");
+	//데이터 수정하기 (web)
+		//금주
+	int wtupdate = sumDAO.updateSum(wcontent, wend, wprogress, wstate, wnote, sign, summaryDate, id, "WEB", rms_dl, "T");
+		//차주
+	int wnupdate = sumDAO.updateSum(wncontent, wntarget, null, null, wnnote, sign, summaryDate, id, "WEB", rms_dl, "N");
 	
-	int num= -1;
+	//int erp = sumDAO.updateSum(bbsDeadline, "ERP", econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, sign, summaryDate, id);
+	//int web = sumDAO.updateSum(bbsDeadline, "WEB", wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, summaryDate, id);
 	
-	//sumad <- (summary_admin)에 저장되었는지 확인함!
-	ArrayList<Sumad> sumad = sumadDAO.getlistSumad(bbsDeadline);
 	
-	if(sumad.size() == 0) { //데이터가 없기 때문에 저장!  (insert)
-		num = sumadDAO.SummaryAdminWrite(id, bbsDeadline, econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, summaryDate, summaryUpdate);
-		if(num==-1){
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('데이터베이스 오류입니다. 관리자에게 문의 바랍니다.')");
-			script.println("history.back();");
-			script.println("</script>");
-		} else { 
-			if(afsumad.size() == 0) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('정상적으로 요약본이 저장 되었습니다.')");
-				script.println("alert('요약본이 모두 승인 처리 되었습니다. 조회페이지로 이동합니다.')");
-				script.println("location.href='../summaryadRk.jsp'");
-				script.println("</script>");
-			} else {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('정상적으로 요약본이 저장 되었습니다.')");
-			script.println("location.href='../summaryadUpdateDelete.jsp'");
-			script.println("</script>");
-			}
-		} 
-	} else { //데이터가 이미 있으므로 수정! (update)  //sumad가 이미 저장됨
-		num = sumadDAO.SummaryAdminUpdate(bbsDeadline, econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, summaryDate, userDAO.getName(id));
-		if(num==-1){
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('데이터베이스 오류입니다. 관리자에게 문의 바랍니다.')");
-			script.println("history.back();");
-			script.println("</script>");
-		} else {
-			if(afsumad.size() == 0) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('정상적으로 요약본이 저장 되었습니다.')");
-				script.println("alert('요약본이 모두 승인 처리 되었습니다. 조회페이지로 이동합니다.')");
-				script.println("location.href='../summaryadRk.jsp'");
-				script.println("</script>");
-			} else {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('정상적으로 요약본이 저장 되었습니다.')");
-			script.println("location.href='../summaryadUpdateDelete.jsp'");
-			script.println("</script>");
-			}
-		} 
-	} 
+	if(etupdate == -1 || enupdate == -1) { //erp 데이터 저장에 문제 발생!
+		PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('ERP 데이터 저장에 문제가 발생하였습니다.')");
+		script.println("history.back();");
+		script.println("</script>");
+	} else if(wtupdate == -1 || wnupdate == -1) { //web 데이터 저장에 문제 발생!
+		PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('WEB 데이터 저장에 문제가 발생하였습니다.')");
+		script.println("history.back();");
+		script.println("</script>");
+	} else {
+		//정상적으로 모두 수정되었을 경우,
+		PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('정상적으로 요약본이 저장 되었습니다.')");
+		script.println("location.href='../summaryadRk.jsp'");
+		script.println("</script>");
+	}
 	
 	
 	%>

@@ -1,3 +1,9 @@
+<%@page import="rmssumm.RmssummDAO"%>
+<%@page import="rmssumm.rmssumm"%>
+<%@page import="rmsrept.rmsrept"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="javax.swing.RepaintManager"%>
 <%@page import="sum.Sum"%>
 <%@page import="sum.SumDAO"%>
@@ -44,11 +50,9 @@
 
 <body>
 	<%
-		UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-		RmsDAO rms = new RmsDAO();
-		
-		// 로그인 사용자의 랭크 가져오기
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+		RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+		RmssummDAO sumDAO = new RmssummDAO(); //요약본 목록 (v2.-)
 		
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
@@ -63,8 +67,6 @@
 			script.println("</script>");
 		}
 		
-		//pl 리스트 확인
-		String work = userDAO.getpl(id); //현재 접속 유저의 pl(web, erp)를 확인함!
 		
 		//(월요일) 제출 날짜 확인
 		String mon = "";
@@ -90,105 +92,104 @@
 			day = dateFmt.format(cal2.getTime());
 		 }
 		 
-		 String bbsDeadline = mon;
-		if(request.getParameter("bbsDeadline") != null || !request.getParameter("bbsDeadline").isEmpty()) {
-			bbsDeadline = request.getParameter("bbsDeadline");
+		 String rms_dl = mon;
+		if(request.getParameter("rms_dl") != null) {
+			rms_dl = request.getParameter("rms_dl");
 		}
 		
 		//마감기간이 지난 보고의 요약본은 작성할 수 없음!
-			//해당 bbsDeadline으로 조회하여 sign이 마감인 경우,
-		String getSign = rms.getSignNext(bbsDeadline);
-		if(getSign.equals("마감")) {
+			//해당 rms_dl으로 조회하여 sign이 마감인 경우,
+		//String getSign = rms.getSignNext(rms_dl);
+		//if(getSign.equals("마감")) {
 			/* PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('제출 기한이 지나 작성이 불가합니다.')");
 			script.println("location.href='/BBS/pl/bbsRk.jsp'");
 			script.println("</script>"); */
-		}
+		//}
 		
 		
 		 
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
 		String workSet;
-		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
 		List<String> works = new ArrayList<String>();
 		
-		if(code == null) {
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
 			workSet = "";
 		} else {
+			//2. 담당 업무가 있는 경우
 			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
-				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
 				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
 			}
-			
 			workSet = String.join("/",works);
-			
 		}
-				
-		String name = userDAO.getName(id);
 		
 		// 사용자 정보 담기
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
-		
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
 		
 		//만약 이미 해당 날짜로 요약본이 작성되어 있다면, 뒤로 돌려보냄!
-		SumDAO sumDAO = new SumDAO();
-		ArrayList<Sum> list = sumDAO.getlistSum(bbsDeadline, work);
+		ArrayList<rmssumm> list = sumDAO.getSumDL(rms_dl);
 		if(list.size() != 0){ //데이터가 있다면,
+			if(list.get(0).getUser_fd().equals(pl)) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('해당 날짜로 제출된 요약본이 있습니다. \\n수정 및 삭제 페이지로 이동합니다.')");
 			script.println("location.href='/BBS/pl/summaryUpdateDelete.jsp'");
 			script.println("</script>");
-		}
+			}
+		} 
 		
 		//만약 제출자가 전체 인원보다 적을 경우, 경고창을 띄움!
-		ArrayList<String> plist = userDAO.getpluser(work); //pl 관련 유저의 아이디만 출력
+		//pl 리스트 확인
+		ArrayList<String> plist = userDAO.getpluser(pl); //pl 관련 유저의 아이디만 출력
+		//pl에 해당하는 user_id 도출(pllist)
+		String[] pllist = plist.toArray(new String[plist.size()]); //해당 pllist를 바꿔야함! (제출한 사람만)
+		//해당 user_id를 통해 제출된 rms를 조회하기
+		ArrayList<rmsrept> flist = rms.getRmsRkfull(rms_dl, pllist);
 		
-		//RMS 내용 가져오기!
-		//해당 주차로 제출된 RMS 내용 찾기 (nav바)
-		// 모든 내용 (pageNumber가 없음!)이기에 full을 통해 검색함!
-		ArrayList<rms_next> llist = rms.getlastSignRkfullSelect(bbsDeadline, work);
-		
-		String[] userID = new String[llist.size()];
-		
-		for(int i=0; i < llist.size(); i++) {
-			userID[i] = llist.get(i).getUserID();
-		}
-		
-		ArrayList<rms_this> tlist = rms.getthisSignRkfullSelect(bbsDeadline, userID);
-		
-		//사용자 ID -> 사용자 name으로 전환
-		ArrayList<rms_next> flist = rms.getlastSignRkfull(bbsDeadline, work);
-		
-		String userName ="";
-		for (int i=0; i < flist.size(); i++) {
-			if(i < flist.size() -1) {
-				userName += userDAO.getName(flist.get(i).getUserID()) + ", ";
+		//금주업무, 차주업무 나누기
+		//금주
+		ArrayList<rmsrept> tlist = rms.getRmsRkAll(rms_dl, pllist, "T");
+		//차주
+		ArrayList<rmsrept> nlist = rms.getRmsRkAll(rms_dl, pllist, "N");
+ 	
+		//제출자 SubUser
+		String SubUser = "";
+		for(int i=0; i<flist.size(); i++) {
+			if(i < flist.size()-1) {
+				SubUser += userDAO.getName(flist.get(i).getUser_id())+", ";
 			} else {
-				userName +=  userDAO.getName(flist.get(i).getUserID());
+				SubUser += userDAO.getName(flist.get(i).getUser_id());
 			}
 		}
 		
-		
 		// 미제출자 인원 계산 ()
-		int psize = plist.size(); //pl 담당 유저
-		int lsize = flist.size();
+		int psize = plist.size(); //pl 담당 유저의 아이디
+		int lsize = flist.size(); //해당 pl을 담당하는 user들의 제출 rms
 		int noSub =  psize - lsize;
 		
 		//해당 인원 전원 불러오기 (이름으로 변경)
 		ArrayList<String> username = new ArrayList<String>();
 		for(int i=0; i<plist.size(); i++) {
-			String a = userDAO.getName(plist.get(i)); //user 이름을 도출.
-			username.add(a);	
+			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
+			username.add(userName);	
 		}
 		String[] usernamedata = username.toArray(new String[username.size()]);
 		Arrays.sort(usernamedata);
@@ -200,18 +201,18 @@
 		ArrayList<String> noSubname = new ArrayList<String>();
 		ArrayList<String> Subname = new ArrayList<String>();
 
+		
 		//제출한 RMS 도출
 		for(int i=0; i<flist.size(); i++) {
-			Subname.add(flist.get(i).getUserID()); //제출한 user id 도출. (일반 list(10개 제한이 걸림)가 아닌, 모든 제출자를 확인해야함!)
-			//bbsId.add(Integer.toString(flist.get(i).getBbsID()));
+			Subname.add(flist.get(i).getUser_id()); //제출한 user id 도출. (일반 list(10개 제한이 걸림)가 아닌, 모든 제출자를 확인해야함!)
 		}
 		for(int i=0; i<Subname.size(); i++) {
 			plist.remove(Subname.get(i));
 		}
 		//제출 안한 인원 찾기
 		for(int i=0; i<plist.size(); i++) {
-			String b = userDAO.getName(plist.get(i)); //user 이름을 도출.
-			noSubname.add(b);	
+			String userName = userDAO.getName(plist.get(i)); //user 이름을 도출.
+			noSubname.add(userName);	
 		}
 		
 		String[] nousernamedata = noSubname.toArray(new String[noSubname.size()]);
@@ -219,6 +220,15 @@
 		
 		String nouserdata = String.join(", ", nousernamedata);
 		
+		//목록의 모든 rms_dl 불러오기
+		 ArrayList<rmsrept> dllist = rms.getAllRms_dl();
+		 //중복값을 제거하기 위해, rms_dl 빼기
+		 for(int i=0; i < dllist.size(); i++) {
+			 if(dllist.get(i).getRms_dl().equals(rms_dl)) {
+				 dllist.remove(i);
+			 }
+		 }
+
 		//alert가 넘어오면 경고창 미표시, 넘어오지 않으면 표시!
 		String alert = request.getParameter("alert");
 		if(alert == null || alert.isEmpty()) {
@@ -264,17 +274,17 @@
 					</li>
 						<%
 							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(work !="" || !work.isEmpty()) {
+								if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
 								data-toggle="dropdown" role="button" aria-haspopup="true"
-								aria-expanded="false"><%= work %><span class="caret"></span></a>
+								aria-expanded="false"><%= pl %><span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= work %></h5></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
 								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
-								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= work %> Summary</h5></li>
+								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
 								<li class="active" id="summary_nav"><a href="bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
@@ -476,7 +486,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-html="true" data-placement="bottom" title="제출자: <%= userName %> <br> 제출 인원: <%= flist.size() %> "> <%= work  %> 요약본 작성
+					<th colspan="5" style=" text-align: center; color:black " data-toggle="tooltip" data-html="true" data-placement="bottom" title="제출자: <%= SubUser %> <br> 제출 인원: <%= flist.size() %> "> <%= pl  %> 요약본 작성
 					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
 	<%	
 	if(noSub != 0) {
@@ -520,10 +530,10 @@
 						for(int i=0; i< tlist.size(); i++) { //content
 							//content의 "-" 제거하기
 							String bbsContent = "";
-							if(tlist.get(i).getBbsContent().indexOf('-') > -1 && tlist.get(i).getBbsContent().indexOf('-') < 2) { //맨 앞이 - 라면,
-								bbsContent = tlist.get(i).getBbsContent().replaceFirst("-", "");
+							if(tlist.get(i).getRms_con().indexOf('-') > -1 && tlist.get(i).getRms_con().indexOf('-') < 2) { //맨 앞이 - 라면,
+								bbsContent = tlist.get(i).getRms_con().replaceFirst("-", "");
 							} else { //bbsContent의 앞에 '-'이 없거나, 또는 빈칸일때 -> 이 경우는 저장부터 문제가 발생하는 경우!
-								bbsContent = tlist.get(i).getBbsContent();
+								bbsContent = tlist.get(i).getRms_con();
 							}
 						%>
 						<tr>
@@ -531,8 +541,8 @@
 								<textarea name="content<%=i%>" id="content<%=i%>" rows="2" style="resize: none; height:30px; width:300px;"><%= bbsContent %></textarea>
 							</td>
 							<td style="text-align: left; font-size:13px">
-								<textarea name="end<%=i%>" id="end<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= tlist.get(i).getBbsEnd() %></textarea>
-								<textarea name="bbsDeadline" id="bbsDeadline" rows="1" style="resize: none; height:30px; width:60px; text-align: center; display:none"><%= bbsDeadline %></textarea>
+								<textarea name="end<%=i%>" id="end<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= tlist.get(i).getRms_end() %></textarea>
+								<textarea name="rms_dl" id="rms_dl" rows="1" style="resize: none; height:30px; width:60px; text-align: center; display:none"><%= rms_dl %></textarea>
 							</td>
 							<td>
 								<input type="checkbox" name="chk" id="chk<%=i%>" style="zoom:2.0;" value="<%= i %>">
@@ -562,23 +572,23 @@
 						</tr>
 						<%
 						//차주 업무 목록
-						for(int i=0; i< llist.size(); i++) { 
+						for(int i=0; i< nlist.size(); i++) { 
 							
 							//content의 "-" 제거하기
 							String bbsNContent = "";
-							if(llist.get(i).getBbsNContent().indexOf('-') > -1 && llist.get(i).getBbsNContent().indexOf('-') < 2) { //맨 앞이 - 라면,
-								bbsNContent = llist.get(i).getBbsNContent().replaceFirst("-", "");
+							if(nlist.get(i).getRms_con().indexOf('-') > -1 && nlist.get(i).getRms_con().indexOf('-') < 2) { //맨 앞이 - 라면,
+								bbsNContent = nlist.get(i).getRms_con().replaceFirst("-", "");
 							} else { //bbsContent의 앞에 '-'이 없거나, 또는 빈칸일때 -> 이 경우는 저장부터 문제가 발생하는 경우!
-								bbsNContent = llist.get(i).getBbsNContent();
+								bbsNContent = nlist.get(i).getRms_con();
 							}
 							
 							//bbsNTarget이 가공되지 않음!
 							//해당 데이터 가공하여 출력하기!
 							String bbsNTarget = "";
-							if(llist.get(i).getBbsNTarget().isEmpty()) { //보류 표시
+							if(nlist.get(i).getRms_tar().isEmpty()) { //보류 표시
 								bbsNTarget = "[보류]";
 							} else { //데이터가 들어가 있는 경우 (ex> 2023-01-16) ...
-								bbsNTarget = llist.get(i).getBbsNTarget().substring(5);
+								bbsNTarget = nlist.get(i).getRms_tar().substring(5);
 								bbsNTarget = bbsNTarget.replace("-", "/");
 							}
 						%>
@@ -746,11 +756,6 @@
 				ncontent += $(a).val() + "§";
 				ntarget += $(b).val() + "§";
 			}
-			
-			//alert(content);
-			//alert(end);
-			//alert(ncontent);
-			//alert(ntarget);
 			
 			// 데이터 넘기기 
 			var innerHtml = "";

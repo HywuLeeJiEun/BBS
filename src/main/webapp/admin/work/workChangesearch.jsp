@@ -1,9 +1,9 @@
-<%@page import="bbs.BbsDAO"%>
+<%@page import="rmsuser.rmsuser"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="user.User"%>
 <%@page import="java.io.PrintWriter"%>
 <%@page import="java.time.LocalDate"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
-<%@page import="bbs.Bbs"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="user.UserDAO"%>
@@ -29,7 +29,8 @@
 
 <body>
 <%
-		UserDAO userDAO = new UserDAO();
+		RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+
 		// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 		String id = null;
 		if(session.getAttribute("id") != null){
@@ -43,19 +44,19 @@
 			script.println("</script>");
 		}
 		
-		// ********** 담당자를 가져오기 위한 메소드 *********** 
-		//String workSet;
+		// ********** 유저를 가져오기 위한 메소드 *********** 
+		//String workset;
 		//works 리스트에 저장됨!
-		//str1 => 현재 탐색중인 사원의 이름
-		String str1 = "";
+		//user_id => 현재 탐색중인 사원의 이름
+		String user_id = "";
 		if(request.getParameter("searchText") != null) {
-			str1 = request.getParameter("searchText");
+			user_id = userDAO.getId((String)request.getParameter("searchText"));
 		}else {
-			str1 = (String)request.getAttribute("searchText");			
+			user_id = userDAO.getId(((String)request.getAttribute("searchText")));			
 		}
 
 		
-		if(str1 == null) {
+		if(user_id == null) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('대상자가 없습니다. 사원의 이름을 확인해주십시오.')");
@@ -63,54 +64,70 @@
 			script.println("</script>");
 		}
 		//str이 user 목록에 있는지 확인.
-		if(userDAO.getUser(str1) == null) {
+		if(userDAO.getUser(user_id) == null) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('대상자가 없습니다. 사원의 이름을 확인해주십시오.')");
 			script.println("location.href='/BBS/admin/work/workChange.jsp'");
 			script.println("</script>");
 		} 
-		
-		ArrayList<String> code = userDAO.getCodeName(str1); //코드 리스트 출력
-		List<String> works = new ArrayList<String>();
+	
+		ArrayList<String> getcode = userDAO.getCode(user_id); //코드 리스트 출력
+		List<String> getworks = new ArrayList<String>();
 		String str=" ";
-		String workSet ="";
+		String workset ="";
 		
-		if(code == null) {
+		if(getcode == null) {
 			str = "";
-			workSet ="";
+			workset ="";
 		} else {
-			for(int i=0; i < code.size(); i++) {
-				
-				String number = code.get(i);
+			for(int i=0; i < getcode.size(); i++) {
 				// code 번호에 맞는 manager 작업을 가져와 저장해야함!
-				String manager = userDAO.getManager(number);
-				works.add(manager); //즉, work 리스트에 모두 담겨 저장됨
+				String manager = userDAO.getManager(getcode.get(i));
+				getworks.add(manager); //즉, work 리스트에 모두 담겨 저장됨
 			}
 			
-			workSet = String.join("/",works);
+			workset = String.join("/",getworks);
 		}
 		
 		
+		// ********** 담당자를 가져오기 위한 메소드 *********** 
+		String workSet;
+		ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
+		List<String> works = new ArrayList<String>();
+		
+		if(code.size() == 0) {
+			//1. 담당 업무가 없는 경우,
+			workSet = "";
+		} else {
+			//2. 담당 업무가 있는 경우
+			for(int i=0; i < code.size(); i++) {
+				//task_num을 받아옴.
+				String task_num = code.get(i);
+				// task_num을 통해 업무명을 가져옴.
+				String manager = userDAO.getManager(task_num);
+				works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+			}
+			workSet = String.join("/",works);
+		}
+		
 		// 사용자 정보 담기
-		String rk = userDAO.getRank((String)session.getAttribute("id"));
-		String name = userDAO.getName(id);
-		User user = userDAO.getUser(name);
-		String password = user.getPassword();
-		String rank = user.getRank();
+		ArrayList<rmsuser> ulist = userDAO.getUser(id);
+		String password = ulist.get(0).getUser_pwd();
+		String name = ulist.get(0).getUser_name();
+		String rank = ulist.get(0).getUser_rk();
 		//이메일  로직 처리
-		String Staticemail = user.getEmail();
-		String[] email = Staticemail.split("@");
+		String Staticemail = ulist.get(0).getUser_em();
+		String[] email;
+		email = Staticemail.split("@");
+		String pl = ulist.get(0).getUser_fd();
+		String rk = ulist.get(0).getUser_rk();
+		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
+		String au = ulist.get(0).getUser_au();
 		
-		String pl = userDAO.getpl(id); //web, erp pl을 할당 받았는지 확인! 
-		
-		//bbsID를 통한 작성 기능 제공
-		BbsDAO bbsDAO = new BbsDAO();
-		ArrayList<String>  AllbbsID = bbsDAO.signgetBbsID(pl); //bbsID를 가져옴!
-		String inbbsID = String.join(",",AllbbsID);
 		
 	%>
-
+	
 	<!-- 모달 영역! -->
 	   <div class="modal fade" id="UserUpdateModal" role="dialog">
 		   <div class="modal-dialog">
@@ -262,14 +279,11 @@
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
 							<li><a href="/BBS/user/bbs.jsp">조회</a></li>
-							<li><a href="/BBS/user/bbsUpdate.jsp">작성</a></li>
-							<li><a href="/BBS/user/bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
-							if(rk.equals("부장") || rk.equals("차장") || rk.equals("관리자")) {
-								if(pl !="" || !pl.isEmpty()) {
+								if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -281,18 +295,17 @@
 								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
-								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp?bbsID=<%=inbbsID%>">작성</a></li>
+								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
 								<li id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
-								}
 							}
 						%>
 						<%
-							if(rk.equals("실장") || rk.equals("관리자")) {
+							if(au.equals("관리자")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -300,9 +313,9 @@
 								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="/BBS/admin/summaryadRk.jsp">조회</a></li>
-								<li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
-								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li>
+								<li><a href="/BBS/admin/summaryadRk.jsp">조회 및 승인</a></li>
+								<!-- <li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
+								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li> -->
 								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
 							</ul>
 							</li>
@@ -348,8 +361,7 @@
 	<%		
 		
 		// 모든 업무 목록을 불러옴. ( ERP,HR, 의 형태로)
-				ArrayList<String> jobs = new ArrayList<String>();
-				jobs = userDAO.getAlljobs();
+		ArrayList<String> jobs = userDAO.getManagerAll();
 	%>
 
 	
@@ -364,7 +376,7 @@
 								<option value="userName">담당자</option>
 						</select></td>
 						<td><input type="text" class="form-control"
-							placeholder="담당자 입력" name="searchText" maxlength="100" value="<%= str1 %>"></td>
+							placeholder="담당자 입력" name="searchText" maxlength="100" value="<%= userDAO.getName(user_id) %>"></td>
 						<td><button type="submit" style="margin:5px" class="btn btn-success">검색</button></td>
 					</tr>
 
@@ -390,7 +402,7 @@
 				<th colspan="5" style="text-align: center;"> 담당자 업무 변경 </th>
 			</tr>
 			<tr>
-				<th colspan="5" style="text-align: center;">현재 [ <%= str1 %> ](님)의 담당 업무를 변경중입니다.</th>
+				<th colspan="5" style="text-align: center;">현재 [ <%= userDAO.getName(user_id) %> ](님)의 담당 업무를 변경중입니다.</th>
 			</tr>
 			</table>
 			
@@ -405,21 +417,22 @@
 						<th colspan="2" style="text-align:center">담당업무</th>
 					</tr>
 					<%
-						if(str.equals("")) {
-							%>
+						if(workset.equals("")) {
+					%>
+						<tr>
 							<td colspan="1" style="text-align:center"><input type=text style="border:0; width:50%; text-align:center" readonly value="담당 업무 해당이 없습니다."></td>
-							<% 
+						</tr>
+					<% 
 						} else {
 						// 직업의 개수 만큼 for문을 돌림.
-							for(int i=0; i< works.size(); i++ ) {
-	
+							for(int i=0; i< getworks.size(); i++ ) {
 					%>
 					<tr>
-						<td colspan="1" style="text-align:center"><input type=text name="<%= i %>" style="border:0; width:50%; text-align:center" readonly value="<%= works.get(i) %>"></td>
-						<td colspan="1"><a type="submit" style="margin-right:50%" class="btn btn-danger pull-left" href="workDeleteActionSh.jsp?work=<%= works.get(i) %>&user=<%= str1 %>" >삭제</a></td>
+						<td colspan="1" style="text-align:center"><input type=text name="<%= i %>" style="border:0; width:50%; text-align:center" readonly value="<%= getworks.get(i) %>"></td>
+						<td colspan="1"><a type="submit" style="margin-right:50%" class="btn btn-danger pull-left" href="workDeleteActionSh.jsp?work=<%= getworks.get(i) %>&user_id=<%= user_id %>" >삭제</a></td>
 					</tr>
 					<%
-							} if (works.size() == 10) {
+							} if (getworks.size() == 10) {
 					%>
 						<tr>
 							<td colspan="2" style="text-align:center"><input type=text style="border:0; width:100%; text-align:center; color:blue" readonly value="업무 지정은 최대 10개까지만 가능합니다."></td>
@@ -437,10 +450,10 @@
 			</div>
 			
 			<div class="align-slef-start" style="display:inline-block; width:45%;">
-				<form method="post" action="workActionSh.jsp">
+				<form method="post" action="workActionSh.jsp?user_id=<%= user_id %>">
 					<table class="table" style="text-align: center; border: 1px solid #dddddd">
 						<tr>
-							<th colspan="2" style="text-align:center"><input type=text name="user" style="border:0; width:15%; text-align:right" readonly value="<%= str1 %>">(님) 업무관리</th>
+							<th colspan="2" style="text-align:center"><input type=text name="user" style="border:0; width:15%; text-align:right" readonly value="<%= userDAO.getName(user_id) %>">(님) 업무관리</th>
 						</tr>
 						<tr style="border:none">
 							<td style="border-bottom:none">
@@ -448,7 +461,7 @@
 										<%
 											for(int i=0; i<jobs.size(); i++) {
 										%>
-										<option value="<%= i %>"><%= jobs.get(i) %></option> 
+										<option value="<%= jobs.get(i) %>"><%= jobs.get(i) %></option> 
 										<%
 											}
 										%>

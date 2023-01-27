@@ -1,3 +1,6 @@
+<%@page import="rmssumm.RmssummDAO"%>
+<%@page import="rmsrept.RmsreptDAO"%>
+<%@page import="rmsuser.RmsuserDAO"%>
 <%@page import="rms.RmsDAO"%>
 <%@page import="sum.SumDAO"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -6,22 +9,9 @@
 <%@page import="java.util.ArrayList"%>
 <%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
-<%@page import="bbs.BbsDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <% request.setCharacterEncoding("utf-8"); %>
-<jsp:useBean id="bbs" class="bbs.Bbs" scope="page" />
-<jsp:setProperty name="bbs" property="bbsTitle" />
-<jsp:setProperty name="bbs" property="bbsManager" />
-<jsp:setProperty name="bbs" property="bbsContent" />
-<jsp:setProperty name="bbs" property="bbsStart" />
-<jsp:setProperty name="bbs" property="bbsTarget" />
-<jsp:setProperty name="bbs" property="bbsEnd" />
-<jsp:setProperty name="bbs" property="bbsNContent" />
-<jsp:setProperty name="bbs" property="bbsNStart" />
-<jsp:setProperty name="bbs" property="bbsNTarget" />
-<jsp:setProperty name="bbs" property="bbsDeadline" />
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -30,9 +20,9 @@
 </head>
 <body>
 	<%
-	UserDAO userDAO = new UserDAO(); //인스턴스 userDAO 생성
-	SumDAO sumDAO = new SumDAO();
-	RmsDAO rms = new RmsDAO();
+	RmsuserDAO userDAO = new RmsuserDAO(); //사용자 정보
+	RmsreptDAO rms = new RmsreptDAO(); //주간보고 목록
+	RmssummDAO sumDAO = new RmssummDAO(); //요약본 목록 (v2.-)
 	
 	// 메인 페이지로 이동했을 때 세션에 값이 담겨있는지 체크
 	String id = null;
@@ -49,7 +39,7 @@
 		
 	// String 가져오기
 	String pluser = request.getParameter("pl");
-	String bbsDeadline = request.getParameter("bbsDeadline");
+	String rms_dl = request.getParameter("rms_dl");
 	String bbsContent = request.getParameter("content");
 	String bbsEnd = request.getParameter("end");
 	String progress = request.getParameter("progress");
@@ -73,9 +63,13 @@
 	java.sql.Timestamp SummaryDate = rms.getDateNow();
 	String SummaryUpdate = userDAO.getName(id); //user id의 이름을 가져와 업데이트한 사람으로 추가함.
 	
-	int num = sumDAO.updateSum(bbsDeadline, pluser, bbsContent, bbsEnd, progress, state, note, bbsNContent, bbsNTarget, nnote, sign, SummaryDate, SummaryUpdate);
+	//금주
+	int num = sumDAO.updateSum(bbsContent, bbsEnd, progress, state, note, sign, SummaryDate, SummaryUpdate, pluser, rms_dl, "T");
+	//차주
+	int nnum = sumDAO.updateSum(bbsNContent, bbsNTarget, null, null, nnote, sign, SummaryDate, SummaryUpdate, pluser, rms_dl, "N");
+	//(bbsDeadline, pluser, bbsContent, bbsEnd, progress, state, note, bbsNContent, bbsNTarget, nnote, sign, SummaryDate, SummaryUpdate);
 	
-	if(num==-1){
+	if(num == -1 || nnum == -1){
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('데이터베이스 오류입니다. 관리자에게 문의 바랍니다.')");
