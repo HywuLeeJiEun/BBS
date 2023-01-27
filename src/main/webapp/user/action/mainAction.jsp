@@ -1,13 +1,9 @@
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
-<%@page import="rms.rms_next"%>
-<%@page import="rms.rms_this"%>
-<%@page import="rms.RmsDAO"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -35,7 +31,10 @@
 		//줄 개수
 		int trCnt = Integer.parseInt(request.getParameter("trCnt"));
 		int trNCnt = Integer.parseInt(request.getParameter("trNCnt"));
-		int trACnt = Integer.parseInt(request.getParameter("trACnt"));
+		int trACnt = 0;
+		if(request.getParameter("trACnt") != null || request.getParameter("trACnt").isEmpty()) {
+				trACnt = Integer.parseInt(request.getParameter("trACnt"));
+		}
 		
 		if(session.getAttribute("id") != null){
 			id = (String)session.getAttribute("id");
@@ -91,7 +90,12 @@
 							//줄바꿈 세기
 							num = bbscontent.split("\r\n").length-1;
 						}else {
-							bbscontent = "- " + request.getParameter(a+i);
+							if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
+								// -가 있는 경우,
+								bbscontent = request.getParameter(a+i);
+							} else {
+								bbscontent = "- " + request.getParameter(a+i);
+							}
 							//줄바꿈 세기
 							num = bbscontent.split("\r\n").length-1;
 						}
@@ -175,7 +179,11 @@
 							//줄바꿈 세기
 							num = bbscontent.split("\r\n").length-1;
 						}else {
-							bbscontent = "- " + request.getParameter(a+i);
+							if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
+								bbscontent = request.getParameter(a+i);
+							} else {
+								bbscontent = "- " + request.getParameter(a+i);
+							}
 							//줄바꿈 세기
 							num = bbscontent.split("\r\n").length-1;
 						}
@@ -233,29 +241,30 @@
 			String e="erp_division";
 			//ERP 데이터가 있다면,
 			
-			for(int i=0; i< trACnt; i++){
-				//edate 처리
-				if(request.getParameter(a+i).length() != 0) {	//데이터가 존재한다면, 모두 포함되어 있음!
-					String edate=request.getParameter(a+i);
-					String euser=request.getParameter(b+i);
-					String etext=request.getParameter(c+i);
-					String eau=request.getParameter(d+i);
-					String ediv=request.getParameter(e+i);
-					//erp 테이블에 저장
-					int numelist = rms.write_erp(id, rms_dl, edate, euser, etext, eau, ediv);
-					if(numelist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
-						//데이터 삭제
-						int ldel = rms.edelete(id, rms_dl);
-						PrintWriter script = response.getWriter();
-						script.println("<script>");
-						script.println("alert('(erp)데이터 저장에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
-						script.println("history.back();");
-						script.println("</script>");
-						an = -1;
-					} 
+			if(trACnt != 0) {
+				for(int i=0; i< trACnt; i++){
+					//edate 처리
+					if(request.getParameter(a+i).length() != 0) {	//데이터가 존재한다면, 모두 포함되어 있음!
+						String edate=request.getParameter(a+i);
+						String euser=request.getParameter(b+i);
+						String etext=request.getParameter(c+i);
+						String eau=request.getParameter(d+i);
+						String ediv=request.getParameter(e+i);
+						//erp 테이블에 저장
+						int numelist = rms.write_erp(id, rms_dl, edate, euser, etext, eau, ediv);
+						if(numelist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
+							//데이터 삭제
+							int ldel = rms.edelete(id, rms_dl);
+							PrintWriter script = response.getWriter();
+							script.println("<script>");
+							script.println("alert('(erp)데이터 저장에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
+							script.println("history.back();");
+							script.println("</script>");
+							an = -1;
+						} 
+					}
 				}
 			}
-			
 			
 			
 			if(n != -1 && nn != -1) {

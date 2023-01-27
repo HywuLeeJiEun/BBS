@@ -406,7 +406,7 @@
 					<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 						<thead>
 							<tr>
-								<th colspan="5" style="background-color: #eeeeee; text-align: center;">주간보고 작성</th>
+								<th colspan="5" style="background-color: #eeeeee; text-align: center;">주간보고 수정</th>
 							</tr>
 						</thead>
 						<tbody id="tbody">
@@ -802,13 +802,26 @@
 	});
 	</script>
 	
+	<textarea class="textarea" id="workSet" name="workSet" style="display:none;" readonly><%= workSet %></textarea>
+	<script>
+	//'계정관리' 업무를 담당하고 있다면, 
+	$(document).ready(function() {
+		var workSet = document.getElementById("workSet").value;
+		if(workSet.indexOf("계정관리") > -1) {
+			// accountTable 보이도록 설정
+			
+			document.getElementById("wrapper_account").style.display="block";
+		}
+	});
+	</script>
+	
 	<script>
 	//줄개수(count)
 	var acon = 0;
 	var trACnt = document.getElementById("eSize").value;
 	//'계정관리' 업무를 추가함.
 	function addRowAccount() {
-		
+		document.getElementById("accountTable").style.display="block";
 		if(trACnt < 2) {//최대 5개까지 증진
 			if(document.getElementsByClassName('acon').length != 0) {
 				var aconName = document.getElementsByClassName('acon');

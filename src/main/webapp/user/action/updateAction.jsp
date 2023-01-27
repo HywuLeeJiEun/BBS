@@ -34,7 +34,10 @@
 		//줄 개수
 		int trCnt = Integer.parseInt(request.getParameter("trCnt"));
 		int trNCnt = Integer.parseInt(request.getParameter("trNCnt"));
-		int trACnt = Integer.parseInt(request.getParameter("trACnt"));
+		int trACnt = 0;
+		if(request.getParameter("trACnt") != null || request.getParameter("trACnt").isEmpty()) {
+			trACnt = Integer.parseInt(request.getParameter("trACnt"));
+		}
 		
 		// 로그인을 한 사람만 글을 쓸 수 있도록 코드를 수정한다
 		if(id == null){
