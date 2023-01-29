@@ -1,14 +1,8 @@
+<%@page import="java.util.List"%>
 <%@page import="rmsrept.rmsrept"%>
 <%@page import="rmsuser.rmsuser"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
-<%@page import="rms.rms"%>
-<%@page import="rms.rms_next"%>
-<%@page import="rms.rms_this"%>
-<%@page import="rms.RmsDAO"%>
-<%@page import="user.User"%>
-<%@page import="java.util.List"%>
-<%@page import="user.UserDAO"%>
 <%@page import="org.mariadb.jdbc.internal.failover.tools.SearchFilter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>

@@ -1,12 +1,10 @@
 <%@page import="rmsuser.rmsuser"%>
 <%@page import="rmsuser.RmsuserDAO"%>
-<%@page import="user.User"%>
 <%@page import="java.io.PrintWriter"%>
 <%@page import="java.time.LocalDate"%>
 <%@page import="java.time.format.DateTimeFormatter"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="user.UserDAO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <% request.setCharacterEncoding("utf-8"); %>

@@ -85,6 +85,11 @@
 		 }
 		 
 		 String rms_dl = mon;
+		 
+		 //원활한 사용을 위해 가장 최근에 작성된 bbsDeadline을 가져옴. -.
+		 
+		 
+		 
 		if(request.getParameter("rms_dl") != null) {
 			rms_dl = request.getParameter("rms_dl");
 		}

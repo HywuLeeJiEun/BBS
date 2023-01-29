@@ -1,12 +1,7 @@
 <%@page import="rmssumm.RmssummDAO"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
-<%@page import="sum.Sum"%>
-<%@page import="sum.SumDAO"%>
-<%@page import="rms.RmsDAO"%>
-<%@page import="Sumad.Sumad"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="Sumad.SumadDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -55,7 +50,7 @@
 		} else {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('승인(제출)이 완료되었습니다.')");
+			script.println("alert('승인이 완료되었습니다.')");
 			script.println("location.href='/BBS/admin/summaryadRk.jsp'");
 			script.println("</script>");
 		}

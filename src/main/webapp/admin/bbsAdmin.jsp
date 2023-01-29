@@ -2,14 +2,9 @@
 <%@page import="rmsuser.rmsuser"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
-<%@page import="rms.rms"%>
-<%@page import="rms.rms_next"%>
-<%@page import="rms.RmsDAO"%>
 <%@page import="java.util.List"%>
-<%@page import="user.User"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.SimpleDateFormat"%>
-<%@page import="user.UserDAO"%>
 <%@page import="java.util.Locale"%>
 <%@page import="java.util.Calendar"%>
 <%@page import="java.time.LocalDate"%>

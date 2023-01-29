@@ -39,12 +39,17 @@
 	String pluser = request.getParameter("pluser"); // 해당되는 pluser가 나옴(web, erp)
 	String templatePath = null;
 	String newfile = null;
-
-	templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_EW.jrxml";
+	// 1) 개인 pc 환경
+	//templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_EW.jrxml";
+	// 2) local pc 환경
+	templatePath = "C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\RMS_EW.jrxml";
+	
 	if(pluser.equals("WEB")) {
-		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\web_sample.pptx";
+		//newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\web_sample.pptx";
+		newfile = "C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\web_sample.pptx";
 	} else if(pluser.equals("ERP")) {
-		newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\erp_sample.pptx";
+		//newfile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\erp_sample.pptx";
+		newfile = "C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\erp_sample.pptx";
 	}
 	
 	//String templatePath = "D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\sample_bbs.jrxml";
@@ -63,7 +68,8 @@
 	 
 	
 	 // (2)파라메타 생성	  
-	 String logo = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
+	// String logo = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
+	  String logo = "C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
 	 Map<String,Object> paramMap = new HashMap<String,Object>();
 	
 	 paramMap.put("deadLine",rms_dl);	  
@@ -106,7 +112,8 @@
 	} else if(pluser.equals("ERP")) {
 		fileName = "erp_sample.pptx";
 	}
-	String downLoadFile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\" + fileName;
+	//String downLoadFile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\" + fileName;
+	String downLoadFile = "C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\" + fileName;
 	
 	File file = new File(downLoadFile);
 	FileInputStream in = new FileInputStream(downLoadFile);

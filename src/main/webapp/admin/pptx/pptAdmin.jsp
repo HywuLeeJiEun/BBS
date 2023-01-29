@@ -3,10 +3,6 @@
 <%@page import="rmssumm.RmssummDAO"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
-<%@page import="user.UserDAO"%>
-<%@page import="rms.erp"%>
-<%@page import="user.User"%>
-<%@page import="rms.RmsDAO"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.io.OutputStream"%>
 <%@page import="net.sf.jasperreports.swing.JRViewer"%>
@@ -74,8 +70,10 @@
 		//차주
 	ArrayList<rmssumm> wnlist = sumDAO.getSumDiv("WEB", rms_dl, "N");
 	
-	
-	String templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\SummaryAD.jrxml";
+	//1)개인 pc 환경
+	//String templatePath = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\SummaryAD.jrxml";
+	//2)local pc환경
+	String templatePath = "C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\SummaryAD.jrxml";
 	Connection conn = null;
 	
 	try {
@@ -85,7 +83,10 @@
 	 
 	
 	 // (2)파라메타 생성	  
-	 String logo = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
+	 // 1) 개인 pc 환경
+	 //String logo = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
+	 // 2) local pc 환경
+	 String logo = "C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
 	 Map<String,Object> paramMap = new HashMap<String,Object>();
 	
 	 paramMap.put("deadLine",rms_dl);	  
@@ -155,7 +156,10 @@
 	 JRPptxExporter pptxExporter = new JRPptxExporter();
 	 pptxExporter.setExporterInput(new SimpleExporterInput(print));
 	 //pptxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(new File("D:\\git\\BBS\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\주간보고_sample.pptx")));
-	 pptxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(new File("C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\요약본_sample.pptx")));
+	 // 1) 개인 pc 환경
+	 //pptxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(new File("C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\요약본_sample.pptx")));
+	 // 2) local pc 환경
+	 pptxExporter.setExporterOutput(new SimpleOutputStreamExporterOutput(new File("C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\요약본_sample.pptx")));
 	 
 	 // frame으로 출력
 	 /* JFrame frame = new JFrame("Report");
@@ -170,9 +174,12 @@
 	     ex.printStackTrace();
 	
 	}
-	
+	 
 	String fileName = "요약본_sample.pptx";
-	String downLoadFile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\" + fileName;
+	// 1) 개인 pc 환경
+	//String downLoadFile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\" + fileName;
+	// 2) local pc 환경
+	String downLoadFile = "C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\" + fileName;
 	
 	File file = new File(downLoadFile);
 	FileInputStream in = new FileInputStream(downLoadFile);
@@ -193,8 +200,8 @@
 	while ((length = in.read(b)) >0) {
 		os.write(b,0,length);
 	}
-	
-	os.flush();   
+
+	os.flush();    
 %>
 
 

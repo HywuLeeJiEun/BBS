@@ -145,11 +145,11 @@
 		}
 		
 		if(rmslist.size() == 0) {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('제출된 주간보고가 없습니다.')");
+			//PrintWriter script = response.getWriter();
+			//script.println("<script>");
+			//script.println("alert('제출된 주간보고가 없습니다.')");
 			//script.println("history.back();");
-			script.println("</script>");
+			//script.println("</script>");
 		}
 		
 		// 미제출자 인원 계산 ()

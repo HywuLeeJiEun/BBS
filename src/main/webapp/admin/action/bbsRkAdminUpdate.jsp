@@ -1,15 +1,10 @@
 <%@page import="rmssumm.RmssummDAO"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
-<%@page import="sum.SumDAO"%>
-<%@page import="rms.RmsDAO"%>
-<%@page import="Sumad.Sumad"%>
-<%@page import="Sumad.SumadDAO"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
-<%@page import="user.UserDAO"%>
 <%@page import="java.io.PrintWriter"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>

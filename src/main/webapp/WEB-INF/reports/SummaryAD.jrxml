@@ -12,7 +12,7 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="MariaDB"/>
 	<property name="net.sf.jasperreports.export.pdf.force.linebreak.policy" value="true"/>
-	<property name="com.jaspersoft.studio.data.sql.tables" value="cm1zLnJtc3N1bW0gLDE1LDE1LGMyMTdjYjAwLWI4YmEtNDY4Yy1iN2ZiLThkZTMzN2EwYTUxYjs="/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
 	<parameter name="deadLine" class="java.lang.String">
 		<parameterDescription><![CDATA[제출마감일]]></parameterDescription>
 	</parameter>
@@ -44,64 +44,14 @@
 	<parameter name="wnsum_enta" class="java.lang.String"/>
 	<parameter name="wnsum_note" class="java.lang.String"/>
 	<queryString>
-		<![CDATA[SELECT *
+		<![CDATA[SELECT distinct  rms.rmssumm.`SUM_SIGN` 
 FROM rms.rmssumm
 WHERE 
 	 rms.rmssumm.`RMS_DL` = $P{deadLine}]]>
 	</queryString>
-	<field name="USER_FD" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="USER_FD"/>
-		<property name="com.jaspersoft.studio.field.label" value="USER_FD"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
-	</field>
-	<field name="RMS_DL" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="RMS_DL"/>
-		<property name="com.jaspersoft.studio.field.label" value="RMS_DL"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
-	</field>
-	<field name="SUM_CON" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="SUM_CON"/>
-		<property name="com.jaspersoft.studio.field.label" value="SUM_CON"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
-	</field>
-	<field name="SUM_ENTA" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="SUM_ENTA"/>
-		<property name="com.jaspersoft.studio.field.label" value="SUM_ENTA"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
-	</field>
-	<field name="SUM_PRO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="SUM_PRO"/>
-		<property name="com.jaspersoft.studio.field.label" value="SUM_PRO"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
-	</field>
-	<field name="SUM_STA" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="SUM_STA"/>
-		<property name="com.jaspersoft.studio.field.label" value="SUM_STA"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
-	</field>
-	<field name="SUM_NOTE" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="SUM_NOTE"/>
-		<property name="com.jaspersoft.studio.field.label" value="SUM_NOTE"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
-	</field>
-	<field name="SUM_DIV" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="SUM_DIV"/>
-		<property name="com.jaspersoft.studio.field.label" value="SUM_DIV"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
-	</field>
 	<field name="SUM_SIGN" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="SUM_SIGN"/>
 		<property name="com.jaspersoft.studio.field.label" value="SUM_SIGN"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
-	</field>
-	<field name="SUM_TIME" class="java.sql.Timestamp">
-		<property name="com.jaspersoft.studio.field.name" value="SUM_TIME"/>
-		<property name="com.jaspersoft.studio.field.label" value="SUM_TIME"/>
-		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
-	</field>
-	<field name="SUM_UPDU" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="SUM_UPDU"/>
-		<property name="com.jaspersoft.studio.field.label" value="SUM_UPDU"/>
 		<property name="com.jaspersoft.studio.field.tree.path" value="rmssumm"/>
 	</field>
 	<background>
@@ -159,7 +109,7 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["\n"+$P{ensum_note}]]></textFieldExpression>
 			</textField>
@@ -172,7 +122,7 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["\n"+$P{ensum_enta}]]></textFieldExpression>
 			</textField>
@@ -185,9 +135,9 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$P{ensum_con}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{ensum_con}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="9" y="233" width="64" height="63" uuid="30ad4989-d781-4e9f-89db-5d174194f6c5"/>
@@ -227,9 +177,9 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$P{etsum_con}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{etsum_con}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="RelativeToTallestObject" x="574" y="52" width="210" height="62" uuid="6112df65-0eea-4391-a4bc-4c974c4b0d1e"/>
@@ -240,7 +190,7 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["\n"+$P{etsum_note}]]></textFieldExpression>
 			</textField>
@@ -253,7 +203,7 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{etsum_pro}]]></textFieldExpression>
 			</textField>
@@ -413,7 +363,7 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["\n"+$P{etsum_enta}]]></textFieldExpression>
 			</textField>
@@ -442,9 +392,9 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$P{wtsum_con}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{wtsum_con}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="RelativeToTallestObject" x="574" y="114" width="210" height="64" uuid="5983db18-c0b8-4250-9e3a-0a6c46579478"/>
@@ -455,7 +405,7 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["\n"+$P{wtsum_note}]]></textFieldExpression>
 			</textField>
@@ -468,7 +418,7 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{wtsum_pro}]]></textFieldExpression>
 			</textField>
@@ -481,7 +431,7 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["\n"+$P{wtsum_enta}]]></textFieldExpression>
 			</textField>
@@ -494,7 +444,7 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["\n"+$P{wnsum_note}]]></textFieldExpression>
 			</textField>
@@ -507,7 +457,7 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA["\n"+$P{wnsum_enta}]]></textFieldExpression>
 			</textField>
@@ -520,9 +470,9 @@ WHERE
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 				<textElement textAlignment="Left">
-					<font fontName="맑은 고딕" size="11" isBold="false"/>
+					<font fontName="맑은 고딕" size="9" isBold="false"/>
 				</textElement>
-				<textFieldExpression><![CDATA["\n"+$P{wnsum_con}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{wnsum_con}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement stretchType="ElementGroupHeight" x="9" y="296" width="64" height="63" uuid="9dcc787c-c47c-4a18-96b4-c04310fe7bff"/>
