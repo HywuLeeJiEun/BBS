@@ -182,7 +182,7 @@
 						<ul class="dropdown-menu">
 							<li><a href="/BBS/user/bbs.jsp">조회</a></li>
 							<li ><a href="/BBS/user/bbsUpdate.jsp">작성</a></li>
-							<li class="active"><a href="/BBS/user/bbsUpdateDelete.jsp">수정 및 제출</a></li>
+							<li><a href="/BBS/user/bbsUpdateDelete.jsp">수정 및 제출</a></li>
 							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					<% } %>

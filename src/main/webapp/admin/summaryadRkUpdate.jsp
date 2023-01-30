@@ -122,8 +122,21 @@
 		//erp_data 가져오기
 		ArrayList<rmsedps> erp = rms.geterp(rms_dl);
 
-		
-
+		//sign 받아오기 (list가 없을 경우를 대비!)
+		String getSign = "";
+		if(etlist.size() == 0) {
+			// 1. erp 데이터가 없고,
+			if(wtlist.size() == 0) {
+				// 1-1. web 데이터도 없다면!
+				getSign = "미승인";
+			} else {
+				// 1-2. web 데이터는 있다면!
+				getSign = wtlist.get(0).getSum_sign();
+			}
+		} else {
+			//1. erp가 있다면,
+			getSign = etlist.get(0).getSum_sign();
+		}
 
 		
 		String str = "미승인 - 관리자의 미승인 상태<br>";
@@ -211,7 +224,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장")||rk.equals("관리자")) {
+					if(au.equals("관리자") || au.equals("PL")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="/BBS/admin/work/workChange.jsp">담당업무 변경</a></li>
@@ -417,7 +430,7 @@
 							<td style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title=""> [ERP/WEB] - summary (<%= rms_dl %>)<textarea id="rms_dl" name="rms_dl" style="display:none"><%= rms_dl %></textarea></td>
 							<td colspan="2"  style="background-color:#f9f9f9;"></td>
 							<td  style="background-color:#f9f9f9;" colspan="1" style="txet:center">상태</td>
-							<td  style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" ><%= etlist.get(0).getSum_sign() %><textarea id="sign" name="sign" style="display:none"><%= etlist.get(0).getSum_sign() %></textarea></td>
+							<td  style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" ><%= getSign %><textarea id="sign" name="sign" style="display:none"><%= getSign %></textarea></td>
 						</tr>
 						<tr>
 							<th colspan="6" style="background-color:#D4D2FF; align:left; border:none" > &nbsp;금주 업무 실적</th>
@@ -612,14 +625,19 @@
 			</div>
 			<div class="container" style="display:inline-block">
 			<%
-			if(etlist.get(0).getSum_sign().equals("미승인")) {
+			if(getSign.equals("미승인")) {
+				if(etlist.size() != 0 && wtlist.size() != 0) {
 			%>
+				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center; margin-left:10px" onClick="location.href='/BBS/admin/summaryadRk.jsp'">목록</button> 
 				<button type="button" class="btn btn-success pull-right" style="width:50px; margin-left:10px; text-align:center; align:center" onclick="signOn()">승인</button> 
 				<button type="button" class="btn btn-info pull-right" style="width:50px; text-align:center; align:center" onclick="update()">수정</button> 
+		<%		} else { %>
+					<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center; margin-left:10px" onClick="location.href='/BBS/admin/summaryadRk.jsp'">목록</button> 
+		<% 		} %>
 		<% } %>
 		<% if(etlist.get(0).getSum_sign().equals("승인") || etlist.get(0).getSum_sign().equals("마감")) {  //승인이나 마감 상태시에만 pptx로 출력 가능!%>
 				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center; margin-left:20px" onClick="location.href='/BBS/admin/summaryadRk.jsp'">목록</button> 
-				<button type="button" class="btn btn-success pull-right" style="width:50px; text-align:center; align:center" onclick="print()">pptx</button> 
+				<button type="button" class="btn btn-success pull-right" style="width:50px; text-align:center; align:center" onclick="print()">출력</button> 
 				
 		<% } %> 
 		</div>

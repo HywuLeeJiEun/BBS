@@ -38,7 +38,7 @@
 		} else {
 		
 		//sign을 승인으로 변경!
-		int num = sumDAO.signSum("승인", rms_dl);
+		int num = sumDAO.signSum("승인",id,rms_dl);
 		
 		if(num == -1) {
 			//정상적으로 이루어지지 않음!

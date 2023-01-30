@@ -380,8 +380,8 @@
 						<!-- <th style="background-color: #eeeeee; text-align: center;">번호</th> -->
 						<th style="background-color: #eeeeee; text-align: center;">제출일</th>
 						<th style="background-color: #eeeeee; text-align: center; text-align: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;요약본 상세정보</th>
-						<th style="background-color: #eeeeee; text-align: center;">작성자</th>
 						<th style="background-color: #eeeeee; text-align: center;">작성일(수정일)</th>
+						<th style="background-color: #eeeeee; text-align: center;">수정자</th>
 						<th style="background-color: #eeeeee; text-align: center;">상태</th>
 						<th style="background-color: #eeeeee; text-align: center;">pptx</th>
 					</tr>
@@ -424,13 +424,13 @@
 							
 							if(wlist.size() != 0) { //web이 있다면,
 								wtitle = "WEB";
-								edate = dateFmt.parse(wlist.get(0).getSum_time());
+								plus = "/";
+								wdate = dateFmt.parse(wlist.get(0).getSum_time());
 								getSign = wlist.get(0).getSum_sign();
 							}
 							if(elist.size() != 0) { //erp가 있다면,
 								etitle = "ERP";
-								plus = "/";
-								wdate = dateFmt.parse(elist.get(0).getSum_time());
+								edate = dateFmt.parse(elist.get(0).getSum_time());
 								getSign = elist.get(0).getSum_sign();
 							}
 							
@@ -467,12 +467,8 @@
 						<td><%= writer %></td>
 						<!-- 승인/미승인/마감 표시 -->
 						<td><%= getSign %></td>
-						<td data-toggle="tooltip" data-html="true" data-placement="right" title="승인 상태에만, <br>출력이 가능합니다.">
-						<% if(getSign.equals("미승인")) { %>
-							<a class="btn btn-success" style="font-size:12px" href="/BBS/admin/action/summaryadsignOnAction.jsp?rms_dl=<%= dl %>"> 승인 </a>
-						<% }else { //승인, 마감 상태라면 %>
-							완료
-						<% } %>
+						<td data-toggle="tooltip" data-html="true" data-placement="right" title="버튼을 통해,<br>pptx 출력">
+							<a class="btn btn-success" style="font-size:12px" href="/BBS/admin/pptx/pptAdmin.jsp?rms_dl=<%= dl %>"> 출력 </a>
 						</td>
 					</tr>
 					<%

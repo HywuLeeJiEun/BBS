@@ -93,7 +93,6 @@
 		if(request.getParameter("rms_md") != null) {
 			rms_md = Integer.parseInt(request.getParameter("rms_md"));
 		}
-
 		
 		if(rms_md == -1) {
 			PrintWriter script = response.getWriter();
@@ -196,7 +195,6 @@
 		//미제출자 인원
 		ArrayList<String> noSubname = new ArrayList<String>();
 		ArrayList<String> Subname = new ArrayList<String>();
-
 		
 		//제출한 RMS 도출
 		for(int i=0; i<flist.size(); i++) {
@@ -229,7 +227,6 @@
 				 
 			 }
 		 }
-
 		//alert가 넘어오면 경고창 미표시, 넘어오지 않으면 표시!
 		String alert = request.getParameter("alert");
 		if(alert == null || alert.isEmpty()) {
@@ -371,7 +368,7 @@
 		     			<div class="col-md-3" style="visibility:hidden">
 		     			</div>
 		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label" data-toggle="tooltip" data-placement="bottom" title="작성되지 않은 제출일 목록">제출일 선택</label>
+		     				<label class="col-form-label" data-toggle="tooltip" data-placement="top" title="요약본이 제출되지 않은 목록">제출일 선택</label>
 		     				<i class="glyphicon glyphicon-info-sign"  style="left:5px;"></i>
 		     				<select class="form-control" name="searchField" id="searchField" onchange="if(this.value) location.href=(this.value);">
 								<option value="rms_dl" selected="selected">[선택]</option>
@@ -798,6 +795,7 @@
 	var ntarget ="";
 	
 	$(document).ready(function() {
+		var noSub = <%= noSub %>;
 		$('#save').click(function () {
 			//alert($("input[type=checkbox][name=chk]:checked").val());	
 			$("input[type=checkbox][name=chk]:checked").each(function(){
@@ -815,46 +813,86 @@
 			
 			if(chk_arr == null || chk_arr =="") {
 				alert('금주 업무 실적 중, 내용이 선택되지 않았습니다. \n1개 이상을 선택하여 주십시오.');
+				chk_arr = [];
+				nchk_arr = [];
 			}else if(nchk_arr == null || nchk_arr =="") {
 				alert('차주 업무 계획 중, 내용이 선택되지 않았습니다. \n1개 이상을 선택하여 주십시오.');
+				chk_arr = [];
+				nchk_arr = [];
 			} else {
-			
-			//데이터를 다른 페이지로 보냄!
-			// ((금주 업무 내용 / 완료일))
-			for(var i=0; i < chk_arr.length; i++) {
-				var a = "#content"+chk_arr[i];
-				var b = "#end"+chk_arr[i];
-				//금주 업무 실적에 대한 내용 넣기
-				content += $(a).val() + "§";
-				end += $(b).val() + "§";
-			}
-			
-			// ((차주 업무 내용 / 목표일))
-			for(var i=0; i < nchk_arr.length; i++) {
-				var a = "#ncontent"+nchk_arr[i];
-				var b = "#ntarget"+nchk_arr[i];
-				//금주 업무 실적에 대한 내용 넣기
-				ncontent += $(a).val() + "§";
-				ntarget += $(b).val() + "§";
-			}
-			
-			// 데이터 넘기기 
-			var innerHtml = "";
-			//innerHtml += '<td><textarea class="textarea" id="chk_arr" name="chk_arr" readonly>'+ chk_arr +'</textarea></td>';
-			//innerHtml += '<td><textarea class="textarea" id="nchk_arr" name="nchk_arr" readonly>'+ nchk_arr +'</textarea></td>';
-			innerHtml += '<td><textarea class="textarea" id="content" name="content" readonly>'+ content +'</textarea></td>';
-			innerHtml += '<td><textarea class="textarea" id="end" name="end" readonly>'+ end +'</textarea></td>';
-			innerHtml += '<td><textarea class="textarea" id="ncontent" name="ncontent" readonly>'+ ncontent +'</textarea></td>';
-			innerHtml += '<td><textarea class="textarea" id="ntarget" name="ntarget" readonly>'+ ntarget +'</textarea></td>';
-			
-			$('#Table > tbody > tr:last').append(innerHtml);
-			$('#Rkwrite').submit(); 
+				if(noSub != 0) {
+					var con = confirm('미제출 인원이 있습니다. 요약본을 작성하시겠습니까?')
+					if(con) {
+						//데이터를 다른 페이지로 보냄!
+						// ((금주 업무 내용 / 완료일))
+						for(var i=0; i < chk_arr.length; i++) {
+							var a = "#content"+chk_arr[i];
+							var b = "#end"+chk_arr[i];
+							//금주 업무 실적에 대한 내용 넣기
+							content += $(a).val() + "§";
+							end += $(b).val() + "§";
+						}
+						
+						// ((차주 업무 내용 / 목표일))
+						for(var i=0; i < nchk_arr.length; i++) {
+							var a = "#ncontent"+nchk_arr[i];
+							var b = "#ntarget"+nchk_arr[i];
+							//금주 업무 실적에 대한 내용 넣기
+							ncontent += $(a).val() + "§";
+							ntarget += $(b).val() + "§";
+						}
+						
+						// 데이터 넘기기 
+						var innerHtml = "";
+						//innerHtml += '<td><textarea class="textarea" id="chk_arr" name="chk_arr" readonly>'+ chk_arr +'</textarea></td>';
+						//innerHtml += '<td><textarea class="textarea" id="nchk_arr" name="nchk_arr" readonly>'+ nchk_arr +'</textarea></td>';
+						innerHtml += '<td><textarea class="textarea" id="content" name="content" readonly>'+ content +'</textarea></td>';
+						innerHtml += '<td><textarea class="textarea" id="end" name="end" readonly>'+ end +'</textarea></td>';
+						innerHtml += '<td><textarea class="textarea" id="ncontent" name="ncontent" readonly>'+ ncontent +'</textarea></td>';
+						innerHtml += '<td><textarea class="textarea" id="ntarget" name="ntarget" readonly>'+ ntarget +'</textarea></td>';
+						
+						$('#Table > tbody > tr:last').append(innerHtml);
+						$('#Rkwrite').submit(); 
+					} else {
+						chk_arr = [];
+						nchk_arr = [];
+					}
+				}else {		
+				//데이터를 다른 페이지로 보냄!
+				// ((금주 업무 내용 / 완료일))
+				for(var i=0; i < chk_arr.length; i++) {
+					var a = "#content"+chk_arr[i];
+					var b = "#end"+chk_arr[i];
+					//금주 업무 실적에 대한 내용 넣기
+					content += $(a).val() + "§";
+					end += $(b).val() + "§";
+				}
+				
+				// ((차주 업무 내용 / 목표일))
+				for(var i=0; i < nchk_arr.length; i++) {
+					var a = "#ncontent"+nchk_arr[i];
+					var b = "#ntarget"+nchk_arr[i];
+					//금주 업무 실적에 대한 내용 넣기
+					ncontent += $(a).val() + "§";
+					ntarget += $(b).val() + "§";
+				}
+				
+				// 데이터 넘기기 
+				var innerHtml = "";
+				//innerHtml += '<td><textarea class="textarea" id="chk_arr" name="chk_arr" readonly>'+ chk_arr +'</textarea></td>';
+				//innerHtml += '<td><textarea class="textarea" id="nchk_arr" name="nchk_arr" readonly>'+ nchk_arr +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="content" name="content" readonly>'+ content +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="end" name="end" readonly>'+ end +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="ncontent" name="ncontent" readonly>'+ ncontent +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="ntarget" name="ntarget" readonly>'+ ntarget +'</textarea></td>';
+				
+				$('#Table > tbody > tr:last').append(innerHtml);
+				$('#Rkwrite').submit(); 
+				}
 			}
 		})
 	});
 	
-
-
 	</script>
 </body>
 </html>

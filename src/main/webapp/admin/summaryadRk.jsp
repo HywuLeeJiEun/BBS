@@ -412,13 +412,13 @@
 							
 							if(wlist.size() != 0) { //web이 있다면,
 								wtitle = "WEB";
-								edate = dateFmt.parse(wlist.get(0).getSum_time());
+								wdate = dateFmt.parse(wlist.get(0).getSum_time());
 								getSign = wlist.get(0).getSum_sign();
 							}
 							if(elist.size() != 0) { //erp가 있다면,
 								etitle = "ERP";
 								plus = "/";
-								wdate = dateFmt.parse(elist.get(0).getSum_time());
+								edate = dateFmt.parse(elist.get(0).getSum_time());
 								getSign = elist.get(0).getSum_sign();
 							}
 							
@@ -452,7 +452,7 @@
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						<a href="/BBS/admin/summaryadRkUpdate.jsp?rms_dl=<%= dl %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
-							[<%= wtitle+plus+etitle %>] - summary (<%= dl %>)</a></td>
+							[<%= etitle+plus+wtitle %>] - summary (<%= dl %>)</a></td>
 						<td><%= date.substring(0, 11) + date.substring(11, 13) +"시"+ date.substring(14, 16)+"분" %></td>
 						<td><%= writer %></td>
 						<!-- 승인/미승인/마감 표시 -->
@@ -460,8 +460,10 @@
 						<td data-toggle="tooltip" data-html="true" data-placement="right" title="승인 시, <br>수정이 불가합니다.">
 						<% if(getSign.equals("미승인")) { %>
 							<a class="btn btn-success" style="font-size:12px" href="/BBS/admin/action/summaryadsignOnAction.jsp?rms_dl=<%= dl %>"> 승인 </a>
-						<% }else { //승인, 마감 상태라면 %>
+						<% }else if(getSign.equals("승인")){ //승인 상태라면 %>
 							완료
+						<% }else{ //summary - 마감 상태는 아직 존재하지 않음!%>
+							마감 
 						<% } %>
 						</td>
 					</tr>

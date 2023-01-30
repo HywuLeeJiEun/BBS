@@ -363,7 +363,24 @@ public class RmsuserDAO {
 				PreparedStatement pstmt = conn.prepareStatement(sql);
 				pstmt.setString(1, user_fd);
 				rs = pstmt.executeQuery();
-				if(rs.next()) {
+				while(rs.next()) {
+					list.add(rs.getString(1)); //user_id
+				}
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return list;
+		}
+	
+	
+	//RMSUSER - user_id 모두 가져오기 - workChange.jsp
+	public ArrayList<String> getidfull() {
+		String sql = "select user_id from rmsuser order by user_name asc";
+			ArrayList<String> list = new ArrayList<String>();
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				rs = pstmt.executeQuery();
+				while(rs.next()) {
 					list.add(rs.getString(1)); //user_id
 				}
 			}catch (Exception e) {

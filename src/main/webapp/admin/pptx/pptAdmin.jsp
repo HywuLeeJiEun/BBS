@@ -47,10 +47,7 @@
 	// RMSSUMM에 해당하는 rms_dl
 	String rms_dl = request.getParameter("rms_dl");
 	//e_state, w_state => 색상표
-	//String e_color = request.getParameter("ecolor");
-	//String w_color = request.getParameter("wcolor");
-	String e_state = request.getParameter("ecolor");//"#ff0000";
-	String w_state = request.getParameter("wcolor");//"#ffff00";
+
 	
 	// erp_bbs가 있다면, 데이터를 저장함!
 	//erp 데이터가 있는지 확인
@@ -91,6 +88,24 @@
 	
 	 paramMap.put("deadLine",rms_dl);	  
 	 paramMap.put("logo",logo);
+	 String e_state = "";
+	 String w_state = "";
+	 if(etlist.get(0).getSum_pro().equals("완료")) {
+		 e_state ="#00ff00";
+	 }else if(etlist.get(0).getSum_pro().equals("진행중")) {
+		 e_state ="#ffff00";
+	 }else {
+		 e_state = "ff0000";
+	 }
+	 if(wtlist.get(0).getSum_pro().equals("완료")) {
+		 w_state ="#00ff00";
+	 }else if(wtlist.get(0).getSum_pro().equals("진행중")) {
+		 w_state ="#ffff00";
+	 }else {
+		 w_state = "ff0000";
+	 }
+	 
+	 
 	 paramMap.put("e_state",e_state);
 	 paramMap.put("w_state",w_state);
 	 

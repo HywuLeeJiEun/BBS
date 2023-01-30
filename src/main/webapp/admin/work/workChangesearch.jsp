@@ -46,13 +46,7 @@
 		//String workset;
 		//works 리스트에 저장됨!
 		//user_id => 현재 탐색중인 사원의 이름
-		String user_id = "";
-		if(request.getParameter("searchText") != null) {
-			user_id = userDAO.getId((String)request.getParameter("searchText"));
-		}else {
-			user_id = userDAO.getId(((String)request.getAttribute("searchText")));			
-		}
-
+		String user_id = request.getParameter("user_id");
 		
 		if(user_id == null) {
 			PrintWriter script = response.getWriter();
@@ -123,9 +117,15 @@
 		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
 		String au = ulist.get(0).getUser_au();
 		
-		
+		//모든 사용자 아이디 가져오기!
+		ArrayList<String> fuser = userDAO.getidfull();
+		//중복값 제거
+		for(int i=0; i < fuser.size(); i++) {
+			if(fuser.get(i).equals("user_id")) {
+				fuser.remove(i);
+			}
+		}
 	%>
-	
 	<!-- 모달 영역! -->
 	   <div class="modal fade" id="UserUpdateModal" role="dialog">
 		   <div class="modal-dialog">
@@ -334,7 +334,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
+					if(au.equals("관리자") || au.equals("PL")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li class="active"><a href="/BBS/admin/work/workChange.jsp">담당업무 변경</a></li>
@@ -370,12 +370,13 @@
 			<form method="post" name="search" action="/BBS/admin/work/workChangesearch.jsp">
 				<table class="pull-left">
 					<tr>
-						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
-								<option value="userName">담당자</option>
-						</select></td>
-						<td><input type="text" class="form-control"
-							placeholder="담당자 입력" name="searchText" maxlength="100" value="<%= userDAO.getName(user_id) %>"></td>
-						<td><button type="submit" style="margin:5px" class="btn btn-success">검색</button></td>
+					<td><i class="glyphicon glyphicon-triangle-right" id="icon"  style="left:5px;"></i>&nbsp; <b>담당자</b> &nbsp;</td>
+						<td><select class="form-control" name="searchField" id="searchField" onchange="if(this.value) location.href=(this.value);">
+							<option><%= userDAO.getName(user_id) %></option>
+							<% for(int i=0; i < fuser.size(); i++) {%>
+								<option value="/BBS/admin/work/workChangesearch.jsp?user_id=<%= fuser.get(i) %>"><%= userDAO.getName(fuser.get(i)) %></option>
+							<% } %>
+							</select></td>
 					</tr>
 
 				</table>

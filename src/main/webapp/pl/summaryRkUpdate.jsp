@@ -188,7 +188,7 @@
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
 								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
-								<li class="active"><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
+								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
 								<li id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
@@ -387,7 +387,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; color:black " data-html="true" class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인 및 마감 상태에선<br> 수정/삭제가 불가합니다.<br><br> 예외: 관리자가 데이터를 수정한 경우,<br> 삭제가 불가합니다." > <%= pl %> 요약본(Summary) </th>
+					<th colspan="5" style=" text-align: center; color:black " data-html="true" class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인 및 마감 상태에선<br> 수정/삭제가 불가합니다." > <%= pl %> 요약본(Summary) </th>
 				</tr>
 			</thead>
 		</table>

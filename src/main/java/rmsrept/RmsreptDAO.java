@@ -367,7 +367,7 @@ public class RmsreptDAO {
 	      				SQL += "user_id='"+plist[i].trim()+"'";
 	      			}
 	      		}
-	      		SQL += ")) r where rms_sign='승인' or rms_sign='마감'";
+	      		SQL += ")) r where rms_sign='승인' or rms_sign='마감' order by rms_time";
 	      try {
 	            PreparedStatement pstmt=conn.prepareStatement(SQL);
 	            pstmt.setString(1, rms_dl);

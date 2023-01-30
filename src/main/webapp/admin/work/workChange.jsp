@@ -81,6 +81,16 @@
 		if(request.getParameter("user_id") != null && !request.getParameter("user_id").isEmpty()) {
 			user_id = request.getParameter("user_id");
 		}
+		
+		//모든 사용자 아이디 가져오기!
+		ArrayList<String> fuser = userDAO.getidfull();
+		//중복값 제거
+		for(int i=0; i < fuser.size(); i++) {
+			if(fuser.get(i).equals("user_id")) {
+				fuser.remove(i);
+			}
+		}
+		
 	%>
 
 	<!-- 모달 영역! -->
@@ -293,7 +303,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장") || rk.equals("관리자")) {
+					if(au.equals("관리자")||au.equals("PL")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li class="active"><a href="/BBS/admin/work/workChange.jsp">담당업무 변경</a></li>
@@ -330,12 +340,13 @@
 			<form method="post" name="search" action="/BBS/admin/work/workChangesearch.jsp">
 				<table class="pull-left">
 					<tr>
-						<td><select class="form-control" name="searchField" id="searchField" onchange="ChangeValue()">
-								<option value="userName">담당자</option>
-						</select></td>
-						<td><input type="text" class="form-control"
-							placeholder="담당자 입력" name="searchText" maxlength="100" value="<%= userDAO.getName(id) %>"></td>
-						<td><button type="submit" style="margin:5px" class="btn btn-success">검색</button></td>
+					<td><i class="glyphicon glyphicon-triangle-right" id="icon"  style="left:5px;"></i>&nbsp; <b>담당자</b> &nbsp;</td>
+						<td><select class="form-control" name="searchField" id="searchField" onchange="if(this.value) location.href=(this.value);">
+							<option><%= userDAO.getName(user_id) %></option>
+							<% for(int i=0; i < fuser.size(); i++) {%>
+								<option value="/BBS/admin/work/workChangesearch.jsp?user_id=<%= fuser.get(i) %>"><%= userDAO.getName(fuser.get(i)) %></option>
+							<% } %>
+							</select></td>
 					</tr>
 
 				</table>
@@ -385,25 +396,25 @@
 						// 직업의 개수 만큼 for문을 돌림.
 							for(int i=0; i< works.size(); i++ ) {
 	
-					%>
-					<tr>
-						<td colspan="1" style="text-align:center;"><input type=text name="<%= i %>" style="border:0; width:50%; text-align:center" readonly value="<%= works.get(i) %>"></td>
-						<td colspan="1"><a type="submit" style="margin-right:50%;border:none" class="btn btn-danger pull-left" href="/BBS/admin/action/workDeleteAction.jsp?work=<%= works.get(i) %>&user_id=<%= id %>" >삭제</a></td>
-					</tr>
-					<%
-							} if (works.size() == 10) {
-					%>
-						<tr>
-							<td colspan="2" style="text-align:center"><input type=text style="border:0; width:100%; text-align:center; color:blue" readonly value="업무 지정은 최대 10개까지만 가능합니다."></td>
-						</tr>
-					<%
-							}
-						}
-					%>
-				</table>
-			</div>
-			
-			<div class="align-self-start" style="display:inline-block; width:5%">
+								%>
+								<tr>
+									<td colspan="1" style="text-align:center;"><input type=text name="<%= i %>" style="border:0; width:50%; text-align:center" readonly value="<%= works.get(i) %>"></td>
+									<td colspan="1"><a type="submit" style="margin-right:50%;border:none" class="btn btn-danger pull-left" href="/BBS/admin/action/workDeleteAction.jsp?work=<%= works.get(i) %>&user_id=<%= id %>" >삭제</a></td>
+								</tr>
+								<%
+										} if (works.size() == 10) {
+								%>
+									<tr>
+										<td colspan="2" style="text-align:center"><input type=text style="border:0; width:100%; text-align:center; color:blue" readonly value="업무 지정은 최대 10개까지만 가능합니다."></td>
+									</tr>
+								<%
+										}
+									}
+								%>
+							</table>
+						</div>
+						
+						<div class="align-self-start" style="display:inline-block; width:5%">
 				<table class="table" style="text-align: center; border: 1px solid #dddddd">
 				</table>
 			</div>
