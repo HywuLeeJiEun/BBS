@@ -626,9 +626,8 @@
 			Date dldate = dateFormat.parse(dl);
 			Date today = dateFormat.parse(timenow);
 			
-			//if(dldate.before(today)){ %>
+			%>
 			<a href="/BBS/pl/bbsRkwrite.jsp?rms_dl=<%=rms_dl%>" style="width:100px; margin-right:20px" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> Summary</a>
-			<% //} %>
 		</div>
 	</div>
 	
@@ -785,7 +784,7 @@
 		}
 	});
 	
-	$("#summary_nav").on('mousedown', function() {
+	<%-- $("#summary_nav").on('mousedown', function() {
 		//noSub -> 미제출자
 		if(<%= noSub %> != 0) { //즉, 미제출자가 있다면!
 			var go;
@@ -798,7 +797,7 @@
 			}
 		
 		}
-	});
+	}); --%>
 	</script>
 </body>
 </html>

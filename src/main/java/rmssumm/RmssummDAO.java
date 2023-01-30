@@ -288,4 +288,16 @@ public class RmssummDAO {
 		}
 		return -1; //데이터베이스 오류
 	}
+	
+	
+	//RMSSUMM - rms_dl을 기준으로, 작성된 summary가 있는지 확인 (bbsRkwrite.jsp)
+	public String getDluse(String rms_dl) { 
+		 String sql ="select distinct rms_dl from rmssumm where rms_dl=?";
+		 try { PreparedStatement pstmt = conn.prepareStatement(sql);
+		 	pstmt.setString(1, rms_dl); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입 
+		 	rs =pstmt.executeQuery(); 
+		 	if(rs.next()) { return rs.getString(1); } 
+		 }catch (Exception e) { 
+		 e.printStackTrace(); } return ""; //데이터베이스 오류 
+	 }
 }

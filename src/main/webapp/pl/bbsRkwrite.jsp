@@ -84,27 +84,24 @@
 			day = dateFmt.format(cal2.getTime());
 		 }
 		 
-		 String rms_dl = mon;
-		 
-		 //원활한 사용을 위해 가장 최근에 작성된 bbsDeadline을 가져옴. -.
-		 
-		 
+		 String rms_dl = "";
+		 int rms_md = 0;
 		 
 		if(request.getParameter("rms_dl") != null) {
 			rms_dl = request.getParameter("rms_dl");
 		}
+		if(request.getParameter("rms_md") != null) {
+			rms_md = Integer.parseInt(request.getParameter("rms_md"));
+		}
+
 		
-		//마감기간이 지난 보고의 요약본은 작성할 수 없음!
-			//해당 rms_dl으로 조회하여 sign이 마감인 경우,
-		//String getSign = rms.getSignNext(rms_dl);
-		//if(getSign.equals("마감")) {
-			/* PrintWriter script = response.getWriter();
+		if(rms_md == -1) {
+			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('제출 기한이 지나 작성이 불가합니다.')");
-			script.println("location.href='/BBS/pl/bbsRk.jsp'");
-			script.println("</script>"); */
-		//}
-		
+			script.println("alert('제출일이 선택되지 않았습니다.')");
+			script.println("location.href='/BBS/pl/bbsRkwrite.jsp'");
+			script.println("</script>"); 
+		} 
 		
 		 
 		// ********** 담당자를 가져오기 위한 메소드 *********** 
@@ -144,12 +141,14 @@
 		//만약 이미 해당 날짜로 요약본이 작성되어 있다면, 뒤로 돌려보냄!
 		ArrayList<rmssumm> list = sumDAO.getSumDL(rms_dl);
 		if(list.size() != 0){ //데이터가 있다면,
-			if(list.get(0).getUser_fd().equals(pl)) {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('해당 날짜로 제출된 요약본이 있습니다.')");
-			script.println("location.href='/BBS/pl/bbsRk.jsp'");
-			script.println("</script>");
+			for(int i=0; i < list.size(); i++) {
+				if(list.get(0).getUser_fd().equals(pl)) {
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('해당 날짜로 제출된 요약본이 있습니다.')");
+				script.println("location.href='/BBS/pl/bbsRk.jsp'");
+				script.println("</script>");
+				}
 			}
 		} 
 		
@@ -219,10 +218,15 @@
 		
 		//목록의 모든 rms_dl 불러오기
 		 ArrayList<rmsrept> dllist = rms.getAllRms_dl();
-		 //중복값을 제거하기 위해, rms_dl 빼기
+		 //중복값을 제거하기 위해, rms_dl 빼기, 해당 데이터가 rmssumm에 저장되어 있는지 확인
 		 for(int i=0; i < dllist.size(); i++) {
 			 if(dllist.get(i).getRms_dl().equals(rms_dl)) {
 				 dllist.remove(i);
+			 }
+			 String useDl = sumDAO.getDluse(dllist.get(i).getRms_dl());
+			 if(useDl != null && !useDl.isEmpty()) { //이미 요약본이 작성되어 있음!
+				 dllist.remove(i);
+				 
 			 }
 		 }
 
@@ -237,6 +241,7 @@
 		} 
 		
 	%>
+	<textarea id="rms_dl" style="display:none"><%= rms_dl %></textarea>
 
 
  <!-- ************ 상단 네비게이션바 영역 ************* -->
@@ -346,7 +351,62 @@
 	<!-- 네비게이션 영역 끝 -->
 	
 	
-		
+	<!-- 모달 영역! (날짜 선택 모달) -->
+	<button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#RmsdlModal" id="rmsData" style="display:none"> get rms_dl </button>
+	<div class="modal fade" id="RmsdlModal" role="dialog">
+		   <div class="modal-dialog">
+		    <div class="modal-content">
+		     <div class="modal-header">
+		      <!-- <button type="button" class="close" data-dismiss="modal">×</button> -->
+		      <!-- <h3 class="modal-title" align="center">제출일 선택</h3> -->
+		     </div>
+		     <!-- 모달에 포함될 내용 -->
+		     <form method="post" action="/BBS/pl/bbsRkwrite.jsp" id="modalform">
+		     <div class="modal-body">
+		     		<div class="row">
+		     			<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			<div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6 form-outline">
+		     				<label class="col-form-label" data-toggle="tooltip" data-placement="bottom" title="작성되지 않은 제출일 목록">제출일 선택</label>
+		     				<i class="glyphicon glyphicon-info-sign"  style="left:5px;"></i>
+		     				<select class="form-control" name="searchField" id="searchField" onchange="if(this.value) location.href=(this.value);">
+								<option value="rms_dl" selected="selected">[선택]</option>
+							<% for(int i=0; i < dllist.size(); i++) { %>
+									<option value="/BBS/pl/bbsRkwrite.jsp?rms_dl=<%= dllist.get(i).getRms_dl() %>"><%= dllist.get(i).getRms_dl() %></option>
+							<% } %>
+							</select>
+							<br>
+		     				<h5 class="col-form-label">제출일을 선택하여 요약본을 작성합니다.</h5>
+		     				<input type="password" maxlength="20" required class="form-control" style="width:100%; display:none" id="rms_md" name="rms_md" value="-1">
+		     			</div>
+		     			<div class="col-md-3">
+		     				<label class="col-form-label"> &nbsp; </label>
+		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
+						</div>
+						<div class="col-md-12" style="visibility:hidden">
+		     				<a type="button" class="close" >취소</a>
+		     				<a type="button" class="close" >취소</a>
+		     			</div>
+		     			</div>
+		     			<div class="modal-footer">
+					     <div class="col-md-3" style="visibility:hidden">
+		     			</div>
+		     			<div class="col-md-6">
+					     	<button type="button" class="btn btn-primary pull-right form-control" style="width:30%" onClick="location.href='/BBS/pl/bbsRk.jsp'" >취소</button>
+				     	</div>
+				     	 <div class="col-md-3" style="visibility:hidden">
+			   			</div>	
+		    </div>
+   			</div>
+		    </form>
+		   </div>
+	  </div>
+	</div>
+
 	
 	<!-- 모달 영역! -->
 	   <div class="modal fade" id="UserUpdateModal" role="dialog">
@@ -489,7 +549,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; color:blue; font-size:13px " data-toggle="tooltip" data-html="true" data-placement="bottom" title="미제출자: <%= nouserdata %> <br> 미제출 인원: <%= noSub %> "> 미제출 인원이 존재합니다
+					<th colspan="5" style=" text-align: center; color:blue; font-size:13px " data-toggle="tooltip" data-html="true" data-placement="bottom" title="미제출자: <%= nouserdata %> <br> 미제출 인원: <%= noSub %> "> 미제출자 확인
 					<i class="glyphicon glyphicon-info-sign" id="icon"  style="left:5px;"></i></th>
 				</tr>
 	<%
@@ -614,6 +674,22 @@
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="../css/js/bootstrap.js"></script>
+	
+	<script>
+	// rms modal 띄우기
+	$(document).ready(function() {
+		var rms_dl = document.getElementById("rms_dl").value;
+		if(rms_dl == null || rms_dl === "") {
+			$("#rmsData").hide();
+			$("#rmsData").trigger('click');
+		}
+		
+		$('#RmsdlModal').on('hidden.bs.modal', function (){
+			var rms_md = document.getElementById("rms_md").value;
+			location.href="/BBS/pl/bbsRkwrite.jsp?rms_md="+rms_md;
+		})
+	});
+	</script>
 	
 	<!-- modal 내, password 보이기(안보이기) 기능 -->
 		<script>
