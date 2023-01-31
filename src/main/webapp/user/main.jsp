@@ -333,7 +333,7 @@
 		
 		<div class="container">
 			<div class="row">
-				<form method="post" action="/BBS/user/action/mainAction.jsp" id="main" name="main">
+				<form method="post" action="/BBS/user/action/mainAction.jsp" id="main" name="main" onsubmit="return false">
 					<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 						<thead>
 							<tr>
@@ -459,7 +459,7 @@
 						<div id="wrapper" style="width:100%; text-align: center;">
 							<!-- 저장 버튼 생성 -->
 							<button type="button" id="save" style="margin-bottom:50px" class="btn btn-primary pull-right" onclick="saveData()"> 저장 </button>									
-							<!-- <button type="Submit" id="save_sub" style="margin-bottom:50px; display:none" class="btn btn-primary pull-right"> 저장 </button>	 -->
+							<button type="Submit" id="save_sub" style="margin-bottom:50px; display:none" class="btn btn-primary pull-right"> 저장 </button>
 						</div>					
 				</form>
 			</div>
@@ -771,11 +771,14 @@
 		innerHtml += '</tr>';
         $('#bbsNTable > tbody> tr:last').append(innerHtml);
         
-        //$("#save_sub").trigger("click");
-        $("#main").submit();
-		/* }else {
-			alert("제출일은 [월요일]"); //공휴일을 제외 ....
-		} */
+ 		$("#save_sub").trigger("click");
+        
+        var form = document.getElementById("main");
+        if(form.checkValidity()) {
+        	form.action = "/BBS/user/action/mainAction.jsp";
+            form.mathod = "post";
+            form.submit(); 
+        }
     }
 	</script>
 	

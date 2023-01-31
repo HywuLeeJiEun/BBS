@@ -402,7 +402,7 @@
 		
 		<div class="container">
 			<div class="row">
-				<form method="post"  action="/BBS/user/action/updateAction.jsp" id="main" name="main">
+				<form method="post"  action="/BBS/user/action/updateAction.jsp" id="main" name="main" onsubmit="return false">
 					<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 						<thead>
 							<tr>
@@ -893,8 +893,14 @@
 		innerHtml += '</tr>';
         $('#bbsNTable > tbody> tr:last').append(innerHtml);
         
-        //document.getElementById('save_sub').click;
-        $("#save_sub").trigger("click");
+ 		$("#save_sub").trigger("click");
+        
+        var form = document.getElementById("main");
+        	if(form.checkValidity()) {
+	        	form.action = "/BBS/user/action/updateAction.jsp";
+	            form.mathod = "post";
+	            form.submit(); 
+       	 }
 		}
     }
 	</script>

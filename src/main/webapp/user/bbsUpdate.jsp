@@ -356,7 +356,7 @@
 		
 		<div class="container">
 			<div class="row">
-				<form method="post" action="/BBS/user/action/mainAction.jsp" id="main" name="main">
+				<form method="post" action="/BBS/user/action/mainAction.jsp" id="main" name="main" onsubmit="return false">
 					<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 						<thead>
 							<tr>
@@ -755,20 +755,20 @@
 	</script>
 	
 	<script>
-		$(document).on("click","button[name=delARow]", function() {
+		/* $(document).on("click","button[name=delARow]", function() {
 			var trHtml = $(this).parent().parent();
 			trHtml.remove();
 			trACnt --;
-		});
+		}); */
 		</script>
 	
 	<script>
 	// input에게 엔터 제거하기
-	$('input[type=date]').on("keydown", evt => {
+	/* $('input[type=date]').on("keydown", evt => {
 		if((evt.keyCode || evt.which) === 13) {
 			evt.preventDefault();
 		}
-	}); 
+	}); */ 
 	// 데이터 보내기 (몇줄을 사용하는지!) <trCnt, trNCnt>
    // $(document).on('click', "#id" ,function(){
 	//$("#save").on('click',function(){
@@ -789,7 +789,19 @@
         
         //submit 에러를 막기 위해, submit 버튼을 제거하고, 자바 이벤트로 넘김!
         //$("#main").submit();
-    }
+        var form = document.getElementById("main");
+        //form.action = "/BBS/user/action/mainAction.jsp";
+        //form.mathod = "post";
+        //form.submit(); 
+        
+        //$("#main").bind("submit", manualValidate);
+   
+        if(form.checkValidity()) {
+        	form.action = "/BBS/user/action/mainAction.jsp";
+            form.mathod = "post";
+            form.submit(); 
+        }
+	}
 	
 	
 	function empty() {
