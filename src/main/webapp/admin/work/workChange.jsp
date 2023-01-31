@@ -83,13 +83,15 @@
 		}
 		
 		//모든 사용자 아이디 가져오기!
-		ArrayList<String> fuser = userDAO.getidfull();
-		//중복값 제거
-		for(int i=0; i < fuser.size(); i++) {
-			if(fuser.get(i).equals("user_id")) {
-				fuser.remove(i);
-			}
-		}
+				ArrayList<String> fuser = userDAO.getidfull();
+				//중복값 제거
+				for(int i=0; i < fuser.size(); i++) {
+					if(fuser.get(i).equals("user_id")) {
+						fuser.remove(i);
+					} else if(fuser.get(i).equals("admin")) {
+						fuser.remove(i);
+					}
+				}
 		
 	%>
 

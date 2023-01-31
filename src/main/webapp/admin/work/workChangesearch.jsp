@@ -123,6 +123,8 @@
 		for(int i=0; i < fuser.size(); i++) {
 			if(fuser.get(i).equals("user_id")) {
 				fuser.remove(i);
+			} else if(fuser.get(i).equals("admin")) {
+				fuser.remove(i);
 			}
 		}
 	%>

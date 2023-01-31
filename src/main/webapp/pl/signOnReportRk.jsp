@@ -471,7 +471,7 @@
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
 	<textarea class="textarea"  readonly style="resize:none; height:180px; width:100%; border:none; overflow:auto; text-align: center;" placeholder="구분/담당자"   readonly><%= nlist.get(0).getRms_mgrs() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
-	<textarea class="textarea" readonly required id="bbsNContent" style="resize:none; height:180px;width:100%; border:none; " placeholder="업무내용" name="bbsNContent"><%= nlist.get(0).getRms_con() %></textarea></td>
+	<textarea class="textarea" readonly required id="bbsNContent" style="resize:none; height:180px;width:101%; border:none; background-color:transparent" placeholder="업무내용" name="bbsNContent"><%= nlist.get(0).getRms_con() %></textarea></td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
 	<textarea class="textarea" readonly required id="bbsNStart" style="resize:none; height:180px; width:100%; border:none; text-align: center;" placeholder="접수일" name="bbsNStart"  oninput="this.value = this.value
 												.replace(/[^0-9./.\s.-]/g, '')
@@ -481,7 +481,6 @@
 												.replace(/[^0-9./.\s.-]/g, '')
 												.replace(/(\..*)\./g, '$1');"><%= nlist.get(0).getRms_tar() %></textarea></td>
 	<td colspan="2">
-	
 	</td>
 </tr>
 <%
@@ -489,7 +488,7 @@
 %>
 <tr  style="height:80px">
 	<td colspan="16" style="margin-right:50px;">
-		<a href="/BBS/pl/bbsRk.jsp" style="margin-left:200px;" class="btn btn-primary pull-right">목록</a>
+		<a href="/BBS/pl/bbsRk.jsp?rms_dl=<%= rms_dl %>" style="margin-left:200px;" class="btn btn-primary pull-right">목록</a>
 	</td>
 </tr>
 <tr valign="top" style="height:30px">

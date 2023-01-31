@@ -242,9 +242,9 @@
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
 								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
-								<li class="active"><a href="/BBS/pl/bbsRk.jsp">조회</a></li>
+								<li class="active"><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
-								<li><a href="/BBS/pl/summaryRk.jsp">조회 및 수정</a></li>
+								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
@@ -610,10 +610,10 @@
 				}
 			%>
 			<% if(pl.equals("ERP")) {%>
-			<a href="/BBS/pl/pptx/ppt.jsp?rms_dl=<%=rmslist.get(0).getRms_dl()%>&pluser=<%= pl %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력(ERP)" id="pptx" type="button"> pptx</a>
+			<a href="/BBS/pl/pptx/ppt.jsp?rms_dl=<%=rmslist.get(0).getRms_dl()%>&pluser=<%= pl %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력(ERP)" id="pptx" type="button"> 출력</a>
 			<% }  %>
 			<% if(pl.equals("WEB")) {%>
-			<a href="/BBS/pl/pptx/ppt.jsp?rms_dl=<%=rmslist.get(0).getRms_dl()%>&pluser=<%= pl %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력(WEB)" id="pptx" type="button"> pptx</a>
+			<a href="/BBS/pl/pptx/ppt.jsp?rms_dl=<%=rmslist.get(0).getRms_dl()%>&pluser=<%= pl %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력(WEB)" id="pptx" type="button"> 출력</a>
 			<% }  %>
 			<% 	
 			// 현재 시간, 날짜를 구해 이전 데이터는 수정하지 못하도록 함!
@@ -627,7 +627,7 @@
 			Date today = dateFormat.parse(timenow);
 			
 			%>
-			<a href="/BBS/pl/bbsRkwrite.jsp?rms_dl=<%=rms_dl%>" style="width:100px; margin-right:20px" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> Summary</a>
+			<a href="/BBS/pl/bbsRkwrite.jsp?rms_dl=<%=rms_dl%>" style="width:50px; margin-right:20px" class="btn btn-info pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="요약본(Summary) 작성" id="summary"> 작성</a>
 		</div>
 	</div>
 	

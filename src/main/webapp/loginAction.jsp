@@ -44,7 +44,8 @@
 		if(result == 1){
 			// 로그인에 성공하면 세션을 부여한다. 
 			session.setAttribute("id", user_id);
-			//session.setMaxInactiveInterval(60 * 60); 
+			//session.setMaxInactiveInterval(60 * 60);  //1순위
+			//session 순위 - https://dejavuhyo.github.io/posts/session-timeout-setting-and-application-priority/
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("location.href='/BBS/user/bbs.jsp'");

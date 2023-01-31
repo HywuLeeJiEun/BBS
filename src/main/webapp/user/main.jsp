@@ -365,7 +365,7 @@
 									<tr>
 										 <td>
 										 	<div style="float:left">
-											 <select name="jobs0" id="jobs0" style="height:45px; width:95px; text-align-last:center;">
+											 <select name="jobs0" id="jobs0" style="height:45px; width:120px; text-align-last:center;">
 													 <option> [시스템] </option>
 													 <%
 													 for(int count=0; count < works.size(); count++) {
@@ -378,7 +378,7 @@
 												 </select>
 											 </div>
 											 <div style="float:left">
-											 <textarea class="textarea con" wrap="hard" id="bbsContent" required style="height:45px;width:200%; border:none; resize:none " placeholder="업무내용" name="bbsContent0"></textarea>
+											 <textarea class="textarea con" wrap="hard" id="bbsContent" required style="height:45px;width:190%; border:none; resize:none " placeholder="업무내용" name="bbsContent0"></textarea>
 											 </div>
 										 </td>
 										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart0" value="<%= now %>" ></td>
@@ -410,7 +410,7 @@
 							<tr>
 								 <td>
 								 	<div style="float:left">
-									 <select name="njobs0" id="njobs0" style="height:45px; width:95px; text-align-last:center;">
+									 <select name="njobs0" id="njobs0" style="height:45px; width:120px; text-align-last:center;">
 											 <option> [시스템] </option>
 											 <%
 											 for(int count=0; count < works.size(); count++) {
@@ -423,7 +423,7 @@
 										 </select>
 									 </div>
 									 <div style="float:left">
-									 <textarea class="textarea ncon" wrap="hard" id="bbsNContent2" required style="height:45px;width:200%; border:none; resize:none" placeholder="업무내용" name="bbsNContent0"></textarea>
+									 <textarea class="textarea ncon" wrap="hard" id="bbsNContent2" required style="height:45px;width:190%; border:none; resize:none" placeholder="업무내용" name="bbsNContent0"></textarea>
 									 </div>
 								 </td>
 								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart0" value="<%= now %>" ></td>
@@ -459,7 +459,7 @@
 						<div id="wrapper" style="width:100%; text-align: center;">
 							<!-- 저장 버튼 생성 -->
 							<button type="button" id="save" style="margin-bottom:50px" class="btn btn-primary pull-right" onclick="saveData()"> 저장 </button>									
-							<button type="Submit" id="save_sub" style="margin-bottom:50px; display:none" class="btn btn-primary pull-right"> 저장 </button>	
+							<!-- <button type="Submit" id="save_sub" style="margin-bottom:50px; display:none" class="btn btn-primary pull-right"> 저장 </button>	 -->
 						</div>					
 				</form>
 			</div>
@@ -534,14 +534,14 @@
 	            innerHtml += '<tr>';
 	            innerHtml += '    <td>';
             	innerHtml += '<div style="float:left">';
-	            innerHtml += '     <select name="jobs'+c+'" id="jobs'+c+'" style="height:45px; width:95px; text-align-last:center;">';
+	            innerHtml += '     <select name="jobs'+c+'" id="jobs'+c+'" style="height:45px; width:120px; text-align-last:center;">';
 	            innerHtml += '			<option> [시스템] </option>';
 	            innerHtml += strworks; 
 	            innerHtml += '  <option> 기타 </option>';
 	            innerHtml += ' </select>';
 	            innerHtml += ' </div>';
 	            innerHtml += ' <div style="float:left">';
-	            innerHtml += ' <textarea wrap="hard" class="textarea con" id="bbsContent'+c+'" required style="height:45px;width:200%; border:none; resize:none" placeholder="업무내용" name="bbsContent'+c+'"></textarea>';
+	            innerHtml += ' <textarea wrap="hard" class="textarea con" id="bbsContent'+c+'" required style="height:45px;width:190%; border:none; resize:none" placeholder="업무내용" name="bbsContent'+c+'"></textarea>';
 	            innerHtml += '  </div> </td>';
 	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart'+c+'" class="form-control" placeholder="접수일" name="bbsStart'+c+'"  value="'+now+'"></td>';
 	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+c+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsTarget'+c+'" ></td>';
@@ -607,14 +607,14 @@
 	            innerHtml += '<tr>';
 	            innerHtml += '    <td>';
             	innerHtml += '<div style="float:left">';
-	            innerHtml += '     <select name="njobs'+n+'" id="njobs'+n+'" style="height:45px; width:95px; text-align-last:center;">';
+	            innerHtml += '     <select name="njobs'+n+'" id="njobs'+n+'" style="height:45px; width:120px; text-align-last:center;">';
 	            innerHtml += '			<option> [시스템] </option>';
 	            innerHtml += strworks; 
 	            innerHtml += '  <option> 기타 </option>';
 	            innerHtml += ' </select>';
 	            innerHtml += ' </div>';
 	            innerHtml += ' <div style="float:left">';
-	            innerHtml += ' <textarea wrap="hard" class="textarea ncon" id="bbsNContent'+n+'" required style="height:45px;width:200%; resize:none; border:none; " placeholder="업무내용" name="bbsNContent'+n+'"></textarea>';
+	            innerHtml += ' <textarea wrap="hard" class="textarea ncon" id="bbsNContent'+n+'" required style="height:45px;width:190%; resize:none; border:none; " placeholder="업무내용" name="bbsNContent'+n+'"></textarea>';
 	            innerHtml += '  </div> </td>';
 	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNStart'+n+'" class="form-control" placeholder="접수일" name="bbsNStart'+n+'" value="'+now+'"></td>';
 	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget'+n+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsNTarget'+n+'" ></td>';
@@ -771,7 +771,8 @@
 		innerHtml += '</tr>';
         $('#bbsNTable > tbody> tr:last').append(innerHtml);
         
-        $("#save_sub").trigger("click");
+        //$("#save_sub").trigger("click");
+        $("#main").submit();
 		/* }else {
 			alert("제출일은 [월요일]"); //공휴일을 제외 ....
 		} */

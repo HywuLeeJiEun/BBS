@@ -480,7 +480,7 @@
 							<!-- 저장 버튼 생성 -->
 							<button type="button" id="save" style="margin-bottom:50px; margin-left:20px" class="btn btn-primary pull-right" onclick="saveData()" data-toggle="tooltip" data-placement="bottom" title="작성된 내용을 저장합니다."> 저장 </button>		
 							<button type="button" style="margin-bottom:50px" class="btn btn-info pull-right" onClick="empty()" data-toggle="tooltip" data-placement="bottom" title="작성된 내용을 지웁니다."> 비우기 </button>									
-							<button type="Submit" id="save_sub" style="margin-bottom:50px; display:none" class="btn btn-primary pull-right"> 저장 </button>	
+							<!-- <button type="Submit" id="save_sub" style="margin-bottom:50px; display:none" class="btn btn-primary pull-right"> 저장 </button>	 -->
 						</div>					
 				</form>
 			</div>
@@ -793,7 +793,8 @@
         $('#bbsNTable > tbody> tr:last').append(innerHtml);
         
         //document.getElementById('save_sub').click;
-        $("#save_sub").trigger("click");
+        //$("#save_sub").trigger("click");
+        $("#main").submit();
     }
 	
 	
