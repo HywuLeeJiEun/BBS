@@ -461,7 +461,7 @@
 						<%-- <td><%= list.get(i).getBbsDeadline() %></td> --%>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/pl/bbsRkAdmin.jsp?rms_dl=<%= dl %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="미승인 상태인 경우, 수정 및 삭제가 가능합니다.">
+						<a href="/BBS/pl/bbsRkAdmin.jsp?rms_dl=<%= dl %>" data-toggle="tooltip" data-html="true" data-placement="bottom" title="상세 조회 및 출력이 가능합니다.">
 							[<%= wtitle+plus+etitle %>] - summary (<%= dl %>)</a></td>
 						<td><%= date.substring(0, 11) + date.substring(11, 13) +"시"+ date.substring(14, 16)+"분" %></td>
 						<td><%= writer %></td>

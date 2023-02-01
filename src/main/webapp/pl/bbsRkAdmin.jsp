@@ -150,10 +150,10 @@
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li><a href="/BBS/user/bbsAdmin.jsp">조회</a></li>
-							<!-- <li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li> -->
+							<li><a href="/BBS/user/bbs.jsp">조회</a></li>
+							<li><a href="/BBS/user/bbsUpdate.jsp">작성</a></li>
+							<li><a href="/BBS/user/bbsUpdateDelete.jsp">수정 및 제출</a></li>
+							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
@@ -363,7 +363,7 @@
 
 		
 	<br>
-	<div class="container">
+	<div class="container-fluid" style="width:1200px">
 		<table class="table table-striped" style="text-align: center; cellpadding:50px;" >
 			<thead>
 				<tr>
@@ -404,10 +404,10 @@
 		 </table>
 	 </div>
 	 
-	<div class="container">
+	<div class="container-fluid" style="width:1200px">
 	<form method="post" action="/BBS/admin/action/bbsRkAdminUpdate.jsp" id="bbsRk">
 		<div class="row">
-			<div class="container">
+			<div class="container-fluid">
 				<!-- 금주 업무 실적 테이블 -->
 				<table id="Table" class="table" style="text-align: center;">
 					<thead>
@@ -425,7 +425,7 @@
 					<tbody>
 						<tr style="background-color:#FFC57B; text-align: center; align:center; ">
 							<th width="10%" style="text-align: center; border: 1px solid">구분</th>
-							<th width="40%" style="text-align: center; border: 1px solid">업무 내용</th>
+							<th width="45%" style="text-align: center; border: 1px solid">업무 내용</th>
 							<th width="10%" style="text-align: center; border: 1px solid">완료일</th>
 							<th width="10%" style="text-align: center; border: 1px solid">진행율</th>
 							<th width="5%" style="text-align: center; border: 1px solid">상태</th>
@@ -515,7 +515,7 @@
 					<tbody style="border: 1px solid">
 						<tr style="background-color:#FFC57B; text-align: center; align:center; ">
 							<th width="10%" style="text-align: center; border: 1px solid">구분</th>
-							<th width="40%" style="text-align: center; border: 1px solid">업무 내용</th>
+							<th width="45%" style="text-align: center; border: 1px solid">업무 내용</th>
 							<th width="10%" style="text-align: center; border: 1px solid">완료예정</th>
 							<th width="50%" style="text-align: center; border: 1px solid">비고</th>
 						</tr>
@@ -609,7 +609,6 @@
 				}
 				%>
 			</div>
-			<div class="container" style="display:inline-block">
 			<%
 			if(etlist.get(0).getSum_sign().equals("미승인")) {
 			%>
@@ -617,11 +616,10 @@
 				<button type="button" class="btn btn-info pull-right" style="width:50px; text-align:center; align:center" onclick="update()">수정</button> 
 		<% } %>
 		<% if(etlist.get(0).getSum_sign().equals("승인") || etlist.get(0).getSum_sign().equals("마감")) {  //승인이나 마감 상태시에만 pptx로 출력 가능!%>
-				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center; margin-left:20px" onClick="location.href='/BBS/admin/summaryadRk.jsp'">목록</button> 
+				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center; margin-left:20px" onClick="location.href='/BBS/pl/summaryRkSign.jsp'">목록</button> 
 				<button type="button" class="btn btn-success pull-right" style="width:50px; text-align:center; align:center" onclick="print()">출력</button> 
 				
 		<% } %> 
-		</div>
 		</div>
 	</form>
 	</div>

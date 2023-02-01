@@ -391,10 +391,10 @@
 		 </table>
 	 </div>
 	 
-	<div class="container">
+	<div class="container-fluid" style="width:1200px">
 	<form method="post" action="/BBS/pl/action/bbsRkAction.jsp" id="bbsRk">
 		<div class="row">
-			<div class="container">
+			<div class="container-fluid">
 				<!-- 금주 업무 실적 테이블 -->
 				<table id="Table" class="table" style="text-align: center;">
 					<thead>
@@ -412,7 +412,7 @@
 					<tbody>
 						<tr style="background-color:#FFC57B; text-align: center; align:center; ">
 							<th width="10%" style="text-align: center; border: 1px solid">구분</th>
-							<th width="40%" style="text-align: center; border: 1px solid">업무 내용</th>
+							<th width="45%" style="text-align: center; border: 1px solid">업무 내용</th>
 							<th width="10%" style="text-align: center; border: 1px solid">완료일</th>
 							<th width="10%" style="text-align: center; border: 1px solid">진행율</th>
 							<th width="5%" style="text-align: center; border: 1px solid">상태</th>
@@ -463,7 +463,7 @@
 					<tbody style="border: 1px solid">
 						<tr style="background-color:#FFC57B; text-align: center; align:center; ">
 							<th width="10%" style="text-align: center; border: 1px solid">구분</th>
-							<th width="40%" style="text-align: center; border: 1px solid">업무 내용</th>
+							<th width="45%" style="text-align: center; border: 1px solid">업무 내용</th>
 							<th width="10%" style="text-align: center; border: 1px solid">완료예정</th>
 							<th width="50%" style="text-align: center; border: 1px solid">비고</th>
 						</tr>

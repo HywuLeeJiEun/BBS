@@ -484,7 +484,7 @@
 	</td>
 </tr>
 <%
-	if(erp.size() == 0 || pl.equals("WEB")) {
+	if(erp.size() == 0 || !user_id.equals(userDAO.getMgrs("36"))) {
 %>
 <tr  style="height:80px">
 	<td colspan="16" style="margin-right:50px;">
@@ -504,6 +504,7 @@
 
 <%
 	if(erp.size() != 0 && pl.equals("ERP")) { //erp가 비어있지 않다면, 하단 출력
+		if(user_id.equals(userDAO.getMgrs("36"))) { //계정관리를 담당하는 유저라면,
 	%>
 <div class="container-fluid" style="margin-top:50px;">
 <table style="margin-left:20%">
@@ -540,11 +541,12 @@
 	%>
 	<tr  style="height:80px">
 	<td colspan="5" style="margin-right:50px;">
-		<a href="/BBS/pl/bbsRk.jsp" class="btn btn-primary pull-right">목록</a>
+		<a href="/BBS/pl/bbsRk.jsp?rms_dl=<%= rms_dl %>" class="btn btn-primary pull-right">목록</a>
 	</td>
 	</tr>
 	<tr valign="top" style="height:30px">
 	<%
+		}
 	}
 	%>
 </table>

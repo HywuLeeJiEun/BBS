@@ -218,14 +218,13 @@
 		 ArrayList<rmsrept> dllist = rms.getAllRms_dl();
 		 //중복값을 제거하기 위해, rms_dl 빼기, 해당 데이터가 rmssumm에 저장되어 있는지 확인
 		 for(int i=0; i < dllist.size(); i++) {
-			 if(dllist.get(i).getRms_dl().equals(rms_dl)) {
+			 /* if(dllist.get(i).getRms_dl().equals(rms_dl)) {
 				 dllist.remove(i);
-			 }
+			 } */
 			 String useDl = sumDAO.getDluse(dllist.get(i).getRms_dl());
 			 if(useDl != null && !useDl.isEmpty()) { //이미 요약본이 작성되어 있음!
 				 dllist.remove(i);
-				 
-			 }
+			 } 
 		 }
 		//alert가 넘어오면 경고창 미표시, 넘어오지 않으면 표시!
 		String alert = request.getParameter("alert");
@@ -881,10 +880,10 @@
 				var innerHtml = "";
 				//innerHtml += '<td><textarea class="textarea" id="chk_arr" name="chk_arr" readonly>'+ chk_arr +'</textarea></td>';
 				//innerHtml += '<td><textarea class="textarea" id="nchk_arr" name="nchk_arr" readonly>'+ nchk_arr +'</textarea></td>';
-				innerHtml += '<td><textarea class="textarea" id="content" name="content" readonly>'+ content +'</textarea></td>';
-				innerHtml += '<td><textarea class="textarea" id="end" name="end" readonly>'+ end +'</textarea></td>';
-				innerHtml += '<td><textarea class="textarea" id="ncontent" name="ncontent" readonly>'+ ncontent +'</textarea></td>';
-				innerHtml += '<td><textarea class="textarea" id="ntarget" name="ntarget" readonly>'+ ntarget +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="content" name="content" readonly style="display:none">'+ content +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="end" name="end" readonly style="display:none">'+ end +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="ncontent" name="ncontent" readonly style="display:none">'+ ncontent +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="ntarget" name="ntarget" readonly style="display:none">'+ ntarget +'</textarea></td>';
 				
 				$('#Table > tbody > tr:last').append(innerHtml);
 				$('#Rkwrite').submit(); 

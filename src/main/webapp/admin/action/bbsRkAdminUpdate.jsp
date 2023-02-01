@@ -107,7 +107,7 @@
 		//정상적으로 모두 수정되었을 경우,
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
-		script.println("alert('정상적으로 요약본이 저장 되었습니다.')");
+		script.println("alert('요약본이 수정이 완료되었습니다.')");
 		script.println("location.href='../summaryadRk.jsp'");
 		script.println("</script>");
 	}
