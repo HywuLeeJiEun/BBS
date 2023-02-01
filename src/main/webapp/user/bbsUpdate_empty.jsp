@@ -764,12 +764,12 @@
 	</script>
 	
 	<script>
-		/* $(document).on("click","button[name=delARow]", function() {
+		$(document).on("click","button[name=delARow]", function() {
 			var trHtml = $(this).parent().parent();
 			trHtml.remove();
 			trACnt --;
-		}); */
-		</script>
+		}); 
+	</script>
 	
 	<script>
 	/* document.main.addEventListener("keydown", evt => {

@@ -425,7 +425,9 @@
 										<th width="10%">| &nbsp; 접수일</th>
 										<th width="10%">| &nbsp; 완료목표일</th>
 										<th width="10%">| &nbsp;&nbsp; 진행율<br>&nbsp;&nbsp;&nbsp;&nbsp;/완료일</th>
+										<% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
 										<th></th>
+										<% } %>
 									</tr>
 									
 									<tr align="center">
@@ -442,7 +444,9 @@
 										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart<%=i%>" value="<%= tlist.get(i).getRms_str() %>" ></td>
 										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget<%=i%>" value="<%= tlist.get(i).getRms_tar() %>" ></td>		
 										 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none; resize:none"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd<%=i%>" ><%= tlist.get(i).getRms_end() %></textarea></td>
+										 <% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
 										 <td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button></td>
+										<% } %>
 									</tr>
 									<%
 										}
@@ -450,9 +454,11 @@
 									%>
 									</tbody>
 								</table>
+								 <% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
 									<div id="wrapper" style="width:100%; text-align: center;">
 										<button type="button" style="margin-bottom:15px; margin-right:30px" onclick="addRow()" class="btn btn-primary"> + </button>
-									</div>	 			
+									</div>	 
+								<% } %>			
 
 
 				<!-- 차주 업무 계획  -->
@@ -467,8 +473,10 @@
 								<th width="50%">| &nbsp; 업무내용</th>
 								<th width="10%">| &nbsp; 접수일</th>
 								<th width="10%">| &nbsp; 완료목표일</th>
-								<th></th>
-								<th></th>
+								<% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
+									<th></th>
+									<th></th>
+								<% } %>
 							</tr>
 							<%
 							if(nlist.size() != 0){
@@ -480,7 +488,9 @@
 								 </td>
 								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart<%=i%>" value="<%= nlist.get(i).getRms_str() %>" ></td>
 								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget2" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget<%=i%>" value="<%= nlist.get(i).getRms_tar() %>"></td>	
+								 <% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
 								 <td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delNRow" name="delNRow" class="btn btn-danger"> 삭제 </button></td>	
+								<% } %>
 							</tr>
 							<%
 								}
@@ -488,10 +498,11 @@
 							%>
 							</tbody>
 						</table>
+						 <% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
 						<div id="wrapper" style="width:100%; text-align: center;">
 								<button type="button" style="margin-bottom:5px; margin-top:5px; margin-right:35px; margin-bottom:50px;" onclick="addNRow()" class="btn btn-primary"> + </button>
 						</div>
-						
+						<% } %>
 						<!-- '계정 관리가 있을 경우, 생성' -->
 						<table class="table" id="accountTable" style="text-align: center; cellpadding:50px; display:none;" >
 							<tbody id="tbody">
@@ -504,7 +515,9 @@
 								<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
 								<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
 								<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
+								<% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
 								<th width="15%" style="text-align:center; border: 1px solid; font-size:10px"></th>
+								<% } %>
 							</tr>
 							<%
 							if(erp != null && erp.size() != 0){
@@ -521,7 +534,9 @@
 								  <textarea class="textarea" id="erp_authority0" maxlength="10" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%=i%>"><%= erp.get(i).getErp_anum() %></textarea></td>
 							  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
 								  <textarea class="textarea" id="erp_division0" maxlength="2" style=" width:130px; border:none; resize:none " placeholder="구분(일반/긴급)" name="erp_division<%=i%>"><%= erp.get(i).getErp_div() %></textarea></td>
-								  <td style="border: 1px solid;"><button type="button" style="margin-bottom:5px; margin-top:5px;" id="delARow" name="delARow" class="btn btn-danger"> 삭제 </button></td>
+								  <% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
+								  	<td style="border: 1px solid;"><button type="button" style="margin-bottom:5px; margin-top:5px;" id="delARow" name="delARow" class="btn btn-danger"> 삭제 </button></td>
+								  <% } %>
 							</tr>
 							<%
 								}
@@ -529,9 +544,11 @@
 							%>
 							</tbody>
 						</table>
+						 <% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
 						<div id="wrapper_account" style="width:100%; text-align: center; display:none">
 							<button type="button" style="margin-bottom:15px; margin-right:33px" onclick="addRowAccount()" class="btn btn-primary " data-toggle="tooltip" data-placement="bottom" title="ERP 디버깅 권한 신청 처리 작성"> + </button>
 						</div>
+						<%} %>
 						<!-- 계정 관리 끝 -->
 						<div id="wrapper" style="width:100%; text-align: center;">
 						<!-- 목록 -->
@@ -564,7 +581,6 @@
 				</form>
 			</div>
 		</div>
-
 
 	<!-- 현재 날짜에 대한 데이터 -->
 	<textarea class="textarea" id="now" style="display:none " name="now"><%= now %></textarea>

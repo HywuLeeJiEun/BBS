@@ -755,12 +755,12 @@
 	</script>
 	
 	<script>
-		/* $(document).on("click","button[name=delARow]", function() {
+		$(document).on("click","button[name=delARow]", function() {
 			var trHtml = $(this).parent().parent();
 			trHtml.remove();
 			trACnt --;
-		}); */
-		</script>
+		}); 
+	</script>
 	
 	<script>
 	// input에게 엔터 제거하기
