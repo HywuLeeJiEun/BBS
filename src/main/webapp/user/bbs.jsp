@@ -441,25 +441,25 @@
 									//금주 업무 (this)
 									for(int j=0; j < rms_this.size(); j++) {
 										//content, ncotent의 줄바꿈 개수만큼 추가함
-										int num = rms_this.get(j).getRms_con().split("\r\n").length-1;
+										int num = rms_this.get(j).getRms_con().split(System.lineSeparator()).length-1;
 										if(j < rms_this.size()-1) {
-											 bbsContent += rms_this.get(j).getRms_con() + "\r\n";
-											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/") + "\r\n";
+											 bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
+											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/") + System.lineSeparator();
 											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
-											 	bbsTarget += "[보류]" + "\r\n";
+											 	bbsTarget += "[보류]" + System.lineSeparator();
 											 } else {
 												 if(rms_this.get(j).getRms_tar().length() > 5) {
-												 bbsTarget += rms_this.get(j).getRms_tar().substring(5).replace("-","/") + "\r\n";
+												 bbsTarget += rms_this.get(j).getRms_tar().substring(5).replace("-","/") + System.lineSeparator();
 												 }else {
-													 bbsTarget += "[보류]" + "\r\n";
+													 bbsTarget += "[보류]" + System.lineSeparator();
 												 }
 											 }
-											 bbsEnd += rms_this.get(j).getRms_end() + "\r\n";
+											 bbsEnd += rms_this.get(j).getRms_end() + System.lineSeparator();
 											
 											 for(int k=0;k < num; k ++) {
-												 bbsStart +="\r\n";
-												 bbsTarget +="\r\n";
-												 bbsEnd +="\r\n";
+												 bbsStart +=System.lineSeparator();
+												 bbsTarget +=System.lineSeparator();
+												 bbsEnd +=System.lineSeparator();
 											 }
 										} else {
 											bbsContent += rms_this.get(j).getRms_con();
@@ -475,31 +475,31 @@
 											 }
 											 bbsEnd += rms_this.get(j).getRms_end();
 											 for(int k=0;k < num; k ++) {
-												 bbsStart +="\r\n";
-												 bbsTarget +="\r\n";
-												 bbsEnd +="\r\n";
+												 bbsStart +=System.lineSeparator();
+												 bbsTarget +=System.lineSeparator();
+												 bbsEnd +=System.lineSeparator();
 											 }
 										}
 									}
 									//차주 (next)
 									for(int j=0; j < rms_next.size(); j++) {
 										//content, ncotent의 줄바꿈 개수만큼 추가함
-										int nnum = rms_next.get(j).getRms_con().split("\r\n").length-1;
+										int nnum = rms_next.get(j).getRms_con().split(System.lineSeparator()).length-1;
 										if(j < rms_next.size()-1) {
-											 bbsNContent += rms_next.get(j).getRms_con() + "\r\n";
-											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/") + "\r\n";
+											 bbsNContent += rms_next.get(j).getRms_con() + System.lineSeparator();
+											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/") + System.lineSeparator();
 											 if(rms_next.get(j).getRms_tar() == null || rms_next.get(j).getRms_tar().isEmpty()) {
-												 bbsNTarget += "[보류]" + "\r\n";
+												 bbsNTarget += "[보류]" + System.lineSeparator();
 											 } else {
 												 if(rms_next.get(j).getRms_tar().length() > 5) {
-												 bbsNTarget += rms_next.get(j).getRms_tar().substring(5).replace("-","/") + "\r\n";
+												 bbsNTarget += rms_next.get(j).getRms_tar().substring(5).replace("-","/") + System.lineSeparator();
 												 } else {
-													 bbsNTarget += "[보류]" + "\r\n";
+													 bbsNTarget += "[보류]" + System.lineSeparator();
 												 }
 											 }
 											 for (int h=0; h < nnum; h++) {
-												 bbsNStart += "\r\n";
-												 bbsNTarget += "\r\n";
+												 bbsNStart += System.lineSeparator();
+												 bbsNTarget += System.lineSeparator();
 											 }
 										} else {
 											 bbsNContent += rms_next.get(j).getRms_con();
@@ -514,8 +514,8 @@
 												 }
 											 }
 											 for (int h=0; h < nnum; h++) {
-												 bbsNStart += "\r\n";
-												 bbsNTarget += "\r\n";
+												 bbsNStart += System.lineSeparator();
+												 bbsNTarget += System.lineSeparator();
 											 }
 										}
 									}
@@ -565,25 +565,25 @@
 									//금주 업무 (this)
 									for(int j=0; j < rms_this.size(); j++) {
 										//content, ncotent의 줄바꿈 개수만큼 추가함
-										int num = rms_this.get(j).getRms_con().split("\r\n").length-1;
+										int num = rms_this.get(j).getRms_con().split(System.lineSeparator()).length-1;
 										if(j < rms_this.size()-1) {
-											 bbsContent += rms_this.get(j).getRms_con() + "\r\n";
-											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/") + "\r\n";
+											 bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
+											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/") + System.lineSeparator();
 											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
-											 	bbsTarget += "[보류]" + "\r\n";
+											 	bbsTarget += "[보류]" + System.lineSeparator();
 											 } else {
 												 if(rms_this.get(j).getRms_tar().length() > 5) {
-												 bbsTarget += rms_this.get(j).getRms_tar().substring(5).replace("-","/") + "\r\n";
+												 bbsTarget += rms_this.get(j).getRms_tar().substring(5).replace("-","/") + System.lineSeparator();
 												 }else {
-													 bbsTarget += "[보류]" + "\r\n";
+													 bbsTarget += "[보류]" + System.lineSeparator();
 												 }
 											 }
-											 bbsEnd += rms_this.get(j).getRms_end() + "\r\n";
+											 bbsEnd += rms_this.get(j).getRms_end() + System.lineSeparator();
 											
 											 for(int k=0;k < num; k ++) {
-												 bbsStart +="\r\n";
-												 bbsTarget +="\r\n";
-												 bbsEnd +="\r\n";
+												 bbsStart +=System.lineSeparator();
+												 bbsTarget +=System.lineSeparator();
+												 bbsEnd +=System.lineSeparator();
 											 }
 										} else {
 											bbsContent += rms_this.get(j).getRms_con();
@@ -599,31 +599,31 @@
 											 }
 											 bbsEnd += rms_this.get(j).getRms_end();
 											 for(int k=0;k < num; k ++) {
-												 bbsStart +="\r\n";
-												 bbsTarget +="\r\n";
-												 bbsEnd +="\r\n";
+												 bbsStart +=System.lineSeparator();
+												 bbsTarget +=System.lineSeparator();
+												 bbsEnd +=System.lineSeparator();
 											 }
 										}
 									}
 									//차주 (next)
 									for(int j=0; j < rms_next.size(); j++) {
 										//content, ncotent의 줄바꿈 개수만큼 추가함
-										int nnum = rms_next.get(j).getRms_con().split("\r\n").length-1;
+										int nnum = rms_next.get(j).getRms_con().split(System.lineSeparator()).length-1;
 										if(j < rms_next.size()-1) {
-											 bbsNContent += rms_next.get(j).getRms_con() + "\r\n";
-											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/") + "\r\n";
+											 bbsNContent += rms_next.get(j).getRms_con() + System.lineSeparator();
+											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/") + System.lineSeparator();
 											 if(rms_next.get(j).getRms_tar() == null || rms_next.get(j).getRms_tar().isEmpty()) {
-												 bbsNTarget += "[보류]" + "\r\n";
+												 bbsNTarget += "[보류]" + System.lineSeparator();
 											 } else {
 												 if(rms_next.get(j).getRms_tar().length() > 5) {
-												 bbsNTarget += rms_next.get(j).getRms_tar().substring(5).replace("-","/") + "\r\n";
+												 bbsNTarget += rms_next.get(j).getRms_tar().substring(5).replace("-","/") + System.lineSeparator();
 												 } else {
-													 bbsNTarget += "[보류]" + "\r\n";
+													 bbsNTarget += "[보류]" + System.lineSeparator();
 												 }
 											 }
 											 for (int h=0; h < nnum; h++) {
-												 bbsNStart += "\r\n";
-												 bbsNTarget += "\r\n";
+												 bbsNStart += System.lineSeparator();
+												 bbsNTarget += System.lineSeparator();
 											 }
 										} else {
 											 bbsNContent += rms_next.get(j).getRms_con();
@@ -638,8 +638,8 @@
 												 }
 											 }
 											 for (int h=0; h < nnum; h++) {
-												 bbsNStart += "\r\n";
-												 bbsNTarget += "\r\n";
+												 bbsNStart += System.lineSeparator();
+												 bbsNTarget += System.lineSeparator();
 											 }
 										}
 									}

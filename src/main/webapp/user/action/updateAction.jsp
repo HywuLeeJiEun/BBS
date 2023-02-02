@@ -91,7 +91,7 @@
 					if(!request.getParameter(jobs+i).contains("시스템") && !request.getParameter(jobs+i).contains("기타")) { //시스템이나 기타가 아니라면,
 						bbscontent = "- ["+ request.getParameter(jobs+i) +"] " + request.getParameter(a+i);
 						//줄바꿈 세기
-						num = bbscontent.split("\r\n").length-1;
+						num = bbscontent.split(System.lineSeparator()).length-1;
 					}else {
 						if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
 							bbscontent = request.getParameter(a+i);
@@ -99,12 +99,12 @@
 							bbscontent = "- " + request.getParameter(a+i);
 						}
 						//줄바꿈 세기
-						num = bbscontent.split("\r\n").length-1;
+						num = bbscontent.split(System.lineSeparator()).length-1;
 					}
 				} else { //job 선택이 없는 경우!
 					bbscontent = request.getParameter(a+i);
 					//줄바꿈 세기
-					num = bbscontent.split("\r\n").length-1;
+					num = bbscontent.split(System.lineSeparator()).length-1;
 				}
 			}
 			
@@ -139,20 +139,20 @@
 				}
 				
 				//줄바꿈 제거(임의 변경을 최소화 하기 위함)
-				bbsend = bbsend.replaceAll("\r\n", "");
+				bbsend = bbsend.replaceAll(System.lineSeparator(), "");
 
 			}
 			
 			//content의 줄바꿈을 최소화함
-			String recon = bbscontent.replaceAll("\r\n", "§");
+			String recon = bbscontent.replaceAll(System.lineSeparator(), "§");
 			for(int k=0; k < recon.split("§").length+1; k++) {
-				if(recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
+				if(recon.length() > 0 && recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
 					recon = recon.replaceFirst(".$", "");
 				} else {
 					break;
 				}
 			}
-			recon = recon.replaceAll("§","\r\n");
+			recon = recon.replaceAll("§",System.lineSeparator());
 			
 			//update 작업 진행 (rms_this)
 			if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
@@ -184,7 +184,7 @@
 						if(!request.getParameter(jobs+i).contains("시스템") && !request.getParameter(jobs+i).contains("기타")) { //시스템이나 기타가 아니라면,
 							bbscontent = "- ["+ request.getParameter(jobs+i) +"] " + request.getParameter(a+i);
 							//줄바꿈 세기
-							num = bbscontent.split("\r\n").length-1;
+							num = bbscontent.split(System.lineSeparator()).length-1;
 						}else {
 							if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
 								bbscontent = request.getParameter(a+i);
@@ -192,12 +192,12 @@
 								bbscontent = "- " + request.getParameter(a+i);
 							}
 							//줄바꿈 세기
-							num = bbscontent.split("\r\n").length-1;
+							num = bbscontent.split(System.lineSeparator()).length-1;
 						}
 					} else { //job 선택이 없는 경우!
 						bbscontent = request.getParameter(a+i);
 						//줄바꿈 세기
-						num = bbscontent.split("\r\n").length-1;
+						num = bbscontent.split(System.lineSeparator()).length-1;
 					}
 				}
 				
@@ -222,15 +222,15 @@
 				}
 				
 				//content의 줄바꿈을 최소화함
-				String recon = bbscontent.replaceAll("\r\n", "§");
+				String recon = bbscontent.replaceAll(System.lineSeparator(), "§");
 				for(int k=0; k < recon.split("§").length+1; k++) {
-					if(recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
+					if(recon.length() > 0 && recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
 						recon = recon.replaceFirst(".$", "");
 					} else {
 						break;
 					}
 				}
-				recon = recon.replaceAll("§","\r\n");
+				recon = recon.replaceAll("§",System.lineSeparator());
 				
 				// 저장에 오류가 없는지 확인!
 				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!

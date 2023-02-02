@@ -444,7 +444,7 @@
 									%>
 									<tr>
 										 <td>
-											<textarea class="textarea con" wrap="hard" id="bbsContent<%= i %>" required style="height:45px;width:80%; border:none; resize:none " placeholder="업무내용" name="bbsContent<%=i%>"><%= tlist.get(i).getRms_con() %></textarea>
+											<textarea class="textarea con" wrap="hard" id="bbsContent<%= i %>" required style="height:45px;width:80%; border:none; resize:none;" placeholder="업무내용" name="bbsContent<%=i%>"><%= tlist.get(i).getRms_con() %></textarea>
 										 </td>
 										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart<%= i %>" class="form-control" placeholder="접수일" name="bbsStart<%=i%>" value="<%= tlist.get(i).getRms_str() %>" ></td>
 										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget<%= i %>" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget<%=i%>" value="<%= tlist.get(i).getRms_tar() %>" ></td>		
@@ -473,12 +473,13 @@
 				</thead>
 				<tbody id="tbody">
 							<tr>
-								<th colspan="5" style="background-color: #D4D2FF;" align="center">차주 업무 계획</th>
+								<th colspan="100%" style="background-color: #D4D2FF;" align="center">차주 업무 계획</th>
 							</tr>
 							<tr style="background-color: #FFC57B;">
 								<th width="50%">| &nbsp; 업무내용</th>
 								<th width="10%">| &nbsp; 접수일</th>
 								<th width="10%">| &nbsp; 완료목표일</th>
+								<th>
 								<% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
 									<th></th>
 									<th></th>
@@ -490,10 +491,11 @@
 							%>
 							<tr>
 								 <td>
-									 <textarea class="textarea ncon" wrap="hard" id="bbsNContent<%= i %>" required style="height:45px;width:80%; border:none; resize:none " placeholder="업무내용" name="bbsNContent<%=i%>"><%= nlist.get(i).getRms_con() %></textarea>
+									 <textarea class="textarea ncon" wrap="hard" id="bbsNContent<%= i %>" required style="height:45px;width:75%; border:none; resize:none " placeholder="업무내용" name="bbsNContent<%=i%>"><%= nlist.get(i).getRms_con() %></textarea>
 								 </td>
 								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart<%= i %>" class="form-control" placeholder="접수일" name="bbsNStart<%=i%>" value="<%= nlist.get(i).getRms_str() %>" ></td>
 								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget<%= i %>" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget<%=i%>" value="<%= nlist.get(i).getRms_tar() %>"></td>	
+								 <td><textarea class="textarea" style="height:45px; width:100%; visibility:hidden"  ></textarea></td>
 								 <% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
 								 <td><button type="button" style="margin-bottom:5px; margin-top:5px;" id="delNRow" name="delNRow" class="btn btn-danger"> 삭제 </button></td>	
 								<td><button type="button" id="npaste<%= i %>" class="btn btn-default" style="margin-bottom:5px; margin-top:5px; visibility:hidden" onclick="npaste(this.id)" data-html="true" data-toggle="tooltip" data-placement="bottom" title="업무선택/접수일/완료목표일<br>복사하여 붙여넣습니다."><span class="glyphicon glyphicon-arrow-down"></span></button></td>
@@ -677,7 +679,7 @@
 	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+c+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsTarget'+c+'" ></td>';
 	            innerHtml += '  <td><textarea class="textarea" id="bbsEnd'+c+'" style="height:45px; resize:none; width:100%; border:none;"  data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다."  placeholder="진행율\n/완료일" name="bbsEnd'+c+'" ></textarea></td>'; 
 	            innerHtml += '    <td>';
-	            innerHtml += '<button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button>';
+	            innerHtml += '<button type="button" style="margin-bottom:5px; margin-top:5px;" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button>';
 	            innerHtml += '    </td>';
 	            innerHtml += '    <td>';
 	            innerHtml += '<button type="button" id="paste'+c+'" class="btn btn-default" style="margin-bottom:5px; margin-top:5px;" onclick="paste(this.id)"><span class="glyphicon glyphicon-arrow-down"></span></button>';
@@ -757,7 +759,8 @@
 	            innerHtml += '  </div> </td>';
 	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNStart'+n+'" class="form-control" placeholder="접수일" name="bbsNStart'+n+'" value="'+now+'"></td>';
 	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget'+n+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsNTarget'+n+'" ></td>';
-	            innerHtml += '<td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:10px" id="delRow" name="delNRow" class="btn btn-danger"> 삭제 </button>';
+	            innerHtml += ' <td><textarea class="textarea" style="height:45px; width:100%; visibility:hidden"  ></textarea></td>';
+	            innerHtml += '<td><button type="button" style="margin-bottom:5px; margin-top:5px;" id="delRow" name="delNRow" class="btn btn-danger"> 삭제 </button>';
 	            innerHtml += '    </td>';
 	            innerHtml += '<td><button type="button" id="npaste'+n+'" class="btn btn-default" style="margin-bottom:5px; margin-top:5px;" onclick="npaste(this.id)"><span class="glyphicon glyphicon-arrow-down"></span></button></td>';
 	            innerHtml += '</tr>'; 

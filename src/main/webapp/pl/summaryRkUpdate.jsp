@@ -186,7 +186,7 @@
 								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
 								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
-								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
+								<li class="active"><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>

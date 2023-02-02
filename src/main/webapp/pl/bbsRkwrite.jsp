@@ -586,6 +586,8 @@
 							} else { //bbsContent의 앞에 '-'이 없거나, 또는 빈칸일때 -> 이 경우는 저장부터 문제가 발생하는 경우!
 								bbsContent = tlist.get(i).getRms_con();
 							}
+							//bbsContent 줄바꿈 제거
+							bbsContent = bbsContent.replaceAll(System.lineSeparator(), ""); //줄바꿈 모두 제거
 						%>
 						<tr>
 							<td style="text-align: left; font-size:13px">
@@ -631,6 +633,8 @@
 							} else { //bbsContent의 앞에 '-'이 없거나, 또는 빈칸일때 -> 이 경우는 저장부터 문제가 발생하는 경우!
 								bbsNContent = nlist.get(i).getRms_con();
 							}
+							//bbsContent 줄바꿈 제거
+							bbsNContent = bbsNContent.replaceAll(System.lineSeparator(), ""); //줄바꿈 모두 제거
 							
 							//bbsNTarget이 가공되지 않음!
 							//해당 데이터 가공하여 출력하기!

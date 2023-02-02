@@ -578,7 +578,7 @@
 						<td> <%= rmslist.get(i).getRms_dl() %> </td>
 						<td style="text-align: left">
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<a href="/BBS/pl/signOnReportRk.jsp?rms_dl=<%= rmslist.get(i).getRms_dl() %>&user_id=<%= rmslist.get(i).getUser_id() %>">
+						<a href="/BBS/pl/signOnReportRk.jsp?rms_dl=<%= rmslist.get(i).getRms_dl() %>&user_id=<%= rmslist.get(i).getUser_id() %>&pageNumber=<%= pageNumber %>">
 							<%= rmslist.get(i).getRms_title() %></a></td>
 						<td><%= name_list %></td>
 						<td><%= rmslist.get(i).getRms_time().substring(0, 11) + rmslist.get(i).getRms_time().substring(11, 13) + "시"

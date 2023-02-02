@@ -78,8 +78,7 @@
 			for(int i=0; i < trCnt+con; i++) {
 				String a = "bbsContent";
 				String jobs = "jobs";
-				//줄바꿈 세기
-				int num = 0;
+
 				
 				//bbscontent
 				String bbscontent = "";
@@ -87,8 +86,7 @@
 					if(request.getParameter(a+i) != null && request.getParameter(jobs+i) != null) { // 값이 비어있지 않다면,
 						if(!request.getParameter(jobs+i).contains("시스템") && !request.getParameter(jobs+i).contains("기타")) { //시스템이나 기타가 아니라면,
 							bbscontent = "- ["+ request.getParameter(jobs+i) +"] " + request.getParameter(a+i);
-							//줄바꿈 세기
-							num = bbscontent.split("\r\n").length-1;
+
 						}else {
 							if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
 								// -가 있는 경우,
@@ -97,7 +95,6 @@
 								bbscontent = "- " + request.getParameter(a+i);
 							}
 							//줄바꿈 세기
-							num = bbscontent.split("\r\n").length-1;
 						}
 					} else { //job 선택이 없는 경우!
 						if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
@@ -106,8 +103,6 @@
 						} else {
 							bbscontent ="- " + request.getParameter(a+i);
 						}
-						//줄바꿈 세기
-						num = bbscontent.split("\r\n").length-1;
 					}
 				}
 				
@@ -142,19 +137,19 @@
 					}
 					
 					//줄바꿈 제거(임의 변경을 최소화 하기 위함)
-					bbsend = bbsend.replaceAll("\r\n", "");
+					bbsend = bbsend.replaceAll(System.lineSeparator(), "");
 				}
 				
 				//content의 줄바꿈을 최소화함
-				String recon = bbscontent.replaceAll("\r\n", "§");
+				String recon = bbscontent.replaceAll(System.lineSeparator(), "§");
 				for(int k=0; k < recon.split("§").length+1; k++) {
-					if(recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
+					if(recon.length() > 0 && recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
 						recon = recon.replaceFirst(".$", "");
 					} else {
 						break;
 					}	
 				}
-				recon = recon.replaceAll("§","\r\n");
+				recon = recon.replaceAll("§",System.lineSeparator());
 				
 				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
 					// write_rms_this
@@ -177,8 +172,6 @@
 			for(int i=0; i < trNCnt+ncon; i++) {
 				String a = "bbsNContent";
 				String jobs = "njobs";
-				//줄바꿈 세기
-				int num = 0;
 				
 				//bbscontent
 				String bbscontent = "";
@@ -186,16 +179,12 @@
 					if(request.getParameter(a+i) != null && request.getParameter(jobs+i) != null) { // 값이 비어있지 않다면,
 						if(!request.getParameter(jobs+i).contains("시스템") && !request.getParameter(jobs+i).contains("기타")) { //시스템이나 기타가 아니라면,
 							bbscontent = "- ["+ request.getParameter(jobs+i) +"] " + request.getParameter(a+i);
-							//줄바꿈 세기
-							num = bbscontent.split("\r\n").length-1;
 						}else {
 							if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
 								bbscontent = request.getParameter(a+i);
 							} else {
 								bbscontent = "- " + request.getParameter(a+i);
 							}
-							//줄바꿈 세기
-							num = bbscontent.split("\r\n").length-1;
 						}
 					} else { //job 선택이 없는 경우!
 						if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
@@ -203,8 +192,6 @@
 						} else {
 							bbscontent = "- " + request.getParameter(a+i);
 						}
-						//줄바꿈 세기
-						num = bbscontent.split("\r\n").length-1;
 					}
 				}
 				
@@ -227,15 +214,15 @@
 				}
 				
 				//content의 줄바꿈을 최소화함
-				String recon = bbscontent.replaceAll("\r\n", "§");
+				String recon = bbscontent.replaceAll(System.lineSeparator(), "§");
 				for(int k=0; k < recon.split("§").length+1; k++) {
-					if(recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
+					if(recon.length() > 0 && recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
 						recon = recon.replaceFirst(".$", "");
 					} else {
 						break;
 					}
 				}
-				recon = recon.replaceAll("§","\r\n");
+				recon = recon.replaceAll("§",System.lineSeparator());
 					
 				// 저장에 오류가 없는지 확인!
 				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
@@ -244,6 +231,7 @@
 					if(numlist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
 						//데이터 삭제
 						int ndel = rms.Rmsdelete(id, rms_dl,"N");
+						int tdel = rms.Rmsdelete(id, rms_dl,"T");
 						PrintWriter script = response.getWriter();
 						script.println("<script>");
 						script.println("alert('(차주)데이터 저장에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");

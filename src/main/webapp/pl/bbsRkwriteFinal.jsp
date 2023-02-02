@@ -88,11 +88,11 @@
 	String rms_dl = request.getParameter("rms_dl");
 
 	//데이터 가공
-	content = content.replaceAll("§","\r\n");
-    end = end.replaceAll("§","\r\n");
-	ncontent = ncontent.replaceAll("§","\r\n");
-	ntarget = ntarget.replaceAll("§","\r\n");
-	rms_dl = rms_dl.replaceAll("§","\r\n"); 
+	content = content.replaceAll("§",System.lineSeparator());
+    end = end.replaceAll("§",System.lineSeparator());
+	ncontent = ncontent.replaceAll("§",System.lineSeparator());
+	ntarget = ntarget.replaceAll("§",System.lineSeparator());
+	rms_dl = rms_dl.replaceAll("§",System.lineSeparator()); 
 
 
 	
@@ -100,7 +100,7 @@
 	// 진행율 구하기 (정확히 구현하려면 - 상세 Data가 DB에 저장되어야 함.)
 	String a = "[보류],12/31,12/30";
 	String[] endlist = a.split(",");
-	//String[] endlist = end.split("\r\n"); 
+	//String[] endlist = end.split(System.lineSeparator()); 
 	for(int i=0; i<endlist.length; i++) {
 		if(endlist[i].contains("보류")) {
 			
