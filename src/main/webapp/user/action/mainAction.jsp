@@ -145,10 +145,20 @@
 					bbsend = bbsend.replaceAll("\r\n", "");
 				}
 				
+				//content의 줄바꿈을 최소화함
+				String recon = bbscontent.replaceAll("\r\n", "§");
+				for(int k=0; k < recon.split("§").length+1; k++) {
+					if(recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
+						recon = recon.replaceFirst(".$", "");
+					} else {
+						break;
+					}	
+				}
+				recon = recon.replaceAll("§","\r\n");
 				
 				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
 					// write_rms_this
-					int numlist = rms.writeRms(id, rms_dl, rms_title, bbscontent, bbsstart, bbstarget, bbsend, "T", date);
+					int numlist = rms.writeRms("미승인", id, rms_dl, rms_title, recon, bbsstart, bbstarget, bbsend, "T", date);
 					if(numlist == -1) { //데이터 저장 오류
 						//데이터 삭제
 						int tdel = rms.Rmsdelete(id, rms_dl,"T");
@@ -216,10 +226,21 @@
 					}
 				}
 				
+				//content의 줄바꿈을 최소화함
+				String recon = bbscontent.replaceAll("\r\n", "§");
+				for(int k=0; k < recon.split("§").length+1; k++) {
+					if(recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
+						recon = recon.replaceFirst(".$", "");
+					} else {
+						break;
+					}
+				}
+				recon = recon.replaceAll("§","\r\n");
+					
 				// 저장에 오류가 없는지 확인!
 				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
 					// write_rms_last
-					int numlist = rms.writeRms(id, rms_dl, rms_title, bbscontent, bbsstart, bbstarget, null, "N", date);
+					int numlist = rms.writeRms("미승인", id, rms_dl, rms_title, recon, bbsstart, bbstarget, null, "N", date);
 					if(numlist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
 						//데이터 삭제
 						int ndel = rms.Rmsdelete(id, rms_dl,"N");

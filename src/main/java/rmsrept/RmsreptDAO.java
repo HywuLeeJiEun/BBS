@@ -229,9 +229,8 @@ public class RmsreptDAO {
 	
 	
 	//RMSREPT 작성하기 (insert)
-	public int writeRms(String user_id, String rms_dl, String rms_title, String rms_con, String rms_str, String rms_tar, String rms_end, String rms_div, java.sql.Timestamp date) {
+	public int writeRms(String rms_sign, String user_id, String rms_dl, String rms_title, String rms_con, String rms_str, String rms_tar, String rms_end, String rms_div, java.sql.Timestamp date) {
 		String sql = "insert into rmsrept values(?,?,?,?,?,?,?,?,?,?)";
-		String rms_sign = "미승인";
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, user_id);

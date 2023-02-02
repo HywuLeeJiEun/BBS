@@ -54,6 +54,11 @@
 		} //비어있는 경우는 관리자 및 담당 업무가 없는 사용자
 		String name = userDAO.getName(id);
 		
+		String rms_sign="미승인";
+		if(request.getParameter("rms_sign") != null) {
+			rms_sign=request.getParameter("rms_sign");			
+		}
+		
 		
 		//필요한 데이터 추출
 		String rms_dl = request.getParameter("bbsDeadline");		
@@ -138,11 +143,21 @@
 
 			}
 			
+			//content의 줄바꿈을 최소화함
+			String recon = bbscontent.replaceAll("\r\n", "§");
+			for(int k=0; k < recon.split("§").length+1; k++) {
+				if(recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
+					recon = recon.replaceFirst(".$", "");
+				} else {
+					break;
+				}
+			}
+			recon = recon.replaceAll("§","\r\n");
 			
 			//update 작업 진행 (rms_this)
 			if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
 				// write_rms_this
-				int numlist = rms.writeRms(id, rms_dl, rms_title, bbscontent, bbsstart, bbstarget, bbsend, "T", date);
+				int numlist = rms.writeRms(rms_sign, id, rms_dl, rms_title, recon, bbsstart, bbstarget, bbsend, "T", date);
 				if(numlist == -1) { //데이터 저장 오류
 					PrintWriter script = response.getWriter();
 					script.println("<script>");
@@ -206,10 +221,21 @@
 
 				}
 				
+				//content의 줄바꿈을 최소화함
+				String recon = bbscontent.replaceAll("\r\n", "§");
+				for(int k=0; k < recon.split("§").length+1; k++) {
+					if(recon.substring(recon.length()-1).equals("§")) { //맨 마지막이 줄바꿈으로 끝난다면,
+						recon = recon.replaceFirst(".$", "");
+					} else {
+						break;
+					}
+				}
+				recon = recon.replaceAll("§","\r\n");
+				
 				// 저장에 오류가 없는지 확인!
 				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
 					// write_rms_last
-					int numlist = rms.writeRms(id, rms_dl, rms_title, bbscontent, bbsstart, bbstarget, null, "N", date);
+					int numlist = rms.writeRms(rms_sign, id, rms_dl, rms_title, bbscontent, bbsstart, bbstarget, null, "N", date);
 					if(numlist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
 						PrintWriter script = response.getWriter();
 						script.println("<script>");
