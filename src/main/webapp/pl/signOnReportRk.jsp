@@ -421,9 +421,9 @@
 </tr>
 
 <tr valign="top" style="height:37px">
-<td colspan="2">
+<td colspan="1">
 </td>
-<td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
+<td colspan="3" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
 <span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">구분/<br/>담당자</span></td>
 <td colspan="2" style="background-color: #FFCC99; border: 1px solid #000000; text-indent: 0px;  vertical-align: middle;text-align: center;">
 <span style="font-family: 맑은 고딕; color: #000000; font-size: 18px; line-height: 1.3300781; font-weight: bold;">업무 내용</span></td>
@@ -450,10 +450,9 @@
 <!-- for문을 통해 출력 -->
 
 <tr valign="top" align="center">
-	<td colspan="2">
-	</td>
-   	 <td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea" readonly id="bbsManager" name="bbsManager" style="resize:none; height:180px; width:100%; border:none; overflow:auto; vertical-align:top; text-align: center;" placeholder="구분/담당자"  readonly><%= tlist.get(0).getRms_mgrs() %></textarea></td>
+	<td colspan="1"></td>
+   	 <td colspan="3" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
+	<textarea class="textarea" readonly id="bbsManager" name="bbsManager" style="resize:none; height:180px; width:105%; border:none; overflow:auto; vertical-align:top; text-align: center; background-color:transparent" placeholder="구분/담당자"  readonly><%= tlist.get(0).getRms_mgrs() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
 	<textarea class="textarea" readonly id="bbsContent" required style="resize:none; height:180px;width:100%; border:none;  " placeholder="업무내용" name="bbsContent"><%= tlist.get(0).getRms_con() %></textarea></td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
@@ -466,10 +465,9 @@
 	<textarea class="textarea" readonly id="bbsEnd" required style="resize:none; height:180px; width:100%; border:none; text-align: center;"  placeholder="진행율/완료일" name="bbsEnd" oninput="this.value = this.value
 												.replace(/[^0-9./.\s.%.-.ㅂ.ㅗ.ㄹ.ㅠ]/g, '')
 												.replace(/(\..*)\./g, '$1');"><%= tlist.get(0).getRms_end() %></textarea></td>
-	<td>
-	</td>
-	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">
-	<textarea class="textarea"  readonly style="resize:none; height:180px; width:100%; border:none; overflow:auto; text-align: center;" placeholder="구분/담당자"   readonly><%= nlist.get(0).getRms_mgrs() %></textarea></td>
+	<td></td>
+	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: right;">
+	<textarea class="textarea"  readonly style="resize:none; height:180px; width:110%; border:none; overflow:auto; text-align: center; background-color:transparent;" placeholder="구분/담당자"   readonly><%= nlist.get(0).getRms_mgrs() %></textarea></td>
 	<td colspan="2" style=" border: 1px solid #000000; text-indent: 0px;  vertical-align:top;text-align: center;">
 	<textarea class="textarea" readonly required id="bbsNContent" style="resize:none; height:180px;width:101%; border:none; background-color:transparent" placeholder="업무내용" name="bbsNContent"><%= nlist.get(0).getRms_con() %></textarea></td>
 	<td style=" border: 1px solid #000000; text-indent: 0px;  vertical-align: top;text-align: center;">

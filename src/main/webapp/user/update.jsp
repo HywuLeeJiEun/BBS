@@ -406,7 +406,7 @@
 					<table class="table" id="bbsTable" style="text-align: center; border: 1px solid #dddddd; cellpadding:50px;" >
 						<thead>
 							<tr>
-								<th colspan="5" style="background-color: #eeeeee; text-align: center;">주간보고 수정</th>
+								<th colspan="100%" style="background-color: #eeeeee; text-align: center;">주간보고 수정</th>
 							</tr>
 						</thead>
 						<tbody id="tbody">
@@ -414,10 +414,14 @@
 									<td colspan="2"> 
 									주간보고 명세서 <input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50" value="<%= tlist.get(0).getRms_title() %>"></td>
 									<td colspan="1"></td>
+									<% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
+									<td colspan="3">  주간보고 제출일 <input type="date" max="9999-12-31" style="width:80%; margin-left:20px" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value="<%= tlist.get(0).getRms_dl() %>" readonly></td>
+									<% }else { %>
 									<td colspan="2">  주간보고 제출일 <input type="date" max="9999-12-31" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value="<%= tlist.get(0).getRms_dl() %>" readonly></td>
+									<% } %>
 							</tr>
 									<tr>
-										<th colspan="5" style="background-color: #D4D2FF;" align="center">금주 업무 실적</th>
+										<th colspan="100%" style="background-color: #D4D2FF;" align="center">금주 업무 실적</th>
 									</tr>
 									<tr style="background-color: #FFC57B;">
 										<!-- <th width="6%">|  담당자</th> -->
@@ -426,6 +430,7 @@
 										<th width="10%">| &nbsp; 완료목표일</th>
 										<th width="10%">| &nbsp;&nbsp; 진행율<br>&nbsp;&nbsp;&nbsp;&nbsp;/완료일</th>
 										<% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
+										<th></th>
 										<th></th>
 										<% } %>
 									</tr>
@@ -439,13 +444,14 @@
 									%>
 									<tr>
 										 <td>
-											<textarea class="textarea con" wrap="hard" id="bbsContent" required style="height:45px;width:80%; border:none; resize:none " placeholder="업무내용" name="bbsContent<%=i%>"><%= tlist.get(i).getRms_con() %></textarea>
+											<textarea class="textarea con" wrap="hard" id="bbsContent<%= i %>" required style="height:45px;width:80%; border:none; resize:none " placeholder="업무내용" name="bbsContent<%=i%>"><%= tlist.get(i).getRms_con() %></textarea>
 										 </td>
-										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart" class="form-control" placeholder="접수일" name="bbsStart<%=i%>" value="<%= tlist.get(i).getRms_str() %>" ></td>
-										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget<%=i%>" value="<%= tlist.get(i).getRms_tar() %>" ></td>		
-										 <td><textarea class="textarea" id="bbsEnd" style="height:45px; width:100%; border:none; resize:none"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd<%=i%>" ><%= tlist.get(i).getRms_end() %></textarea></td>
+										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart<%= i %>" class="form-control" placeholder="접수일" name="bbsStart<%=i%>" value="<%= tlist.get(i).getRms_str() %>" ></td>
+										 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget<%= i %>" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsTarget<%=i%>" value="<%= tlist.get(i).getRms_tar() %>" ></td>		
+										 <td><textarea class="textarea" id="bbsEnd<%= i %>" style="height:45px; width:100%; border:none; resize:none"  placeholder="진행율&#13;&#10;/완료일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsEnd<%=i%>" ><%= tlist.get(i).getRms_end() %></textarea></td>
 										 <% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
-										 <td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button></td>
+										 <td><button type="button" style="margin-bottom:5px; margin-top:5px;" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button></td>
+										<td><button type="button" id="paste<%= i %>" class="btn btn-default" style="margin-bottom:5px; margin-top:5px; visibility:hidden" onclick="paste(this.id)" data-html="true" data-toggle="tooltip" data-placement="bottom" title="업무선택/접수일/완료목표일<br>복사하여 붙여넣습니다."><span class="glyphicon glyphicon-arrow-down"></span></button></td>
 										<% } %>
 									</tr>
 									<%
@@ -484,12 +490,13 @@
 							%>
 							<tr>
 								 <td>
-									 <textarea class="textarea ncon" wrap="hard" id="bbsNContent" required style="height:45px;width:80%; border:none; resize:none " placeholder="업무내용" name="bbsNContent<%=i%>"><%= nlist.get(i).getRms_con() %></textarea>
+									 <textarea class="textarea ncon" wrap="hard" id="bbsNContent<%= i %>" required style="height:45px;width:80%; border:none; resize:none " placeholder="업무내용" name="bbsNContent<%=i%>"><%= nlist.get(i).getRms_con() %></textarea>
 								 </td>
-								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart2" class="form-control" placeholder="접수일" name="bbsNStart<%=i%>" value="<%= nlist.get(i).getRms_str() %>" ></td>
-								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget2" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget<%=i%>" value="<%= nlist.get(i).getRms_tar() %>"></td>	
+								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart<%= i %>" class="form-control" placeholder="접수일" name="bbsNStart<%=i%>" value="<%= nlist.get(i).getRms_str() %>" ></td>
+								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget<%= i %>" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget<%=i%>" value="<%= nlist.get(i).getRms_tar() %>"></td>	
 								 <% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
-								 <td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delNRow" name="delNRow" class="btn btn-danger"> 삭제 </button></td>	
+								 <td><button type="button" style="margin-bottom:5px; margin-top:5px;" id="delNRow" name="delNRow" class="btn btn-danger"> 삭제 </button></td>	
+								<td><button type="button" id="npaste<%= i %>" class="btn btn-default" style="margin-bottom:5px; margin-top:5px; visibility:hidden" onclick="npaste(this.id)" data-html="true" data-toggle="tooltip" data-placement="bottom" title="업무선택/접수일/완료목표일<br>복사하여 붙여넣습니다."><span class="glyphicon glyphicon-arrow-down"></span></button></td>
 								<% } %>
 							</tr>
 							<%
@@ -648,6 +655,11 @@
 					c = trCnt;
 				}
 
+				//버튼 보이기 (paste) (이전)
+				if(document.getElementById("paste"+Number(c-1)) != null) {
+				document.getElementById("paste"+Number(c-1)).style.display = 'block';
+				}
+				
 	            var innerHtml = "";
 	            innerHtml += '<tr>';
 	            innerHtml += '    <td>';
@@ -667,9 +679,14 @@
 	            innerHtml += '    <td>';
 	            innerHtml += '<button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:15px" id="delRow" name="delRow" class="btn btn-danger"> 삭제 </button>';
 	            innerHtml += '    </td>';
+	            innerHtml += '    <td>';
+	            innerHtml += '<button type="button" id="paste'+c+'" class="btn btn-default" style="margin-bottom:5px; margin-top:5px;" onclick="paste(this.id)"><span class="glyphicon glyphicon-arrow-down"></span></button>';
+	            innerHtml += '    </td>';
 	            innerHtml += '</tr>'; 
 	            trCnt += 1;
 	            $('#bbsTable > tbody:last').append(innerHtml);
+	          //버튼 숨기기 (paste)
+				document.getElementById("paste"+c).style.display = 'none';
 				} else {
 					alert("업무 예정은 최대 30개를 넘을 수 없습니다.");
 				}
@@ -721,7 +738,10 @@
 				}else {
 					n = trNCnt;
 				}
-				
+				//버튼 보이기 (paste) (이전)
+				if(document.getElementById("npaste"+Number(n-1)) != null) {
+					document.getElementById("npaste"+Number(n-1)).style.display = 'block';
+				}
 	            var innerHtml = "";
 	            innerHtml += '<tr>';
 	            innerHtml += '    <td>';
@@ -739,9 +759,12 @@
 	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget'+n+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsNTarget'+n+'" ></td>';
 	            innerHtml += '<td><button type="button" style="margin-bottom:5px; margin-top:5px; margin-left:10px" id="delRow" name="delNRow" class="btn btn-danger"> 삭제 </button>';
 	            innerHtml += '    </td>';
+	            innerHtml += '<td><button type="button" id="npaste'+n+'" class="btn btn-default" style="margin-bottom:5px; margin-top:5px;" onclick="npaste(this.id)"><span class="glyphicon glyphicon-arrow-down"></span></button></td>';
 	            innerHtml += '</tr>'; 
 	            trNCnt += 1;
 	            $('#bbsNTable > tbody:last').append(innerHtml);
+	          //버튼 숨기기 (paste)
+				document.getElementById("npaste"+n).style.display = 'none';
 				} else {
 					alert("업무 예정은 최대 30개를 넘을 수 없습니다.");
 				}
@@ -922,5 +945,53 @@
 	</script>
 	
 	
+	<script>
+	function paste(id) {
+		//alert(id); //pasteX
+		var num = id.slice(-1);
+		//선택된 업무 내용 읽기
+		var a = document.getElementById("jobs"+num);
+		var jobs = a.options[a.selectedIndex].value;
+		//작성된 접수일 내용
+		var start = document.getElementById("bbsStart"+num).value;
+		//작성된 완료목표일 내용
+		var target = document.getElementById("bbsTarget"+num).value;
+		
+		//데이터를 계승함! 
+		if(document.getElementById("jobs")+Number(num)+1 != null){ //다음 데이터가 있다면, (다음 주간보고 작성이 있다는 것!)
+			//1. 데이터 삽입
+				//업무 내용 넣기
+			$("#jobs"+(Number(num)+1)).val(jobs).prop("selected", true);
+				//작성된 접수일 넣기
+			$("#bbsStart"+(Number(num)+1)).val(start);
+				//작성된 완료목표일 넣기
+			$("#bbsTarget"+(Number(num)+1)).val(target);
+				
+		} 
+	}
 	
+	function npaste(id) {
+		//alert(id); //pasteX
+		var num = id.slice(-1);
+		//선택된 업무 내용 읽기
+		var a = document.getElementById("njobs"+num);
+		var jobs = a.options[a.selectedIndex].value;
+		//작성된 접수일 내용
+		var start = document.getElementById("bbsNStart"+num).value;
+		//작성된 완료목표일 내용
+		var target = document.getElementById("bbsNTarget"+num).value;
+		
+		//데이터를 계승함! 
+		if(document.getElementById("jobs")+Number(num)+1 != null){ //다음 데이터가 있다면, (다음 주간보고 작성이 있다는 것!)
+			//1. 데이터 삽입
+				//업무 내용 넣기
+			$("#njobs"+(Number(num)+1)).val(jobs).prop("selected", true);
+				//작성된 접수일 넣기
+			$("#bbsNStart"+(Number(num)+1)).val(start);
+				//작성된 완료목표일 넣기
+			$("#bbsNTarget"+(Number(num)+1)).val(target);
+				
+		} 
+	}
+	</script>
 </body>
