@@ -415,7 +415,7 @@
 									주간보고 명세서 <input type="text" required class="form-control" placeholder="주간보고 명세서" name="bbsTitle" maxlength="50" value="<%= tlist.get(0).getRms_title() %>"></td>
 									<td colspan="1"></td>
 									<% if(nlist.get(0).getRms_sign().equals("미승인")) { %>
-									<td colspan="3">  주간보고 제출일 <input type="date" max="9999-12-31" style="width:80%; margin-left:20px" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value="<%= tlist.get(0).getRms_dl() %>" readonly></td>
+									<td colspan="3">  주간보고 제출일 <input type="date" max="9999-12-31" style="width:80%; margin-left:20px" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value="<%= tlist.get(0).getRms_dl() %>"><textarea name="before_dl" style="display:none"><%= tlist.get(0).getRms_dl() %></textarea></td>
 									<% }else { %>
 									<td colspan="2">  주간보고 제출일 <input type="date" max="9999-12-31" required class="form-control" placeholder="주간보고 날짜(월 일)" name="bbsDeadline" value="<%= tlist.get(0).getRms_dl() %>" readonly><textarea name="rms_sign" style="display:none"><%= tlist.get(0).getRms_sign() %></textarea></td>
 									<% } %>

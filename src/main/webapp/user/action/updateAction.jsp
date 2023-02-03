@@ -63,6 +63,7 @@
 		//필요한 데이터 추출
 		String rms_dl = request.getParameter("bbsDeadline");		
 		String rms_title = request.getParameter("bbsTitle");
+		String before_dl = request.getParameter("before_dl");
 		java.sql.Timestamp date = rms.getDateNow();
 		
 		int n = 0;
@@ -165,6 +166,9 @@
 					script.println("history.back();");
 					script.println("</script>");
 					n = -1;
+				} else {
+					//데이터 수정이 정상적으로 이루어짐.
+					rms.Rmsdelete(id, before_dl,"T");
 				}
 			}
 		} 
@@ -243,7 +247,9 @@
 						script.println("history.back();");
 						script.println("</script>");
 						nn = -1;
-					} 
+					} else {
+						rms.Rmsdelete(id, before_dl,"N");
+					}
 				} 
 			}
 			
@@ -281,13 +287,18 @@
 							script.println("history.back();");
 							script.println("</script>");
 							an = -1;
-						} 
+						} else {
+							rms.edelete(id, before_dl);	
+						}
 					} 
 				}
 			}
 			
 			
-			if(n == -1 || nn == -1) { //llist.size() != 0
+			if(n == -1 || nn == -1 || an == -1) { //llist.size() != 0
+				rms.Rmsdelete(id, rms_dl,"T");
+				rms.Rmsdelete(id, rms_dl,"N");
+				rms.edelete(id, rms_dl);		
 				PrintWriter script = response.getWriter();
 				script.println("<script>");
 				script.println("alert('수정에 문제가 발생하였습니다.')");

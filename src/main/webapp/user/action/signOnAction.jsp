@@ -26,7 +26,7 @@
 		if(id == null){
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
-			script.println("alert('로그인이 되어 있지 않습니다. 로그인 후 사용해주시길 바랍니다.')");
+			script.println("alert('로그인 후 사용해주시길 바랍니다.')");
 			script.println("location.href='../../login.jsp'");
 			script.println("</script>");
 		} else {
