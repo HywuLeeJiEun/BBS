@@ -171,7 +171,7 @@
 								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li><a href="/BBS/admin/summaryadRk.jsp">조회 및 승인</a></li>
+								<li class="active"><a href="/BBS/admin/summaryadRk.jsp">조회 및 승인</a></li>
 								<!-- <li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
 								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li> -->
 								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
@@ -440,8 +440,7 @@
 								date = dateFmt.format(edate);
 								writer = userDAO.getName(elist.get(0).getSum_updu());
 							}
-							
-							
+
 						
 					%>
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
@@ -458,11 +457,12 @@
 						<!-- 승인/미승인/마감 표시 -->
 						<td><%= getSign %></td>
 						<td data-toggle="tooltip" data-html="true" data-placement="right" title="승인시, <br>수정이 불가합니다.">
-						<% if(getSign.equals("미승인")) { %>
+						<% if(dldate.after(today) || dldate.equals(today)  && getSign.equals("미승인")) { %>
 							<a class="btn btn-success" style="font-size:12px" href="/BBS/admin/action/summaryadsignOnAction.jsp?rms_dl=<%= dl %>"> 승인 </a>
-						<% }else if(getSign.equals("승인")){ //승인 상태라면 %>
+						<% }else if(dldate.after(today) || dldate.equals(today)  && getSign.equals("승인")){ //승인 상태라면 %>
 							완료
-						<% }else{ //summary - 마감 상태는 아직 존재하지 않음!%>
+						<% }else{ //summary - 마감 상태는 아직 존재하지 않음!
+							sumDAO.sumSign(dl); %>
 							마감 
 						<% } %>
 						</td>

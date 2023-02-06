@@ -1,3 +1,4 @@
+<%@page import="net.sf.jasperreports.engine.json.expression.filter.FilterExpression.VALUE_TYPE"%>
 <%@page import="rmssumm.rmssumm"%>
 <%@page import="rmsrept.rmsedps"%>
 <%@page import="rmssumm.RmssummDAO"%>
@@ -105,9 +106,90 @@
 		 w_state = "ff0000";
 	 }
 	 
-	 
 	 paramMap.put("e_state",e_state);
 	 paramMap.put("w_state",w_state);
+	 
+	 //erplist 데이터 저장
+	 String econ = "";
+	 String eend = "";
+	 String encon = "";
+	 String entarget = "";
+	 int num = 0;
+	 for (int i=0; i < etlist.size(); i++) {
+		 if(i < etlist.size()-1) {
+			 num = etlist.get(i).getSum_con().length() -  etlist.get(i).getSum_con().replaceAll("\r\n","").length() - 1;
+			 econ += etlist.get(i).getSum_con() + "\r\n";
+			 eend += etlist.get(i).getSum_enta() + "\r\n";
+			 for(int j=0; j < num; j++) {
+				 eend += "\r\n";
+			 }
+		 } else {
+			 econ += etlist.get(i).getSum_con();
+			 eend += etlist.get(i).getSum_enta();
+		 }
+	 }
+
+	 for (int i=0; i < enlist.size(); i++) {
+		 if(i < enlist.size()-1) {
+			 num = enlist.get(i).getSum_con().length() -  enlist.get(i).getSum_con().replaceAll("\r\n","").length() - 1;
+			 encon += enlist.get(i).getSum_con() + "\r\n";
+			 entarget += enlist.get(i).getSum_enta() + "\r\n";
+			 for(int j=0; j < num; j++) {
+				 entarget += "\r\n";
+			 }
+		 } else {
+			 encon += enlist.get(i).getSum_con();
+			 entarget += enlist.get(i).getSum_enta();
+		 }
+	 }
+ 
+	 paramMap.put("econ",econ);
+	 paramMap.put("eend",eend);
+	 paramMap.put("encon",encon);
+	 paramMap.put("entarget",entarget);
+	 paramMap.put("eprogress",etlist.get(0).getSum_pro());
+	 paramMap.put("enote",etlist.get(0).getSum_note());
+	 paramMap.put("ennote",enlist.get(0).getSum_note());
+	 
+	 //weblist 데이터 저장
+	 String wcon = "";
+	 String wend = "";
+	 String wncon = "";
+	 String wntarget = "";
+	 for (int i=0; i < wtlist.size(); i++) {
+		 if(i < wtlist.size()-1) {
+			 num = wtlist.get(i).getSum_con().length() -  wtlist.get(i).getSum_con().replaceAll("\r\n","").length() - 1;
+			 wcon += wtlist.get(i).getSum_con() + "\r\n";
+			 wend += wtlist.get(i).getSum_enta() + "\r\n";
+			 for(int j=0; j < num; j++) {
+				 wend += "\r\n";
+			 }
+		 } else {
+			 wcon += wtlist.get(i).getSum_con();
+			 wend += wtlist.get(i).getSum_enta();
+		 }
+	 }
+	 
+	 for (int i=0; i < wnlist.size(); i++) {
+		 if(i < wnlist.size()-1) {
+			 num = wnlist.get(i).getSum_con().length() -  wnlist.get(i).getSum_con().replaceAll("\r\n","").length() - 1;
+			 wncon += wnlist.get(i).getSum_con() + "\r\n";
+			 wntarget += wnlist.get(i).getSum_enta() + "\r\n";
+			 for(int j=0; j < num; j++) {
+				 wntarget += "\r\n";
+			 }
+		 } else {
+			 wncon += wnlist.get(i).getSum_con();
+			 wntarget += wnlist.get(i).getSum_enta();
+		 }
+	 }
+	 paramMap.put("wcon",wcon);
+	 paramMap.put("wend",wend);
+	 paramMap.put("wncon",wncon);
+	 paramMap.put("wntarget",wntarget);
+	 paramMap.put("wprogress",wtlist.get(0).getSum_pro());
+	 paramMap.put("wnote",wtlist.get(0).getSum_note());
+	 paramMap.put("wnnote",wnlist.get(0).getSum_note());
 	 
 	 //erp 데이터를 저장함
 	 String a = "erp_date";
@@ -136,26 +218,6 @@
 		 paramMap.put(d+1," ");  
 		 paramMap.put(e+1," ");	
 	 }
-	 
-	 //sum - erp데이터 저장
-	 paramMap.put("etsum_con",etlist.get(0).getSum_con());
-	 paramMap.put("etsum_enta",etlist.get(0).getSum_enta());
-	 paramMap.put("etsum_pro",etlist.get(0).getSum_pro());
-	 paramMap.put("etsum_note",etlist.get(0).getSum_note());
-	 
-	 paramMap.put("ensum_con",enlist.get(0).getSum_con());
-	 paramMap.put("ensum_enta",enlist.get(0).getSum_enta());
-	 paramMap.put("ensum_note",enlist.get(0).getSum_note());
-	 
-	 //sum - web데이터 저장
-	 paramMap.put("wtsum_con",wtlist.get(0).getSum_con());
-	 paramMap.put("wtsum_enta",wtlist.get(0).getSum_enta());
-	 paramMap.put("wtsum_pro",wtlist.get(0).getSum_pro());
-	 paramMap.put("wtsum_note",wtlist.get(0).getSum_note());
-	 
-	 paramMap.put("wnsum_con",wnlist.get(0).getSum_con());
-	 paramMap.put("wnsum_enta",wnlist.get(0).getSum_enta());
-	 paramMap.put("wnsum_note",wnlist.get(0).getSum_note());
 	 
 	 
 	 // (3)데이타소스 생성
@@ -189,8 +251,7 @@
 	     ex.printStackTrace();
 	
 	}
-	 
-	String fileName = "요약본_sample.pptx";
+ 	String fileName = "요약본_sample.pptx";
 	// 1) 개인 pc 환경
 	//String downLoadFile = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\Files\\" + fileName;
 	// 2) local pc 환경
@@ -216,7 +277,7 @@
 		os.write(b,0,length);
 	}
 
-	os.flush();    
+	os.flush();  
 %>
 
 

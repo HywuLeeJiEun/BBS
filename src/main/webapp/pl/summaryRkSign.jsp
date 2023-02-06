@@ -457,7 +457,14 @@
 						<td><%= date.substring(0, 11) + date.substring(11, 13) +"시"+ date.substring(14, 16)+"분" %></td>
 						<td><%= writer %></td>
 						<!-- 승인/미승인/마감 표시 -->
-						<td><%= getSign %></td>
+						<td>	
+						<% if(dldate.after(today) || dldate.equals(today)  && getSign.equals("승인")){ //승인 상태라면 %>
+							완료
+						<% }else{ //summary - 마감 상태는 아직 존재하지 않음!
+							sumDAO.sumSign(dl); %>
+							마감 
+						<% } %>
+						</td>
 						<td data-toggle="tooltip" data-html="true" data-placement="right" title="버튼을 통해,<br>pptx 출력">
 							<a class="btn btn-success" style="font-size:12px" href="/BBS/admin/pptx/pptAdmin.jsp?rms_dl=<%= dl %>"> 출력 </a>
 						</td>

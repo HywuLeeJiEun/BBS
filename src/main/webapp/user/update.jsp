@@ -572,7 +572,7 @@
 						<% } %>
 				<%
 					if(id.equals(tlist.get(0).getUser_id())) {
-						if(dldate.after(today)){
+						if(dldate.after(today) || dldate.equals(today)){
 							if(nlist.get(0).getRms_sign().equals("미승인")) {
 				%>
 						<!-- 삭제 -->

@@ -445,7 +445,7 @@
 						<td data-toggle="tooltip" data-html="true" data-placement="right" title="관리자의 승인 이후, <br>상태가 변경됩니다.">
 						<%
 						String sign = null;
-						if(dldate.after(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
+						if(dldate.after(today) || dldate.equals(today)) { //현재 날짜가 마감일을 아직 넘지 않으면,
 							sign = sumlist.get(i).getSum_sign();
 						} else {
 							sign="마감";

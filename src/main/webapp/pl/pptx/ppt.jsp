@@ -68,8 +68,8 @@
 	 
 	
 	 // (2)파라메타 생성	  
-	// String logo = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
-	  String logo = "C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
+	 //String logo = "C:\\Users\\gkdla\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
+	 String logo = "C:\\Users\\S-OIL\\git\\BBS\\src\\main\\webapp\\WEB-INF\\reports\\s-oil.JPG";
 	 Map<String,Object> paramMap = new HashMap<String,Object>();
 	
 	 paramMap.put("deadLine",rms_dl);	  
