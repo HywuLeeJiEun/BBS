@@ -1,3 +1,4 @@
+<%@page import="org.codehaus.groovy.runtime.ArrayTypeUtils"%>
 <%@page import="rmsuser.rmsuser"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
@@ -81,50 +82,26 @@
 
 
 	// 선택된 데이터 정보
-	String content = request.getParameter("content");
+	/* String content = request.getParameter("content");
 	String end = request.getParameter("end");
 	String ncontent = request.getParameter("ncontent");
 	String ntarget = request.getParameter("ntarget");
+	String rms_dl = request.getParameter("rms_dl"); */
 	String rms_dl = request.getParameter("rms_dl");
 
-	//데이터 가공
-	content = content.replaceAll("§",System.lineSeparator());
-    end = end.replaceAll("§",System.lineSeparator());
-	ncontent = ncontent.replaceAll("§",System.lineSeparator());
-	ntarget = ntarget.replaceAll("§",System.lineSeparator());
-	rms_dl = rms_dl.replaceAll("§",System.lineSeparator()); 
+	String chk_arr = request.getParameter("chk_arr");
+	String nchk_arr = request.getParameter("nchk_arr");
 
-
-	
-
-	// 진행율 구하기 (정확히 구현하려면 - 상세 Data가 DB에 저장되어야 함.)
-	String a = "[보류],12/31,12/30";
-	String[] endlist = a.split(",");
-	//String[] endlist = end.split(System.lineSeparator()); 
-	for(int i=0; i<endlist.length; i++) {
-		if(endlist[i].contains("보류")) {
-			
-		} else { //보류가 아닌, 날짜 형태라면
-			//년도가 바뀔 가능성이 있는 달이라면, (12월 제출일 - 1월 완료 예정일인 경우 ...)
-			//1. endlist가 1월인지 확인 -> 1월인 경우, monday의 월을 확인 (12월인 경우 ...)
-			//2. monday의 년도 확인
-			//3. endlist에게 monday보다 1년 추가하여 텍스트 제공 
-			
-			//기본적으로 년도가 바뀌지 않는다면,
-			//1. endlist의 월 확인 (특수케이스 판별을 위함.)
-			//2. 
-		}
-	}
-	 
-	// 진행율 및 상태 작성을 위한 완료일 분석
-	if(end.contains("보류")) {
-		
-	}
+	String[] chk;
+	String[] nchk;
+	//chk_arr 변경 
+	chk = chk_arr.split(",");
+	nchk = nchk_arr.split(",");
 	
 %>
 
 
- <!-- ************ 상단 네비게이션바 영역 ************* -->
+<!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
 		<div class="navbar-header"> 
 			<!-- 네비게이션 상단 박스 영역 -->
@@ -385,9 +362,8 @@
 			 <tr>
 			 	<td id="incomplete" style="text-align: center; align:center;"><div style="border:1px solid #ff0000; background-color:#ff0000; width:10px; height:10px; float:left; margin-left: 35%; margin-top: 3%"></div><span style="float:left">&nbsp; : 미완료(문제)</span></td>
 			 </tr> 
-			 <%-- <tr>
-			 	<td>업무 담당자 인원 : <%= plist.size() %></td>
-			 </tr> --%> 
+			 <tr>
+			 </tr> 
 		 </table>
 	 </div>
 	 
@@ -399,8 +375,8 @@
 				<table id="Table" class="table" style="text-align: center;">
 					<thead>
 						<tr>
-							<td><textarea id="rms_dl" name="rms_dl" style="display:none"><%= rms_dl %></textarea> </td>
-							<td><textarea id="pl" name="pl" style="display:none"><%= pl %></textarea> </td>
+							<td><textarea id="rms_dl" name="rms_dl" style="display:none"><%= rms_dl %></textarea><textarea id="chk" name="chk" style="display:none"><%= chk.length %></textarea> </td>
+							<td><textarea id="pl" name="pl" style="display:none"><%= pl %></textarea><textarea id="nchk" name="nchk" style="display:none"><%= nchk.length %></textarea> </td>
 						</tr>
 						<tr>
 							<th colspan="2" style="background-color:#D4D2FF; align:left;" > &nbsp;금주 업무 실적</th>
@@ -423,9 +399,17 @@
 							<!-- 구분 -->
 							<td style="text-align: center; border: 1px solid"><%= pl %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="content" id="content" style="resize: none; width:100%; height:100px"><%= content %></textarea></td>
+							<td style=" border: 1px solid">
+							<% for(int i=0; i < chk.length; i++) { %>
+								<textarea required name="content<%= i %>" id="content<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("content"+i) %></textarea>
+							<% } %>
+							</td>
 							<!-- 완료일 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="end" id="end" style="resize: none; width:100%; height:100px"><%= end %></textarea></td>
+							<td style="text-align: center; border: 1px solid">
+							<% for(int i=0; i < chk.length; i++) { %>
+							<textarea required name="end<%= i %>" id="end<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("end"+i) %></textarea>
+							<% } %>
+							</td>
 							<!-- 진행율 -->
 							<td style="text-align: center; border: 1px solid">
 								<select name="progress" id="progress" style="height:45px; width:95px; text-align-last:center;" onchange="selectPro()">
@@ -440,9 +424,6 @@
 							<td style="text-align: center; border: 1px solid;" id="state"></td>
 							<!-- 비고 -->
 							<td style=" border: 1px solid"><textarea  name="note" id="note" style="resize: none; width:100%; height:100px"></textarea></td>
-						</tr>
-						<tr>
-							<td></td>
 						</tr>
 					</tbody>
 				</table>
@@ -472,9 +453,17 @@
 							<!-- 구분 -->
 							<td style="text-align: center; border: 1px solid"><%= pl %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="ncontent" id="ncontent" style="resize: none; width:100%; height:100px"><%= ncontent %></textarea></td>
+							<td style=" border: 1px solid">
+							<% for(int i=0; i < nchk.length; i++) { %>
+								<textarea required name="ncontent<%= i %>" id="ncontent<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("ncontent"+i) %></textarea>
+							<% } %>
+							</td>
 							<!-- 완료예정 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="ntarget" id="ntarget" style="resize: none; width:100%; height:100px"><%= ntarget %></textarea></td>
+							<td style="text-align: center; border: 1px solid">
+							<% for(int i=0; i < nchk.length; i++) { %>
+								<textarea required name="ntarget<%= i %>" id="ntarget<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("ntarget"+i) %></textarea>
+							<% } %>
+							</td>
 							<!-- 비고 -->
 							<td style=" border: 1px solid"><textarea name="nnote" id="nnote" style="resize: none; width:100%; height:100px"></textarea></td>
 						</tr>
@@ -485,7 +474,7 @@
 	</form>
 	<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center" onclick="save()">제출</button>
 	</div>
-	
+	 
 
 <!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -606,10 +595,10 @@
 	
 	<script>
 	function save() {
-		if(document.getElementById("content").value == '' || document.getElementById("content").value == null) {
+		if(document.getElementById("content0").value == '' || document.getElementById("content0").value == null) {
 			alert("금주 업무 실적의 '업무 내용'이 작성되지 않았습니다.");
 		} else {
-			if(document.getElementById("end").value == '' || document.getElementById("end").value == null) {
+			if(document.getElementById("end0").value == '' || document.getElementById("end0").value == null) {
 				alert("금주 업무 실적의 '완료일'이 작성되지 않았습니다.");
 			} else {
 				if(document.getElementById("progress").value.indexOf("선택") > -1) {
@@ -619,13 +608,15 @@
 						alert("금주 업무 실적의 '상태'가 선택되지 않았습니다.");
 					} else {
 						//차주
-						if(document.getElementById("ncontent").value == '' || document.getElementById("ncontent").value == null) {
+						if(document.getElementById("ncontent0").value == '' || document.getElementById("ncontent0").value == null) {
 							alert("차주 업무 계획의 '업무 내용'이 작성되지 않았습니다.");
 						} else {
-							if(document.getElementById("ntarget").value == '' || document.getElementById("ntarget").value == null) {
+							if(document.getElementById("ntarget0").value == '' || document.getElementById("ntarget0").value == null) {
 								alert("차주 업무 계획의 '완료예정'이 작성되지 않았습니다.");
 							} else {
 								var innerHtml = '<td><textarea class="textarea" id="color" name="color" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
+								var innerHtml = '<td><textarea class="textarea" id="chk" name="chk" style="display:none">'+document.getElementById("chk").value+'</textarea></td>';
+								var innerHtml = '<td><textarea class="textarea" id="nchk" name="nchk" style="display:none">'+document.getElementById("nchk").value+'</textarea></td>';
 								$('#Table > tbody > tr:last').append(innerHtml);
 								$('#bbsRk').submit();
 							}

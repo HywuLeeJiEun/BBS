@@ -1,3 +1,4 @@
+<%@page import="rmssumm.rmssumm"%>
 <%@page import="rmssumm.RmssummDAO"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
@@ -36,24 +37,40 @@
 			script.println("history.back();");
 			script.println("</script>");
 		} else {
-		
-		//sign을 승인으로 변경!
-		int num = sumDAO.signSum("승인",id,rms_dl);
-		
-		if(num == -1) {
-			//정상적으로 이루어지지 않음!
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('데이터베이스 오류입니다.(summaryadsignOnAction.jsp)\n관리자에게 문의 바랍니다.')");
-			script.println("history.back();");
-			script.println("</script>");
-		} else {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('승인이 완료되었습니다.')");
-			script.println("location.href='/BBS/admin/summaryadRk.jsp'");
-			script.println("</script>");
-		}
+			//elist와 tlist가 존재하는지 확인
+			ArrayList<rmssumm> elist = sumDAO.getSumDiv("ERP", rms_dl, "T");
+			ArrayList<rmssumm> wlist = sumDAO.getSumDiv("WEB", rms_dl, "T");
+			if(elist.size() != 0 && wlist.size() != 0) {
+				//sign을 승인으로 변경!
+				int num = sumDAO.signSum("승인",id,rms_dl);
+				
+				if(num == -1) {
+					//정상적으로 이루어지지 않음!
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("alert('데이터베이스 오류입니다.(summaryadsignOnAction.jsp)\\n관리자에게 문의 바랍니다.')");
+					script.println("history.back();");
+					script.println("</script>");
+				} else {
+					PrintWriter script = response.getWriter();
+					script.println("<script>");
+					script.println("alert('승인이 완료되었습니다.')");
+					script.println("location.href='/BBS/admin/summaryadRk.jsp'");
+					script.println("</script>");
+				}
+			} else if(elist.size() == 0){
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('작성되지 않은 요약본이 있습니다. (ERP)\\n요약본이 모두 작성되어야 승인이 가능합니다.')");
+				script.println("history.back();");
+				script.println("</script>");
+			} else if(wlist.size() == 0){
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('작성되지 않은 요약본이 있습니다. (WEB)\\n요약본이 모두 작성되어야 승인이 가능합니다.')");
+				script.println("history.back();");
+				script.println("</script>");
+			}
 	}
 %>
 

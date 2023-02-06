@@ -456,8 +456,7 @@
 							<td colspan="2"  style="background-color:#f9f9f9;"><textarea id="rms_dl" name="rms_dl" style="display:none"><%= tlist.get(0).getRms_dl() %></textarea>
 								<textarea id="pl" name="pl" style="display:none"><%= tlist.get(0).getUser_fd() %></textarea> 
 								<textarea id="sign" name="sign" style="display:none"><%= tlist.get(0).getSum_sign() %></textarea>
-								<textarea id="chk" name="chk" style="display:none"><%= tlist.size() %></textarea>
-								<textarea id="nchk" name="nchk" style="display:none"><%= nlist.size() %></textarea>
+								<textarea id="state_value" name="state_value" style="display:none"><%= tlist.get(0).getSum_sta() %></textarea></td>
 							<td  style="background-color:#f9f9f9;" colspan="1" style="txet:center">상태</td>
 							<td  style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" ><%= tlist.get(0).getSum_sign() %></td>
 						</tr>
@@ -482,17 +481,9 @@
 							<!-- 구분 -->
 							<td style="text-align: center; border: 1px solid"><%= tlist.get(0).getUser_fd() %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid">
-							<% for(int i=0; i < tlist.size(); i++) {%>
-								<textarea required name="content<%= i %>" id="content<%= i %>" style="resize: none; width:100%;"><%= tlist.get(i).getSum_con() %></textarea>
-							<% } %>
-							</td>
+							<td style=" border: 1px solid"><textarea required name="content" id="content" style="resize: none; width:100%; height:100px"><%= tlist.get(0).getSum_con() %></textarea></td>
 							<!-- 완료일 -->
-							<td style="text-align: center; border: 1px solid">
-							<% for(int i=0; i < tlist.size(); i++) {%>
-								<textarea required name="end<%= i %>" id="end<%= i %>" style="resize: none; width:100%;"><%= tlist.get(i).getSum_enta() %></textarea>
-							<% } %>	
-							</td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="end" id="end" style="resize: none; width:100%; height:100px"><%= tlist.get(0).getSum_enta() %></textarea></td>
 							<!-- 진행율 -->
 							<td style="text-align: center; border: 1px solid">
 								<select name="progress" id="progress" style="height:45px; width:95px; text-align-last:center;" onchange="selectPro()">
@@ -533,21 +524,11 @@
 						
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid">
-								<textarea id="pl" name="pl" style="display:none"><%= nlist.get(0).getUser_fd() %></textarea><%= nlist.get(0).getUser_fd() %>
-							</td>
+							<td style="text-align: center; border: 1px solid"><textarea id="pl" name="pl" style="display:none"><%= nlist.get(0).getUser_fd() %></textarea><%= nlist.get(0).getUser_fd() %></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid">
-							<% for(int i=0; i < nlist.size(); i++) { %>
-								<textarea required name="ncontent<%= i %>" id="ncontent<%= i %>" style="resize: none; width:100%;"><%= nlist.get(i).getSum_con() %></textarea>
-							<% } %>
-							</td>
+							<td style=" border: 1px solid"><textarea required name="ncontent" id="ncontent" style="resize: none; width:100%; height:100px"><%= nlist.get(0).getSum_con() %></textarea></td>
 							<!-- 완료예정 -->
-							<td style="text-align: center; border: 1px solid">
-							<% for(int i=0; i < nlist.size(); i++) { %>	
-								<textarea required name="ntarget<%= i %>" id="ntarget<%= i %>" style="resize: none; width:100%;"><%= nlist.get(i).getSum_enta() %></textarea>
-							<% } %>	
-							</td>
+							<td style="text-align: center; border: 1px solid"><textarea required name="ntarget" id="ntarget" style="resize: none; width:100%; height:100px"><%= nlist.get(0).getSum_enta() %></textarea></td>
 							<!-- 비고 -->
 							<td style=" border: 1px solid"><textarea name="nnote" id="nnote" style="resize: none; width:100%; height:100px"><%= nlist.get(0).getSum_note() %></textarea></td>
 						</tr>
@@ -619,7 +600,6 @@
 	</form>
 	</div>
 	<br><br><br>	
-	
 <%
 	}
 %>
@@ -686,7 +666,7 @@
 	<script>
 	// 상태 색상 지정
 	$(document).ready(function() {
-		var con = document.getElementById("progress").value; //완료, 진행중, 미완료(문제)
+		var con = document.getElementById("state_value").value; //완료, 진행중, 미완료(문제)
 		var state = document.getElementById("state");
 		if(con == "완료") {
 			state.style.backgroundColor = "#00ff00";
@@ -751,10 +731,10 @@
 	//$("#update").find('[type="submit"]').trigger('click') {
 	//function update() {
 	$("#update").on('click', function () {
-		if(document.getElementById("content0").value == '' || document.getElementById("content0").value == null) {
+		if(document.getElementById("content").value == '' || document.getElementById("content").value == null) {
 			alert("금주 업무 실적의 '업무 내용'이 작성되지 않았습니다.");
 		} else {
-			if(document.getElementById("end0").value == '' || document.getElementById("end0").value == null) {
+			if(document.getElementById("end").value == '' || document.getElementById("end").value == null) {
 				alert("금주 업무 실적의 '완료일'이 작성되지 않았습니다.");
 			} else {
 				if(document.getElementById("progress").value.indexOf("선택") > -1) {
@@ -764,14 +744,16 @@
 						alert("금주 업무 실적의 '상태'가 선택되지 않았습니다.");
 					} else {
 						//차주
-						if(document.getElementById("ncontent0").value == '' || document.getElementById("ncontent0").value == null) {
+						if(document.getElementById("ncontent").value == '' || document.getElementById("ncontent").value == null) {
 							alert("차주 업무 계획의 '업무 내용'이 작성되지 않았습니다.");
 						} else {
-							if(document.getElementById("ntarget0").value == '' || document.getElementById("ntarget0").value == null) {
+							if(document.getElementById("ntarget").value == '' || document.getElementById("ntarget").value == null) {
 								alert("차주 업무 계획의 '완료예정'이 작성되지 않았습니다.");
 							} else {
-								$('#bbsRk').submit();
-							}
+			var innerHtml = '<tr><td><textarea class="textarea" id="color" name="color" style="display:none">'+con.style.backgroundColor+'</textarea></td></tr>';
+			$('#Table > tbody > tr:last').append(innerHtml);
+			$('#bbsRk').submit();
+			}
 						}
 					}
 				}

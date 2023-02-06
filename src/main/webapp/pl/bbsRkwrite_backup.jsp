@@ -221,11 +221,20 @@
 			 /* if(dllist.get(i).getRms_dl().equals(rms_dl)) {
 				 dllist.remove(i);
 			 } */
-			 String useDl = sumDAO.getDluse(dllist.get(i).getRms_dl(), pl);
+			 String useDl = sumDAO.getDluse(dllist.get(i).getRms_dl());
 			 if(useDl != null && !useDl.isEmpty()) { //이미 요약본이 작성되어 있음!
 				 dllist.remove(i);
 			 } 
 		 }
+		//alert가 넘어오면 경고창 미표시, 넘어오지 않으면 표시!
+		String alert = request.getParameter("alert");
+		if(alert == null || alert.isEmpty()) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('주간보고 제출이 확인되지 않은 사용자가 있습니다.\n작성에 유의해주시기 바랍니다.')");
+			//script.println("location.href='../login.jsp'");
+			script.println("</script>");
+		} 
 		
 	%>
 	<textarea id="rms_dl" style="display:none"><%= rms_dl %></textarea>
@@ -816,17 +825,35 @@
 			} else {
 				if(noSub != 0) {
 					var con = confirm('미제출 인원이 있습니다. 요약본을 작성하시겠습니까?')
-					if(con) {	
+					if(con) {
+						//데이터를 다른 페이지로 보냄!
+						// ((금주 업무 내용 / 완료일))
+						for(var i=0; i < chk_arr.length; i++) {
+							var a = "#content"+chk_arr[i];
+							var b = "#end"+chk_arr[i];
+							//금주 업무 실적에 대한 내용 넣기
+							content += $(a).val() + "§";
+							end += $(b).val() + "§";
+						}
+						
+						// ((차주 업무 내용 / 목표일))
+						for(var i=0; i < nchk_arr.length; i++) {
+							var a = "#ncontent"+nchk_arr[i];
+							var b = "#ntarget"+nchk_arr[i];
+							//금주 업무 실적에 대한 내용 넣기
+							ncontent += $(a).val() + "§";
+							ntarget += $(b).val() + "§";
+						}
+						
 						// 데이터 넘기기 
 						var innerHtml = "";
 						//innerHtml += '<td><textarea class="textarea" id="chk_arr" name="chk_arr" readonly>'+ chk_arr +'</textarea></td>';
 						//innerHtml += '<td><textarea class="textarea" id="nchk_arr" name="nchk_arr" readonly>'+ nchk_arr +'</textarea></td>';
-						/* innerHtml += '<td><textarea class="textarea" id="content" name="content" readonly style="display:none">'+ content +'</textarea></td>';
+						innerHtml += '<td><textarea class="textarea" id="content" name="content" readonly style="display:none">'+ content +'</textarea></td>';
 						innerHtml += '<td><textarea class="textarea" id="end" name="end" readonly style="display:none">'+ end +'</textarea></td>';
 						innerHtml += '<td><textarea class="textarea" id="ncontent" name="ncontent" readonly style="display:none">'+ ncontent +'</textarea></td>';
-						innerHtml += '<td><textarea class="textarea" id="ntarget" name="ntarget" readonly style="display:none">'+ ntarget +'</textarea></td>'; */
-						innerHtml += '<td><textarea class="textarea" id="chk_arr" name="chk_arr" readonly style="display:none">'+ chk_arr +'</textarea></td>';
-						innerHtml += '<td><textarea class="textarea" id="nchk_arr" name="nchk_arr" readonly style="display:none">'+ nchk_arr +'</textarea></td>';
+						innerHtml += '<td><textarea class="textarea" id="ntarget" name="ntarget" readonly style="display:none">'+ ntarget +'</textarea></td>';
+						
 						$('#Table > tbody > tr:last').append(innerHtml);
 						$('#Rkwrite').submit(); 
 					} else {
@@ -835,10 +862,33 @@
 					}
 				}else {		
 				//데이터를 다른 페이지로 보냄!
+				// ((금주 업무 내용 / 완료일))
+				for(var i=0; i < chk_arr.length; i++) {
+					var a = "#content"+chk_arr[i];
+					var b = "#end"+chk_arr[i];
+					//금주 업무 실적에 대한 내용 넣기
+					content += $(a).val() + "§";
+					end += $(b).val() + "§";
+				}
+				
+				// ((차주 업무 내용 / 목표일))
+				for(var i=0; i < nchk_arr.length; i++) {
+					var a = "#ncontent"+nchk_arr[i];
+					var b = "#ntarget"+nchk_arr[i];
+					//금주 업무 실적에 대한 내용 넣기
+					ncontent += $(a).val() + "§";
+					ntarget += $(b).val() + "§";
+				}
+				
 				// 데이터 넘기기 
 				var innerHtml = "";
-				innerHtml += '<td><textarea class="textarea" id="chk_arr" name="chk_arr" readonly style="display:none">'+ chk_arr +'</textarea></td>';
-				innerHtml += '<td><textarea class="textarea" id="nchk_arr" name="nchk_arr" readonly style="display:none">'+ nchk_arr +'</textarea></td>';
+				//innerHtml += '<td><textarea class="textarea" id="chk_arr" name="chk_arr" readonly>'+ chk_arr +'</textarea></td>';
+				//innerHtml += '<td><textarea class="textarea" id="nchk_arr" name="nchk_arr" readonly>'+ nchk_arr +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="content" name="content" readonly style="display:none">'+ content +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="end" name="end" readonly style="display:none">'+ end +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="ncontent" name="ncontent" readonly style="display:none">'+ ncontent +'</textarea></td>';
+				innerHtml += '<td><textarea class="textarea" id="ntarget" name="ntarget" readonly style="display:none">'+ ntarget +'</textarea></td>';
+				
 				$('#Table > tbody > tr:last').append(innerHtml);
 				$('#Rkwrite').submit(); 
 				}

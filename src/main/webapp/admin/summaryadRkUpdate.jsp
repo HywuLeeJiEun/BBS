@@ -426,8 +426,20 @@
 				<table id="Table" class="table" style="text-align: center;">
 					<thead>
 						<tr>			
+							<% 
+							String etitle = "";
+							String wtitle = "";
+							String di =  "";
+							if(etlist.size() != 0) {
+								etitle = "ERP";
+							}
+							if(wtlist.size() != 0) {
+								wtitle = "WEB";
+								di = "/";
+							}
+							%>
 							<td style="background-color:#f9f9f9;" colspan="1" style="align:left;" >요약본</td>
-							<td style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title=""> [ERP/WEB] - summary (<%= rms_dl %>)<textarea id="rms_dl" name="rms_dl" style="display:none"><%= rms_dl %></textarea></td>
+							<td style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title=""> [<%= etitle + di + wtitle %>] - summary (<%= rms_dl %>)<textarea id="rms_dl" name="rms_dl" style="display:none"><%= rms_dl %></textarea></td>
 							<td colspan="2"  style="background-color:#f9f9f9;"></td>
 							<td  style="background-color:#f9f9f9;" colspan="1" style="txet:center">상태</td>
 							<td  style="height:100%; width:100%" colspan="1" class="form-control" data-html="true" data-toggle="tooltip" data-placement="bottom" title="<%= str %>" ><%= getSign %><textarea id="sign" name="sign" style="display:none"><%= getSign %></textarea></td>
@@ -451,11 +463,19 @@
 						%>
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid">ERP<textarea id="estate_value" name="estate_value" style="display:none"><%= etlist.get(0).getSum_sta() %></textarea></td>
+							<td style="text-align: center; border: 1px solid">ERP<textarea id="estate_value" name="estate_value" style="display:none"><%= etlist.get(0).getSum_sta() %></textarea><textarea id="echk" name="echk" style="display:none"><%= etlist.size() %></textarea></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="econtent" id="econtent" wrap="hard" style="resize: none; width:100%; height:100px"><%= etlist.get(0).getSum_con() %></textarea></td>
+							<td style=" border: 1px solid">
+							<% for(int i=0; i < etlist.size(); i++) { %>
+								<textarea required name="econtent<%= i %>" id="econtent<%= i %>" wrap="hard" style="resize: none; width:100%;"><%= etlist.get(i).getSum_con() %></textarea>
+							<% } %>	
+							</td>
 							<!-- 완료일 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="eend" id="eend" style="resize: none; width:100%; height:100px"><%=etlist.get(0).getSum_enta() %></textarea></td>
+							<td style="text-align: center; border: 1px solid">
+							<% for(int i=0; i < etlist.size(); i++) { %>
+								<textarea required name="eend<%= i %>" id="eend<%= i %>" style="resize: none; width:100%;"><%=etlist.get(i).getSum_enta() %></textarea>
+							<% } %>
+							</td>
 							<!-- 진행율 -->
 							<td style="text-align: center; border: 1px solid">
 								<select name="eprogress" id="eprogress" style="height:45px; width:95px; text-align-last:center;" onchange="eselectPro()">
@@ -483,11 +503,19 @@
 						<tr>
 							
 							<!-- 구분 -->
-							<td style="border: 1px solid; text-align: center; "><textarea id="wstate_value" name="wstate_value" style="display:none"><%= wtlist.get(0).getSum_sta() %></textarea>WEB</td>
+							<td style="border: 1px solid; text-align: center; "><textarea id="wstate_value" name="wstate_value" style="display:none"><%= wtlist.get(0).getSum_sta() %></textarea><textarea id="wchk" name="wchk" style="display:none"><%= wtlist.size() %></textarea>WEB</td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="wcontent" id="wcontent" wrap="hard" style="resize: none; width:100%; height:100px"><%= wtlist.get(0).getSum_con() %></textarea></td>
+							<td style=" border: 1px solid">
+							<% for(int i=0; i < wtlist.size(); i++) { %>
+								<textarea required name="wcontent<%= i %>" id="wcontent<%= i %>" wrap="hard" style="resize: none; width:100%;"><%= wtlist.get(i).getSum_con() %></textarea>
+							<% } %>	
+							</td>
 							<!-- 완료일 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="wend" id="wend" style="resize: none; width:100%; height:100px"><%= wtlist.get(0).getSum_enta() %></textarea></td>
+							<td style="text-align: center; border: 1px solid">
+							<% for(int i=0; i < wtlist.size(); i++) { %>
+								<textarea required name="wend<%= i %>" id="wend<%= i %>" style="resize: none; width:100%;"><%= wtlist.get(i).getSum_enta() %></textarea>
+							<% } %>	
+							</td>
 							<!-- 진행율 -->
 							<td style="text-align: center; border: 1px solid">
 								<select name="wprogress" id="wprogress" style="height:45px; width:95px; text-align-last:center;" onchange="wselectPro()">
@@ -539,11 +567,19 @@
 						%>
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid">ERP</td>
+							<td style="text-align: center; border: 1px solid">ERP<textarea id="enchk" name="enchk" style="display:none"><%= enlist.size() %></textarea></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="encontent" wrap="hard" id="encontent" style="resize: none; width:100%; height:100px"><%= enlist.get(0).getSum_con() %></textarea></td>
+							<td style=" border: 1px solid">
+							<% for(int i=0; i < enlist.size(); i++) { %>	
+								<textarea required name="encontent<%= i %>" wrap="hard" id="encontent<%= i %>" style="resize: none; width:100%;"><%= enlist.get(i).getSum_con() %></textarea>
+							<% } %>
+							</td>
 							<!-- 완료예정 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="entarget" id="entarget" style="resize: none; width:100%; height:100px"><%= enlist.get(0).getSum_enta() %></textarea></td>
+							<td style="text-align: center; border: 1px solid">
+							<% for(int i=0; i < enlist.size(); i++) { %>	
+								<textarea required name="entarget<%= i %>" id="entarget<%= i %>" style="resize: none; width:100%;"><%= enlist.get(i).getSum_enta() %></textarea>
+							<% } %>	
+							</td>
 							<!-- 비고 -->
 							<td style=" border: 1px solid"><textarea name="ennote" id="ennote" wrap="hard" style="resize: none; width:100%; height:100px"><%= enlist.get(0).getSum_note() %></textarea></td>
 						</tr>
@@ -561,11 +597,19 @@
 						%>
 						<tr>
 							<!-- 구분 -->
-							<td style="text-align: center; border: 1px solid">WEB</td>
+							<td style="text-align: center; border: 1px solid">WEB<textarea id="wnchk" name="wnchk" style="display:none"><%= wnlist.size() %></textarea></td>
 							<!-- 업무 내용 -->
-							<td style=" border: 1px solid"><textarea required name="wncontent" id="wncontent" wrap="hard" style="resize: none; width:100%; height:100px"><%= wnlist.get(0).getSum_con() %></textarea></td>
+							<td style=" border: 1px solid">
+							<% for(int i=0; i < wnlist.size(); i++) { %>
+								<textarea required name="wncontent<%= i %>" id="wncontent<%= i %>" wrap="hard" style="resize: none; width:100%;"><%= wnlist.get(i).getSum_con() %></textarea>
+							<% } %>	
+							</td>
 							<!-- 완료예정 -->
-							<td style="text-align: center; border: 1px solid"><textarea required name="wntarget" id="wntarget" style="resize: none; width:100%; height:100px"><%= wnlist.get(0).getSum_enta() %></textarea></td>
+							<td style="text-align: center; border: 1px solid">
+							<% for(int i=0; i < wnlist.size(); i++) { %>
+								<textarea required name="wntarget<%= i %>" id="wntarget<%= i %>" style="resize: none; width:100%;"><%= wnlist.get(i).getSum_enta() %></textarea>
+							<% } %>
+							</td>
 							<!-- 비고 -->
 							<td style=" border: 1px solid"><textarea name="wnnote" id="wnnote" wrap="hard" style="resize: none; width:100%; height:100px"><%= wnlist.get(0).getSum_note() %></textarea></td>
 						</tr>
@@ -589,12 +633,12 @@
 				<table class="table" id="accountTable" style="text-align: center; cellpadding:50px; display:none;" >
 					<tbody id="tbody">
 					<tr>
-						<th colspan="5" style="background-color: #ccffcc; border:none" align="center" data-toggle="tooltip" title="해당 데이터는 수정이 불가합니다!">ERP 디버깅 권한 신청 처리 현황</th>
+						<th colspan="6" style="background-color: #ccffcc; border:none" align="center" data-toggle="tooltip" title="해당 데이터는 수정이 불가합니다!">ERP 디버깅 권한 신청 처리 현황</th>
 					</tr>
 					<tr style="background-color: #FF9933; border: 1px solid">
-						<th width="20%" style="text-align:center; border: 1px solid; font-size:10px">Date</th>
-						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
-						<th width="35%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
+						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">Date</th>
+						<th width="10%" style="text-align:center; border: 1px solid; font-size:10px">User</th>
+						<th width="45%" style="text-align:center; border: 1px solid; font-size:10px">SText(변경값)</th>
 						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">ERP권한신청서번호</th>
 						<th width="15%" style="text-align:center; border: 1px solid; font-size:10px">구분(일반/긴급)</th>
 					</tr>
@@ -602,17 +646,17 @@
 						for (int i=0; i < erp.size(); i++) {
 						%>
 					<tr>
-						<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white"> 
+						<td style="text-align:center; border: 1px solid;  background-color:white"> 
 						  <textarea class="textarea" readonly style="display:none" name="erp_size"><%= erp.size() %></textarea>
-						  <textarea class="textarea"  readonly id="erp_date<%= i %>" style=" width:180px; border:none; resize:none" readonly placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp.get(i).getErp_date() %></textarea></td>
-					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea"  readonly id="erp_user<%= i %>" style=" width:130px; border:none; resize:none" readonly  placeholder="사용자명" name="erp_user<%= i %>"><%= erp.get(i).getErp_user() %></textarea></td>
-					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea"  readonly id="erp_stext<%= i %>" wrap="hard" style=" width:300px; border:none; resize:none" readonly  placeholder="변경값" name="erp_stext<%= i %>"><%= erp.get(i).getErp_text() %></textarea></td>
-					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea"  readonly id="erp_authority<%= i %>" style=" width:130px; border:none; resize:none" readonly  placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp.get(i).getErp_anum() %></textarea></td>
-					  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-						  <textarea class="textarea"  readonly id="erp_division<%= i %>" style=" width:130px; border:none; resize:none " readonly  placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp.get(i).getErp_div() %></textarea></td>
+						  <textarea class="textarea"  readonly id="erp_date<%= i %>" style=" width:100%; border:none; resize:none" readonly placeholder="YYYY-MM-DD" name="erp_date<%= i %>"><%= erp.get(i).getErp_date() %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; background-color:white">  
+						  <textarea class="textarea"  readonly id="erp_user<%= i %>" style=" width:100%; border:none; resize:none" readonly  placeholder="사용자명" name="erp_user<%= i %>"><%= erp.get(i).getErp_user() %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; background-color:white">  
+						  <textarea class="textarea"  readonly id="erp_stext<%= i %>" wrap="hard" style=" width:100%; border:none; resize:none" readonly  placeholder="변경값" name="erp_stext<%= i %>"><%= erp.get(i).getErp_text() %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; background-color:white">  
+						  <textarea class="textarea"  readonly id="erp_authority<%= i %>" style=" width:100%; border:none; resize:none" readonly  placeholder="ERP권한신청서번호" name="erp_authority<%= i %>"><%= erp.get(i).getErp_anum() %></textarea></td>
+					  	<td style="text-align:center; border: 1px solid; background-color:white">  
+						  <textarea class="textarea"  readonly id="erp_division<%= i %>" style=" width:100%; border:none; resize:none " readonly  placeholder="구분(일반/긴급)" name="erp_division<%= i %>"><%= erp.get(i).getErp_div() %></textarea></td>
 					</tr>
 					<%
 						}
@@ -637,8 +681,9 @@
 		<% } %>
 		<% if(etlist.get(0).getSum_sign().equals("승인") || etlist.get(0).getSum_sign().equals("마감")) {  //승인이나 마감 상태시에만 pptx로 출력 가능!%>
 				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center; margin-left:20px" onClick="location.href='/BBS/admin/summaryadRk.jsp'">목록</button> 
+			<% if(etlist.size() != 0 && wtlist.size() != 0) { %>
 				<button type="button" class="btn btn-success pull-right" style="width:50px; text-align:center; align:center" onclick="print()">출력</button> 
-				
+			<% } %>
 		<% } %> 
 
 		</div>
@@ -710,7 +755,7 @@
 	<script>
 	// 상태 색상 지정
 	$(document).ready(function() {
-		var con = document.getElementById("estate_value").value; //완료, 진행중, 미완료(문제)
+		var con = document.getElementById("eprogress").value; //완료, 진행중, 미완료(문제)
 		var state = document.getElementById("estate");
 		if(con == "완료") {
 			state.style.backgroundColor = "#00ff00";
@@ -720,7 +765,7 @@
 			state.style.backgroundColor = "#ff0000";
 		}
 	
-		var wcon = document.getElementById("wstate_value").value; //완료, 진행중, 미완료(문제)
+		var wcon = document.getElementById("wprogress").value; //완료, 진행중, 미완료(문제)
 		var wstate = document.getElementById("wstate");
 		if(wcon == "완료") {
 			wstate.style.backgroundColor = "#00ff00";
@@ -841,10 +886,10 @@
 	
 	<script>
 	function update() {
-		if(document.getElementById("econtent") == null) { //ERP, WEB 내용이 없는 경우, 
+		if(document.getElementById("econtent0") == null) { //ERP, WEB 내용이 없는 경우, 
 			alert('불러올 ERP 요약본이 없습니다. 담당 파트리더에게 문의 바랍니다.');
 		}
-		if(document.getElementById("wcontent") == null) { //ERP, WEB 내용이 없는 경우, 
+		if(document.getElementById("wcontent0") == null) { //ERP, WEB 내용이 없는 경우, 
 			alert('불러올 WEB 요약본이 없습니다. 담당 파트리더에게 문의 바랍니다.');
 		}
 		if(document.getElementById("eprogress").value == '' || document.getElementById("eprogress").value == null) {
@@ -852,9 +897,6 @@
 		} else if (document.getElementById("wprogress").value == '' || document.getElementById("wprogress").value == null) { 
 			alert("WEB - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
 		}else {
-			var innerHtml = '<td><textarea class="textarea" id="ecolor" name="ecolor" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
-				innerHtml += '<td><textarea class="textarea" id="wcolor" name="wcolor" style="display:none">'+wcon.style.backgroundColor+'</textarea></td>';
-			$('#Table > tbody > tr:last').append(innerHtml);
 			$('#bbsRk').submit();
 		}
 	}
@@ -869,9 +911,6 @@
 			alert("WEB - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
 		}else {
 			if(confirm("해당 요약본을 승인하시겠습니까? \n승인 처리시, 수정/삭제가 불가합니다.")) {
-			var innerHtml = '<td><textarea class="textarea" id="ecolor" name="ecolor" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
-				innerHtml += '<td><textarea class="textarea" id="wcolor" name="wcolor" style="display:none">'+wcon.style.backgroundColor+'</textarea></td>';
-			$('#Table > tbody > tr:last').append(innerHtml);
 			$('#bbsRk').attr("action","/BBS/admin/action/summaryadsignOnAction.jsp?rms_dl="+a).submit();
 			} else {
 				
@@ -882,9 +921,9 @@
 	
 	<script>
 	function print() {
-			var innerHtml = '<td><textarea class="textarea" id="ecolor" name="ecolor" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
+/* 			var innerHtml = '<td><textarea class="textarea" id="ecolor" name="ecolor" style="display:none">'+con.style.backgroundColor+'</textarea></td>';
 				innerHtml += '<td><textarea class="textarea" id="wcolor" name="wcolor" style="display:none">'+wcon.style.backgroundColor+'</textarea></td>';
-			$('#Table > tbody > tr:last').append(innerHtml);
+			$('#Table > tbody > tr:last').append(innerHtml); */
 			$('#bbsRk').attr("action","/BBS/admin/pptx/pptAdmin.jsp").submit();
 		}
 	</script>

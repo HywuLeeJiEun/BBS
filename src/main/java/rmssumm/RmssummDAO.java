@@ -162,7 +162,7 @@ public class RmssummDAO {
 	
 	// summary의 Sign을 마감으로 변경함! ((제출 날짜가 지남!))
 	public int sumSign(String rms_dl) {
-		String sql = " update rmssumm set sign='마감' where rms_dl=?";
+		String sql = " update rmssumm set sum_sign='마감' where rms_dl=?";
 		 try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, rms_dl);
@@ -212,12 +212,28 @@ public class RmssummDAO {
 		}
 		return -1; //데이터베이스 오류 
 	}
+
 	
+	//RMSSUMM - 게시글 삭제(Delete) 메소드 - summaryRkUpdate.jsp - bbsRkDelete.jsp
+		public int deleteSumSign(String rms_dl, String user_fd,String sum_sign) {
+			//실제 데이터 또한 삭제한다.
+			String sql = "delete from rmssumm where rms_dl = ? and user_fd = ? and sum_sign=?";
+			try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, rms_dl);
+				pstmt.setString(2, user_fd);
+				pstmt.setString(3, sum_sign);
+				return pstmt.executeUpdate();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			return -1; //데이터베이스 오류 
+		}
 	
 	
 	//RMSSUMM - 저장된 rms_dl을 모두 불러온다. (페이징처리)
 	public ArrayList<String> getSumDlAll(int pageNumber) {
-		String sql = "select distinct rms_dl from rmssumm limit ?,10";
+		String sql = "select distinct rms_dl from rmssumm order by rms_dl desc limit ?,10";
 		ArrayList<String> list = new ArrayList<String>();
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -235,7 +251,7 @@ public class RmssummDAO {
 	
 	//RMSSUMM - 저장된 rms_dl을 (마감 또는 승인된) 불러온다. (페이징처리) - summaryRkSign.jsp (PL)
 		public ArrayList<String> getSumDlSign(int pageNumber) {
-			String sql = "select distinct rms_dl from rmssumm where sum_sign='승인' or sum_sign='마감' limit ?,10";
+			String sql = "select distinct rms_dl from rmssumm where sum_sign='승인' or sum_sign='마감' order by rms_dl desc limit ?,10";
 			ArrayList<String> list = new ArrayList<String>();
 			try {
 				PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -249,30 +265,6 @@ public class RmssummDAO {
 			}
 			return list; //데이터베이스 오류
 		}
-	
-	
-	//RMSSUMM 수정하기 (update) - bbsRkAdminUpdate.jsp
-	public int updateSum(String user_fd, String rms_dl, String sum_div, String sum_con, String sum_enta, String sum_pro, String sum_sta, String sum_note, String sum_sign, java.sql.Timestamp sum_time, String sum_updu) {
-		String sql = "update rmssumm set sum_con = ?,  sum_enta = ?, sum_pro = ?, sum_sta = ?, sum_note = ?, sum_sign = ?, sum_time = ?, sum_updu = ? where user_fd =? and rms_dl= ? and sum_div = ?";
-		try {
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, sum_con);
-			pstmt.setString(2, sum_enta);
-			pstmt.setString(3, sum_pro);
-			pstmt.setString(4, sum_sta);
-			pstmt.setString(5, sum_note);
-			pstmt.setString(6, sum_sign);
-			pstmt.setTimestamp(7, sum_time);
-			pstmt.setString(8, sum_updu);
-			pstmt.setString(9, user_fd);
-			pstmt.setString(10, rms_dl);
-			pstmt.setString(11, sum_div);
-			return pstmt.executeUpdate();
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
-		return -1; //데이터베이스 오류
-	}
 	
 	
 	//RMSSUMM 승인(sum_sign)으로 변경하기 - summaryadsignOnAction.jsp
@@ -292,10 +284,11 @@ public class RmssummDAO {
 	
 	
 	//RMSSUMM - rms_dl을 기준으로, 작성된 summary가 있는지 확인 (bbsRkwrite.jsp)
-	public String getDluse(String rms_dl) { 
-		 String sql ="select distinct rms_dl from rmssumm where rms_dl=?";
+	public String getDluse(String rms_dl, String user_fd) { 
+		 String sql ="select distinct rms_dl from rmssumm where rms_dl=? and user_fd=?";
 		 try { PreparedStatement pstmt = conn.prepareStatement(sql);
-		 	pstmt.setString(1, rms_dl); //첫번째 '?'에 매개변수로 받아온 'userID'를 대입 
+		 	pstmt.setString(1, rms_dl); 
+		 	pstmt.setString(2, user_fd);
 		 	rs =pstmt.executeQuery(); 
 		 	if(rs.next()) { return rs.getString(1); } 
 		 }catch (Exception e) { 

@@ -1,7 +1,6 @@
 <%@page import="rmssumm.RmssummDAO"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page import="java.util.Arrays"%>
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
@@ -37,42 +36,59 @@
 	// String 가져오기
 	String pluser = request.getParameter("pl");
 	String rms_dl = request.getParameter("rms_dl");
-	String bbsContent = request.getParameter("content");
-	String bbsEnd = request.getParameter("end");
 	String progress = request.getParameter("progress");
-	String statecolor = request.getParameter("color"); //색상 가져오기
+	int chk = Integer.parseInt(request.getParameter("chk"));
+	int nchk = Integer.parseInt(request.getParameter("nchk"));
 	String state = "";
-	if(statecolor.equals("rgb(0, 255, 0)")) {
-		state = "완료";
-	}else if(statecolor.equals("rgb(255, 255, 0)")) {
-		state = "진행중";
+	if(progress.equals("완료")) {
+		state = "#00ff00";
+	}else if(progress.equals("진행중")) {
+		state = "#ffff00";
 	} else {
-		state = "미완료(문제)";
+		state = "#ff0000";
 	} 
 	String note = request.getParameter("note");
-	String bbsNContent = request.getParameter("ncontent");
-	String bbsNTarget = request.getParameter("ntarget");
 	String nnote = request.getParameter("nnote");
 	String sign = request.getParameter("sign");
 	if(sign == null || sign.equals("")) {
 		sign = "미승인";
 	}
 	java.sql.Timestamp SummaryDate = rms.getDateNow();
-	String SummaryUpdate = userDAO.getName(id); //user id의 이름을 가져와 업데이트한 사람으로 추가함.
 	
-	//금주
-	int num = sumDAO.updateSum(bbsContent, bbsEnd, progress, state, note, sign, SummaryDate, SummaryUpdate, pluser, rms_dl, "T");
-	//차주
-	int nnum = sumDAO.updateSum(bbsNContent, bbsNTarget, null, null, nnote, sign, SummaryDate, SummaryUpdate, pluser, rms_dl, "N");
+	int num = -1;
+	int nnum = -1;
+		//금주 저장
+	for(int i=0; i < chk; i++) {
+		String bbsContent = request.getParameter("content"+i); 
+		String bbsEnd = request.getParameter("end"+i); 
+		num = sumDAO.SummaryWrite(pluser, rms_dl, bbsContent, bbsEnd, progress, state, note, "T", "보류", SummaryDate, id);
+	}
+	//차주 저장
+	if(num != -1) {
+		for(int i=0; i < nchk; i++) {
+			String bbsNContent = request.getParameter("ncontent"+i); 
+			String bbsNTarget = request.getParameter("ntarget"+i); 
+			nnum = sumDAO.SummaryWrite(pluser, rms_dl, bbsNContent, bbsNTarget, null, null, nnote, "N", "보류", SummaryDate, id);
+		}
+	} else {
+		PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('데이터베이스 오류입니다. 관리자에게 문의 바랍니다.')");
+		script.println("history.back();");
+		script.println("</script>");
+	}
 	//(bbsDeadline, pluser, bbsContent, bbsEnd, progress, state, note, bbsNContent, bbsNTarget, nnote, sign, SummaryDate, SummaryUpdate);
 	
 	if(num == -1 || nnum == -1){
+		sumDAO.deleteSumSign(rms_dl, pluser, "보류"); //수정 데이터 제거
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('데이터베이스 오류입니다. 관리자에게 문의 바랍니다.')");
 		script.println("history.back();");
 		script.println("</script>");
 	} else {
+		sumDAO.deleteSumSign(rms_dl, pluser, sign); //이전 데이터 제거
+		sumDAO.signSum(sign, id, rms_dl); //수정 데이터 변경
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('정상적으로 요약본이 수정되었습니다.')");

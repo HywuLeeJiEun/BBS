@@ -128,20 +128,20 @@
 		<!-- 게시판 제목 이름 옆에 나타나는 메뉴 영역 -->
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav navbar-left">
-					<li class="dropdown">
+					<li class="dropdown ">
 						<a href="#" class="dropdown-toggle"
 							data-toggle="dropdown" role="button" aria-haspopup="true"
 							aria-expanded="false">주간보고<span class="caret"></span></a>
 						<!-- 드랍다운 아이템 영역 -->	
 						<ul class="dropdown-menu">
-							<li><a href="bbsAdmin.jsp">조회</a></li>
-							<!-- <li><a href="bbsUpdate.jsp">작성</a></li>
-							<li><a href="bbsUpdateDelete.jsp">수정/삭제</a></li>
-							<li><a href="signOn.jsp">승인(제출)</a></li> -->
+							<li ><a href="/BBS/user/bbs.jsp">조회</a></li>
+							<li><a href="/BBS/user/bbsUpdate.jsp">작성</a></li>
+							<li><a href="/BBS/user/bbsUpdateDelete.jsp">수정 및 제출</a></li>
+							<!-- <li><a href="signOn.jsp">승인(제출)</a></li> -->
 						</ul>
 					</li>
 						<%
-						 if (au.equals("PL")) {
+							if(au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
@@ -150,17 +150,17 @@
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
 								<li><h5 style="background-color: #e7e7e7; height:40px; margin-top:-20px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %></h5></li>
-								<li><a href="/BBS/pl/bbsRk.jsp">조회</a></li>
+								<li><a href="/BBS/pl/bbsRk.jsp">조회 및 출력</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; <%= pl %> Summary</h5></li>
-								<li><a href="/BBS/pl/summaryRk.jsp">조회 및 수정</a></li>
+								<li><a href="/BBS/pl/summaryRk.jsp">조회</a></li>
 								<li id="summary_nav"><a href="/BBS/pl/bbsRkwrite.jsp">작성</a></li>
 								<li><a href="/BBS/pl/summaryUpdateDelete.jsp">수정 및 삭제</a></li>
 								<li><h5 style="background-color: #e7e7e7; height:40px" class="dropdwon-header"><br>&nbsp;&nbsp; [ERP/WEB] Summary</h5></li>
-								<li  class="active" id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
+								<li class="active" id="summary_nav"><a href="/BBS/pl/summaryRkSign.jsp">조회 및 출력</a></li>
 							</ul>
 							</li>
 						<%
-						 }
+							}
 						%>
 						<%
 							if(au.equals("관리자")) {
@@ -171,7 +171,7 @@
 								aria-expanded="false">summary<span class="caret"></span></a>
 							<!-- 드랍다운 아이템 영역 -->	
 							<ul class="dropdown-menu">
-								<li class="active"><a href="/BBS/admin/summaryadRk.jsp">조회 및 승인</a></li>
+								<li><a href="/BBS/admin/summaryadRk.jsp">조회 및 승인</a></li>
 								<!-- <li><a href="/BBS/admin/summaryadAdmin.jsp">작성</a></li>
 								<li><a href="/BBS/admin/summaryadUpdateDelete.jsp">수정 및 승인</a></li> -->
 								<!-- <li data-toggle="tooltip" data-html="true" data-placement="right" title="승인처리를 통해 제출을 확정합니다."><a href="bbsRkAdmin_backup.jsp">승인</a></li> -->
@@ -194,7 +194,7 @@
 					<!-- 드랍다운 아이템 영역 -->	
 					<ul class="dropdown-menu">
 					<%
-					if(rk.equals("부장") || rk.equals("실장")||rk.equals("관리자")) {
+					if(au.equals("관리자") || au.equals("PL")) {
 					%>
 						<li><a data-toggle="modal" href="#UserUpdateModal">개인정보 수정</a></li>
 						<li><a href="/BBS/admin/work/workChange.jsp">담당업무 변경</a></li>
@@ -412,12 +412,12 @@
 							
 							if(wlist.size() != 0) { //web이 있다면,
 								wtitle = "WEB";
+								plus = "/";
 								wdate = dateFmt.parse(wlist.get(0).getSum_time());
 								getSign = wlist.get(0).getSum_sign();
 							}
 							if(elist.size() != 0) { //erp가 있다면,
 								etitle = "ERP";
-								plus = "/";
 								edate = dateFmt.parse(elist.get(0).getSum_time());
 								getSign = elist.get(0).getSum_sign();
 							}
@@ -457,7 +457,7 @@
 						<td><%= writer %></td>
 						<!-- 승인/미승인/마감 표시 -->
 						<td><%= getSign %></td>
-						<td data-toggle="tooltip" data-html="true" data-placement="right" title="승인 시, <br>수정이 불가합니다.">
+						<td data-toggle="tooltip" data-html="true" data-placement="right" title="승인시, <br>수정이 불가합니다.">
 						<% if(getSign.equals("미승인")) { %>
 							<a class="btn btn-success" style="font-size:12px" href="/BBS/admin/action/summaryadsignOnAction.jsp?rms_dl=<%= dl %>"> 승인 </a>
 						<% }else if(getSign.equals("승인")){ //승인 상태라면 %>

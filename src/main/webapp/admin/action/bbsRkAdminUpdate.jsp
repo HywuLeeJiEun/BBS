@@ -1,3 +1,4 @@
+<%@page import="javax.swing.RepaintManager"%>
 <%@page import="rmssumm.RmssummDAO"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
@@ -35,69 +36,87 @@
 	}
 		
 	// String 가져오기
+	int echk = Integer.parseInt(request.getParameter("echk"));
+	int wchk = Integer.parseInt(request.getParameter("wchk"));
+	int enchk = Integer.parseInt(request.getParameter("enchk"));
+	int wnchk = Integer.parseInt(request.getParameter("wnchk"));
+	
 	String rms_dl = request.getParameter("rms_dl");
 	String sign = request.getParameter("sign");
 
 	//ERP
-	String econtent = request.getParameter("econtent");
-	String eend = request.getParameter("eend");
+	/* String econtent = request.getParameter("econtent");
+	String eend = request.getParameter("eend"); */
 	String eprogress = request.getParameter("eprogress");
-	String estatecolor = request.getParameter("ecolor");
 	String estate = "";
-	if(estatecolor.equals("rgb(0, 255, 0)")) {
-		estate = "완료";
-	}else if(estatecolor.equals("rgb(255, 255, 0)")) {
-		estate = "진행중";
+	if(eprogress.equals("완료")) {
+		estate = "#00ff00";
+	}else if(eprogress.equals("진행중")) {
+		estate = "#ffff00";
 	} else {
-		estate = "미완료(문제)";
+		estate = "#ff0000";
 	} 
 	String enote = request.getParameter("enote");
-	String encontent = request.getParameter("encontent");
-	String entarget = request.getParameter("entarget");
+	/* String encontent = request.getParameter("encontent");
+	String entarget = request.getParameter("entarget"); */
 	String ennote = request.getParameter("ennote");
 	
 	//WEB
-	String wcontent = request.getParameter("wcontent");
-	String wend = request.getParameter("wend");
+	/* String wcontent = request.getParameter("wcontent");
+	String wend = request.getParameter("wend"); */
 	String wprogress = request.getParameter("wprogress");
-	String wstatecolor = request.getParameter("wcolor");
 	String wstate = "";
-	if(wstatecolor.equals("rgb(0, 255, 0)")) {
-		wstate = "완료";
-	}else if(wstatecolor.equals("rgb(255, 255, 0)")) {
-		wstate = "진행중";
+	if(wprogress.equals("완료")) {
+		wstate = "#00ff00";
+	}else if(wprogress.equals("진행중")) {
+		wstate = "#ffff00";
 	} else {
-		wstate = "미완료(문제)";
-	}
+		wstate = "#ff0000";
+	} 
 	String wnote = request.getParameter("wnote");
-	String wncontent = request.getParameter("wncontent");
-	String wntarget = request.getParameter("wntarget");
+	/* String wncontent = request.getParameter("wncontent");
+	String wntarget = request.getParameter("wntarget"); */
 	String wnnote = request.getParameter("wnnote");
 	java.sql.Timestamp summaryDate = rms.getDateNow();
 	
-	
+	int etupdate = -1;
+	int enupdate = -1;
+	int wtupdate = -1;
+	int wnupdate = -1;
 	//데이터 수정하기 (erp)
+	//update가 아닌, insert로 변경!
 		//금주
-	int etupdate = sumDAO.updateSum(econtent, eend, eprogress, estate, enote, sign, summaryDate, id, "ERP", rms_dl, "T");
+	for(int i=0; i < echk; i++) {
+	 etupdate = sumDAO.SummaryWrite("ERP", rms_dl, request.getParameter("econtent"+i), request.getParameter("eend"+i), eprogress, estate, enote, "T", "보류", summaryDate, id);
+	}
 		//차주
-	int enupdate = sumDAO.updateSum(encontent, entarget, null, null, ennote, sign, summaryDate, id, "ERP", rms_dl, "N");
-	//데이터 수정하기 (web)
+	for(int i=0; i < enchk; i++) {
+	 enupdate = sumDAO.SummaryWrite("ERP", rms_dl, request.getParameter("encontent"+i), request.getParameter("entarget"+i), eprogress, estate, enote, "N", "보류", summaryDate, id);
+	}
+	 //데이터 수정하기 (web)
 		//금주
-	int wtupdate = sumDAO.updateSum(wcontent, wend, wprogress, wstate, wnote, sign, summaryDate, id, "WEB", rms_dl, "T");
+	for(int i=0; i < wchk; i++) {
+	 wtupdate = sumDAO.SummaryWrite("WEB", rms_dl, request.getParameter("wcontent"+i), request.getParameter("wend"+i), wprogress, wstate, wnote, "T", "보류", summaryDate, id);
+	}
 		//차주
-	int wnupdate = sumDAO.updateSum(wncontent, wntarget, null, null, wnnote, sign, summaryDate, id, "WEB", rms_dl, "N");
-	
+	for(int i=0; i < wnchk; i++) {
+	 wnupdate = sumDAO.SummaryWrite("WEB", rms_dl, request.getParameter("wncontent"+i), request.getParameter("wntarget"+i), wprogress, wstate, wnote, "N", "보류", summaryDate, id);
+	}
 	//int erp = sumDAO.updateSum(bbsDeadline, "ERP", econtent, eend, eprogress, estate, enote, encontent, entarget, ennote, sign, summaryDate, id);
 	//int web = sumDAO.updateSum(bbsDeadline, "WEB", wcontent, wend, wprogress, wstate, wnote, wncontent, wntarget, wnnote, sign, summaryDate, id);
 	
 	
 	if(etupdate == -1 || enupdate == -1) { //erp 데이터 저장에 문제 발생!
+		sumDAO.deleteSumSign(rms_dl, "ERP", "보류"); //보류 데이터 제거
+		sumDAO.deleteSumSign(rms_dl, "WEB", "보류"); //보류 데이터 제거
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('ERP 데이터 저장에 문제가 발생하였습니다.')");
 		script.println("history.back();");
 		script.println("</script>");
 	} else if(wtupdate == -1 || wnupdate == -1) { //web 데이터 저장에 문제 발생!
+		sumDAO.deleteSumSign(rms_dl, "ERP", "보류"); //보류 데이터 제거
+		sumDAO.deleteSumSign(rms_dl, "WEB", "보류"); //보류 데이터 제거
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('WEB 데이터 저장에 문제가 발생하였습니다.')");
@@ -105,6 +124,9 @@
 		script.println("</script>");
 	} else {
 		//정상적으로 모두 수정되었을 경우,
+		sumDAO.deleteSumSign(rms_dl, "ERP", sign); //이전 데이터 제거
+		sumDAO.deleteSumSign(rms_dl, "WEB", sign); //이전 데이터 제거
+		sumDAO.signSum(sign, id, rms_dl); //수정 데이터 변경
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
 		script.println("alert('요약본이 수정이 완료되었습니다.')");

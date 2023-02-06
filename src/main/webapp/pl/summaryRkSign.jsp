@@ -112,7 +112,7 @@
 			script.println("</script>");
 		}
 
-		String str = "승인 및 마감처리가 된 요약본을 <br>";
+		String str = "승인처리 된 요약본을 <br>";
 		str += "출력할 수 있습니다.";
 		
 	%>
@@ -443,15 +443,7 @@
 									date = dateFmt.format(edate);
 									writer = userDAO.getName(elist.get(0).getSum_updu());
 								}
-							//둘중, 하나만 데이터가 없다면
-							} else if(edate == null) {
-								date = dateFmt.format(wdate);
-								writer = userDAO.getName(wlist.get(0).getSum_updu());
-							} else if(wdate == null) {
-								date = dateFmt.format(edate);
-								writer = userDAO.getName(elist.get(0).getSum_updu());
-							}
-							
+							//둘중, 하나만 데이터가 없다면							
 					%>
 						<!-- 게시글 제목을 누르면 해당 글을 볼 수 있도록 링크를 걸어둔다 -->
 					<tr>
@@ -470,7 +462,8 @@
 							<a class="btn btn-success" style="font-size:12px" href="/BBS/admin/pptx/pptAdmin.jsp?rms_dl=<%= dl %>"> 출력 </a>
 						</td>
 					</tr>
-					<%
+					<%	
+							}
 						}
 					} else {
 					%>
