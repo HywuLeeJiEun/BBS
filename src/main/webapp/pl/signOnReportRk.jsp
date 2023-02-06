@@ -491,7 +491,10 @@
 							</tbody>
 						</table>
 						<!-- '계정 관리가 있을 경우, 생성' -->
-						<table class="table" id="accountTable" style="text-align: center; cellpadding:50px; display:none;" >
+						<%
+							if(erp != null && erp.size() != 0){
+						%>
+						<table class="table" id="accountTable" style="text-align: center; cellpadding:50px;" >
 							<tbody id="tbody">
 							<tr>
 								<th colspan="6" style="background-color: #ccffcc;" align="center">ERP 디버깅 권한 신청 처리 현황</th>
@@ -525,6 +528,7 @@
 							%>
 							</tbody>
 						</table>
+						<% } %>
 						<!-- 계정 관리 끝 -->
 						<div id="wrapper" style="width:100%; text-align: center;">
 						<!-- 목록 -->
@@ -607,21 +611,7 @@
 	
 	
 	<textarea class="textarea" id="workSet" name="workSet" style="display:none;" readonly><%= workSet %></textarea>
-	<script>
-	//'계정관리' 업무를 담당하고 있다면, 
-	$(document).ready(function() {
-		var workSet = document.getElementById("workSet").value;
-		var au = document.getElementById("au").value;
-		if(trACnt > 0) {
-			if(workSet.indexOf("계정관리") > -1 || au.indexOf("관리자") > -1) {
-				// accountTable 보이도록 설정
-				//처음 작업시, erp 디버깅 권한 신청 처리 현황을 보이게 함.
-			document.getElementById("accountTable").style.display="block";
-			document.getElementById("wrapper_account").style.display="block";
-			}
-		}
-	});
-	</script>
+
 	
 	<textarea class="textarea" id="workSet" name="workSet" style="display:none;" readonly><%= workSet %></textarea>
 	<script>

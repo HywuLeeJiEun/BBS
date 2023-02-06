@@ -757,17 +757,20 @@
 				a = trACnt;
 			}
 		var innerHtml = "";
+		var now = document.getElementById("now").value;
 		innerHtml += '<tr>';
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px">';
-		innerHtml += '<textarea class="textarea acon" required maxlength="10" id="erp_date'+a+'"  style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date'+a+'"></textarea></td>';
+		//innerHtml += '<textarea class="textarea acon" required maxlength="10" id="erp_date'+a+'"  style=" width:180px; border:none; resize:none" placeholder="YYYY-MM-DD" name="erp_date'+a+'"></textarea></td>';
+		innerHtml += '<input type="date" class="acon" max="9999-12-31" required name="erp_date'+a+'" value="'+now+'"></td>'; 
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px"> ';
 		innerHtml += '<textarea class="textarea" required maxlength="10" id="erp_user'+a+'"  style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user'+a+'"></textarea></td>';
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px">  ';
 		innerHtml += '<textarea class="textarea" required maxlength="100" id="erp_stext'+a+'"  style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext'+a+'"></textarea></td>';
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px">  ';
 		innerHtml += '<textarea class="textarea" required maxlength="10" id="erp_authority'+a+'"  style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority'+a+'"></textarea></td>';
-		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px">  ';
-		innerHtml += '<textarea class="textarea" required maxlength="2" id="erp_division'+a+'"  style=" width:130px; border:none; resize:none" placeholder="구분(일반/긴급)" name="erp_division'+a+'"></textarea></td>';
+		innerHtml += '<td style="text-align:center; border: 1px solid;">  ';
+		//innerHtml += '<textarea class="textarea" required maxlength="2" id="erp_division'+a+'"  style=" width:130px; border:none; resize:none" placeholder="구분(일반/긴급)" name="erp_division'+a+'"></textarea></td>';
+		innerHtml += '<select name="erp_division'+a+'"><option>일반</option><option>긴급</option></select></td>';
 		innerHtml += '<td style="border: 1px solid;"><button type="button" style="margin-bottom:5px; margin-top:5px;" id="delARow" name="delARow" class="btn btn-danger"> 삭제 </button>';
         innerHtml += '    </td>';
 		innerHtml +='</tr>';

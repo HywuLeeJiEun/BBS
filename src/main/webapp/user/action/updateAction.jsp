@@ -78,8 +78,9 @@
 		int ndel = rms.Rmsdelete(id, rms_dl,"N");
 		int ldel = rms.edelete(id, rms_dl);		
 		
+		
 		// << 금주 데이터 저장 >> - rms_this
-		for(int i=0; i < trCnt; i++) {
+		for(int i=0; i < trCnt+con; i++) {
 			String a = "bbsContent";
 			String jobs = "jobs";
 			//줄바꿈 세기
@@ -166,16 +167,13 @@
 					script.println("history.back();");
 					script.println("</script>");
 					n = -1;
-				} else {
-					//데이터 수정이 정상적으로 이루어짐.
-					rms.Rmsdelete(id, before_dl,"T");
-				}
+				} 
 			}
 		} 
 			
 			
 			// << 차주 데이터 저장 >> - rms_last
-			for(int i=0; i < trNCnt; i++) {
+			for(int i=0; i < trNCnt+ncon; i++) {
 				String a = "bbsNContent";
 				String jobs = "njobs";
 				//줄바꿈 세기
@@ -241,15 +239,14 @@
 					// write_rms_last
 					int numlist = rms.writeRms(rms_sign, id, rms_dl, rms_title, bbscontent, bbsstart, bbstarget, null, "N", date);
 					if(numlist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
+						rms.Rmsdelete(id, rms_dl,"T");
 						PrintWriter script = response.getWriter();
 						script.println("<script>");
 						script.println("alert('(차주)데이터 수정에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
 						script.println("history.back();");
 						script.println("</script>");
 						nn = -1;
-					} else {
-						rms.Rmsdelete(id, before_dl,"N");
-					}
+					} 
 				} 
 			}
 			
@@ -270,27 +267,29 @@
 				script.println("history.back();");
 				script.println("</script>");
 			} else {
-				for(int i=0; i< trACnt; i++){
-					//edate 처리
-					if(request.getParameter(a+i).length() != 0) {	//데이터가 존재한다면, 모두 포함되어 있음!
-						String edate=request.getParameter(a+i);
-						String euser=request.getParameter(b+i);
-						String etext=request.getParameter(c+i);
-						String eau=request.getParameter(d+i);
-						String ediv=request.getParameter(e+i);
-						//erp 테이블에 저장
-						int numelist = rms.write_erp(id, rms_dl, edate, euser, etext, eau, ediv);
-						if(numelist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
-							PrintWriter script = response.getWriter();
-							script.println("<script>");
-							script.println("alert('(erp)데이터 수정에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
-							script.println("history.back();");
-							script.println("</script>");
-							an = -1;
-						} else {
-							rms.edelete(id, before_dl);	
-						}
-					} 
+				if(trACnt != 0) {
+					for(int i=0; i< trACnt+acon; i++){
+						//edate 처리
+						if(request.getParameter(a+i) != null) {	//데이터가 존재한다면, 모두 포함되어 있음!
+							String edate=request.getParameter(a+i);
+							String euser=request.getParameter(b+i);
+							String etext=request.getParameter(c+i);
+							String eau=request.getParameter(d+i);
+							String ediv=request.getParameter(e+i);
+							//erp 테이블에 저장
+							int numelist = rms.write_erp(id, rms_dl, edate, euser, etext, eau, ediv);
+							if(numelist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
+								rms.Rmsdelete(id, rms_dl,"T");
+								rms.Rmsdelete(id, rms_dl,"N");
+								PrintWriter script = response.getWriter();
+								script.println("<script>");
+								script.println("alert('(erp)데이터 수정에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
+								script.println("history.back();");
+								script.println("</script>");
+								an = -1;
+							} 
+						} 
+					}
 				}
 			}
 			
