@@ -124,6 +124,13 @@
 					str = bstr.toString();
 				}
 			}
+			if (str.matches(".*[ㄱ-ㅎㅏ-ㅣa-z가-힣]+.*")) {
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('제출일은 숫자와 특수문자(.) 또는(-)만 입력이 가능합니다.')");
+				script.println("location.href='/BBS/admin/bbsAdmin.jsp'");
+				script.println("</script>");
+			} 
 		}
 		
 		//작성자명 검색시,
@@ -138,7 +145,7 @@
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("alert('검색결과가 없습니다.')");
-			script.println("location.href='/BBS/user/bbs.jsp'");
+			script.println("location.href='/BBS/admin/bbsAdmin.jsp'");
 			script.println("</script>");
 		} 
 		

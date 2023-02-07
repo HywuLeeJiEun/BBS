@@ -107,19 +107,28 @@
 					str = bstr.toString();
 				}
 			}
+			if (str.matches(".*[ㄱ-ㅎㅏ-ㅣa-z가-힣]+.*")) {
+				PrintWriter script = response.getWriter();
+				script.println("<script>");
+				script.println("alert('제출일은 숫자와 특수문자(.) 또는(-)만 입력이 가능합니다.')");
+				script.println("location.href='/BBS/user/bbs.jsp'");
+				script.println("</script>");
+			} 
 		}
 		
 		// 검색 결과 조회
 		ArrayList<rmsrept> list =  rms.getrmsSearch(id, category, str, pageNumber);
 
 		
-			if (list.size() == 0) {
-			//PrintWriter script = response.getWriter();
-			//script.println("<script>");
-			//script.println("alert('검색결과가 없습니다.')");
-			//script.println("location.href='/BBS/user/bbs.jsp'");
-			//script.println("</script>");
+		if (list.size() == 0) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('검색결과가 없습니다.')");
+			script.println("location.href='/BBS/user/bbs.jsp'");
+			script.println("</script>");
 		} 
+		
+		
 		
 		//다음 페이지가 있는지,
 		ArrayList<rmsrept> aflist =  rms.getrmsSearch(id, category, str, pageNumber+1);
