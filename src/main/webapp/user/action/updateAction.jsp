@@ -1,3 +1,5 @@
+<%@page import="java.util.Date"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="rmsrept.rmsrept"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
@@ -70,14 +72,23 @@
 		int nn = 0;
 		int an = 0;
 		
-		//미승인된 rms를 찾아옴.		
-		ArrayList<rmsrept> list = rms.getrmsSign(id, 1);
-				
-		// 데이터 삭제
-		int tdel = rms.Rmsdelete(id, rms_dl,"T");
-		int ndel = rms.Rmsdelete(id, rms_dl,"N");
-		int ldel = rms.edelete(id, rms_dl);		
+		//데이터 삭제
+		rms.Rmsdelete(id, rms_dl,"T");
+		rms.Rmsdelete(id, rms_dl,"N");
+		rms.edelete(id, rms_dl);	
 		
+		//업데이트하는 rms_dl의 날짜 확인
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String dl = rms_dl;
+		Date time = new Date();
+		String timenow = dateFormat.format(time);
+
+		Date dldate = dateFormat.parse(dl);
+		Date today = dateFormat.parse(timenow);
+		
+		if(!dldate.after(today) && !dldate.equals(today)) { //날짜가 이미 지났다면,
+			rms_sign="마감";
+		}
 		
 		// << 금주 데이터 저장 >> - rms_this
 		for(int i=0; i < trCnt+con; i++) {
@@ -171,7 +182,6 @@
 			}
 		} 
 			
-			
 			// << 차주 데이터 저장 >> - rms_last
 			for(int i=0; i < trNCnt+ncon; i++) {
 				String a = "bbsNContent";
@@ -258,41 +268,35 @@
 			String e="erp_division";
 			//ERP 데이터가 있다면,
 			//데이터를 삭제하고 다시 생성하는 방식으로 진행 -.
-			//erp 데이터 미리 삭제
-			an = rms.edelete(id, rms_dl);
-			if(an == -1){
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('erp 처리에 문제가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
-				script.println("history.back();");
-				script.println("</script>");
-			} else {
-				if(trACnt != 0) {
-					for(int i=0; i< trACnt+acon; i++){
-						//edate 처리
-						if(request.getParameter(a+i) != null) {	//데이터가 존재한다면, 모두 포함되어 있음!
-							String edate=request.getParameter(a+i);
-							String euser=request.getParameter(b+i);
-							String etext=request.getParameter(c+i);
-							String eau=request.getParameter(d+i);
-							String ediv=request.getParameter(e+i);
-							//erp 테이블에 저장
-							int numelist = rms.write_erp(id, rms_dl, edate, euser, etext, eau, ediv);
-							if(numelist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
-								rms.Rmsdelete(id, rms_dl,"T");
-								rms.Rmsdelete(id, rms_dl,"N");
-								PrintWriter script = response.getWriter();
-								script.println("<script>");
-								script.println("alert('(erp)데이터 수정에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
-								script.println("history.back();");
-								script.println("</script>");
-								an = -1;
-							} 
+		
+			if(trACnt != 0) {
+				for(int i=0; i< trACnt+acon; i++){
+					//edate 처리
+					if(request.getParameter(a+i) != null) {	//데이터가 존재한다면, 모두 포함되어 있음!
+						String edate=request.getParameter(a+i);
+						String euser=request.getParameter(b+i);
+						String etext=request.getParameter(c+i);
+						String eau=request.getParameter(d+i);
+						String ediv=request.getParameter(e+i);
+						//erp 테이블에 저장
+						int numelist = rms.write_erp(id, rms_dl, edate, euser, etext, eau, ediv);
+						if(numelist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
+							rms.Rmsdelete(id, rms_dl,"T");
+							rms.Rmsdelete(id, rms_dl,"N");
+							PrintWriter script = response.getWriter();
+							script.println("<script>");
+							script.println("alert('(erp)데이터 수정에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
+							script.println("history.back();");
+							script.println("</script>");
+							an = -1;
 						} 
-					}
+					} 
 				}
 			}
 			
+			
+			//미승인된 rms를 찾아옴.		
+			ArrayList<rmsrept> list = rms.getrmsSign(id, 1);
 			
 			if(n == -1 || nn == -1 || an == -1) { //llist.size() != 0
 				rms.Rmsdelete(id, rms_dl,"T");
@@ -305,12 +309,22 @@
 				script.println("</script>");
 			} else {
 				if(list.size() != 0) {
+					if(!before_dl.equals(rms_dl)) { //같은 날짜로 수정하는 것이 아니라면, 
+						rms.Rmsdelete(id,before_dl,"T");
+						rms.Rmsdelete(id, before_dl,"N");
+						rms.edelete(id, before_dl);
+					}
 					PrintWriter script = response.getWriter();
 					script.println("<script>");
 					script.println("alert('수정이 완료되었습니다.')");
 					script.println("location.href='../bbsUpdateDelete.jsp'");
 					script.println("</script>");
 				}else {
+					if(!before_dl.equals(rms_dl)) { //같은 날짜로 수정하는 것이 아니라면, 
+						rms.Rmsdelete(id,before_dl,"T");
+						rms.Rmsdelete(id, before_dl,"N");
+						rms.edelete(id, before_dl);
+					}
 					PrintWriter script = response.getWriter();
 					script.println("<script>");
 					script.println("alert('수정이 완료되었습니다.')");
