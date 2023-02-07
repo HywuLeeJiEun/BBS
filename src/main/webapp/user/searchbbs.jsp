@@ -94,19 +94,10 @@
 		
 		if(category.equals("rms_dl")) {
 			int len = str.length();
-			// 2글자 이상이며 -을 포함하지 않는다면, 
-			/* if(len > 2 && str.contains("-") == false && len <4) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('날짜 형식은 - 을 갖추어야 합니다.')");
-				script.println("location.href='/BBS/user/bbs.jsp'");
-				script.println("</script>");
-			} */
-			
 			//포맷 형태 확인하기
 			if(len > 2 && len < 11) {
 				if(str.contains(".")) { // .으로 작성된 경우, YYYY.MM.DD
-					str.replaceAll(".", "-");
+					str = String.join("-", str.split("\\."));
 				} else if(str.contains("-")) { // -으로 작성된 경우, YYYY-MM-DD
 					str.replaceAll("-", "-");
 				} else if(len == 8){ //8글자라면 -> 다른 특수기호 없이 숫자만 작성됨.   
@@ -123,11 +114,11 @@
 
 		
 			if (list.size() == 0) {
-			PrintWriter script = response.getWriter();
-			script.println("<script>");
-			script.println("alert('검색결과가 없습니다.')");
-			script.println("location.href='/BBS/user/bbs.jsp'");
-			script.println("</script>");
+			//PrintWriter script = response.getWriter();
+			//script.println("<script>");
+			//script.println("alert('검색결과가 없습니다.')");
+			//script.println("location.href='/BBS/user/bbs.jsp'");
+			//script.println("</script>");
 		} 
 		
 		//다음 페이지가 있는지,
@@ -145,9 +136,10 @@
 				sign[i] = list.get(i).getRms_sign();						
 			}
 		}
-		
-		
+				
 	%>
+
+	
 	
 	      <!-- ************ 상단 네비게이션바 영역 ************* -->
 	<nav class="navbar navbar-default"> 
@@ -403,7 +395,7 @@
 						</select></td>
 						<td>
 							<input type="text" class="form-control"
-							placeholder="" name="searchText" maxlength="100" value="<%= request.getParameter("searchText") %>"></td>
+							placeholder="" name="searchText" maxlength="100" value="<%= str %>"></td>
 						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="/BBS/user/searchbbs.jsp">검색</button></td>
 						<!-- <td><button type="submit" class="btn btn-warning pull-right" formaction="gathering.jsp" onclick="return submit2(this.form)">취합</button></td> -->
 					</tr>

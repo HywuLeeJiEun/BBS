@@ -484,7 +484,7 @@
 									 <option <%= etlist.get(0).getSum_pro().equals("미완료")?"selected":"" %>> 미완료 </option>
 								</select></td>
 							<!-- 상태 -->
-							<td style="text-align: center; border: 1px solid;" id="estate"></td>
+							<td style="text-align: center; border: 1px solid; background-color:<%= etlist.get(0).getSum_sta() %>" id="estate"></td>
 							<!-- 비고 -->
 							<td style=" border: 1px solid"><textarea  name="enote" id="enote" wrap="hard" style="resize: none; width:100%; height:100px"><%= etlist.get(0).getSum_note() %></textarea><textarea id="rms_dl" name="rms_dl" style="display:none"><%= rms_dl %></textarea></td>
 						</tr>
@@ -524,7 +524,7 @@
 									 <option <%= wtlist.get(0).getSum_pro().equals("미완료")?"selected":"" %>> 미완료 </option>
 								</select></td>
 							<!-- 상태 -->
-							<td style="text-align: center; border: 1px solid;" id="wstate"></td>
+							<td style="text-align: center; border: 1px solid; background-color:<%= wtlist.get(0).getSum_sta() %>" id="wstate"></td>
 							<!-- 비고 -->
 							<td style=" border: 1px solid"><textarea  name="wnote" id="wnote" wrap="hard" style="resize: none; width:100%; height:100px"><%=  wtlist.get(0).getSum_note() %></textarea></td>
 						</tr>

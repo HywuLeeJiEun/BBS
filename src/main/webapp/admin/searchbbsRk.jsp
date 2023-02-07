@@ -92,17 +92,22 @@
 			script.println("</script>");
 		}
 		
-		/* if(category.equals("rms_dl")) {
+		if(category.equals("rms_dl")) {
 			int len = str.length();
-			// 2글자 이상이며 -을 포함하지 않는다면, 
-			if(len > 2 && str.contains("-") == false && len <4) {
-				PrintWriter script = response.getWriter();
-				script.println("<script>");
-				script.println("alert('날짜 형식은 - 을 갖추어야 합니다.')");
-				script.println("location.href='/BBS/user/bbs.jsp'");
-				script.println("</script>");
+			//포맷 형태 확인하기
+			if(len > 2 && len < 11) {
+				if(str.contains(".")) { // .으로 작성된 경우, YYYY.MM.DD
+					str = String.join("-", str.split("\\."));
+				} else if(str.contains("-")) { // -으로 작성된 경우, YYYY-MM-DD
+					str.replaceAll("-", "-");
+				} else if(len == 8){ //8글자라면 -> 다른 특수기호 없이 숫자만 작성됨.   
+					StringBuffer bstr = new StringBuffer(str);
+					bstr.insert(4,"-"); //yyyy-MMdd
+					bstr.insert(7,"-"); //yyyy-mm-dd
+					str = bstr.toString();
+				}
 			}
-		} */
+		}
 		
 		//포맷 형태 확인하기
 		if(category.equals("rms_dl")) {
@@ -136,6 +141,10 @@
 			script.println("location.href='/BBS/user/bbs.jsp'");
 			script.println("</script>");
 		} 
+		
+		if(category.equals("user_id")) {
+			str = request.getParameter("searchText");
+		}
 		
 		//다음 페이지가 있는지,
 		ArrayList<rmsrept> aflist =  rms.getRmsAdminSearch(pageNumber+1, category, str);
@@ -400,7 +409,7 @@
 						</select></td>
 						<td>
 							<input type="text" class="form-control"
-							placeholder="" name="searchText" maxlength="100" value="<%= request.getParameter("searchText") %>"></td>
+							placeholder="" name="searchText" maxlength="100" value="<%= str %>"></td>
 						<td><button type="submit" style="margin:5px" class="btn btn-success" formaction="/BBS/admin/searchbbsRk.jsp">검색</button></td>
 						<!-- <td><button type="submit" class="btn btn-warning pull-right" formaction="gathering.jsp" onclick="return submit2(this.form)">취합</button></td> -->
 					</tr>
