@@ -175,11 +175,11 @@
 				// write_rms_this
 				int numlist = rms.writeRms(rms_sign, id, rms_dl, rms_title, recon, bbsstart, bbstarget, bbsend, "T", date);
 				if(numlist == -1) { //데이터 저장 오류
-					PrintWriter script = response.getWriter();
+					/* PrintWriter script = response.getWriter();
 					script.println("<script>");
 					script.println("alert('(금주)데이터 수정에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
 					script.println("history.back();");
-					script.println("</script>");
+					script.println("</script>"); */
 					n = -1;
 				} 
 			}
@@ -252,13 +252,13 @@
 					// write_rms_last
 					int numlist = rms.writeRms(rms_sign, id, rms_dl, rms_title, bbscontent, bbsstart, bbstarget, null, "N", date);
 					if(numlist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
-						rms.RmsdeleteSign(id, rms_dl, rms_sign); //보류가 아닌, 새로 생성된 데이터를 삭제
+						/* rms.RmsdeleteSign(id, rms_dl, rms_sign); //보류가 아닌, 새로 생성된 데이터를 삭제
 						rms.updateSign(id, rms_sign, before_dl); //보류 처리된 데이터를 다시 변경 (rms_sign으로)
 						PrintWriter script = response.getWriter();
 						script.println("<script>");
 						script.println("alert('(차주)데이터 수정에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
 						script.println("history.back();");
-						script.println("</script>");
+						script.println("</script>"); */
 						nn = -1;
 					} 
 				} 
@@ -285,17 +285,6 @@
 						//erp 테이블에 저장
 						int numelist = rms.write_erp(id, rms_dl, edate, euser, etext, eau, ediv);
 						if(numelist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
-							rms.RmsdeleteSign(id, rms_dl, rms_sign); //보류가 아닌, 새로 생성된 데이터를 삭제
-							/* rms.Rmsdelete(id, rms_dl,"T");
-							rms.Rmsdelete(id, rms_dl,"N"); */
-							rms.updateSign(id, rms_sign, before_dl);
-							//user_id를 다시 복구 시킴.
-							rms.updateERPtest(id, before_dl);
-							PrintWriter script = response.getWriter();
-							script.println("<script>");
-							script.println("alert('(erp)데이터 수정에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
-							script.println("history.back();");
-							script.println("</script>");
 							an = -1;
 						} 
 					} 
