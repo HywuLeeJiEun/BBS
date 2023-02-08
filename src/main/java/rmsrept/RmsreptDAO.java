@@ -167,6 +167,21 @@ public class RmsreptDAO {
 	}
 	
 	
+	//RMSEDPS sign 변경하기
+		public int updateERPtest(String test, String before_dl) {
+			String sql = " update rmsedps set user_id=? where rms_dl = ?";
+			 try {
+				PreparedStatement pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, test); 
+				pstmt.setString(2, before_dl); 
+				return pstmt.executeUpdate();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			 return -1;
+		}
+	
+	
 	//RMSREPT 가장 최근에 작성된 rms_dl 찾기
 	public String getMaxDL(String user_id) { 
 		 String sql ="select distinct rms_dl from rmsrept where user_id=? order by rms_dl desc";
@@ -268,6 +283,23 @@ public class RmsreptDAO {
 	}
 	
 	
+	//RMSREPT  제거하기 (rms_sign을 조건으로 검색) (delete)
+	public int RmsdeleteSign(String user_id, String rms_dl, String rms_sign) {
+		//실제 데이터 또한 삭제한다.
+		String sql = "delete from rmsrept where user_id = ? and rms_dl = ? and rms_sign = ?";
+		try {
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, user_id);
+			pstmt.setString(2, rms_dl);
+			pstmt.setString(3, rms_sign);
+			return pstmt.executeUpdate();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return -1; //데이터베이스 오류 
+	}
+	
+	
 	//RMSEDPS erp 권한관리 작성하기 (insert)
 	public int write_erp(String user_id, String rms_dl, String e_date, String e_user, String e_text, String e_authority, String e_division) {
 		String sql = "insert into rmsedps values(?,?,?,?,?,?,?)";
@@ -302,7 +334,7 @@ public class RmsreptDAO {
 		}
 		return -1; //데이터베이스 오류 
 	}
-	
+		
 	
 	//RMSEDPS erp 검색하기 + user_id (select) 
 	public ArrayList<rmsedps> geterp(String rms_dl){//특정한 리스트를 받아서 반환
@@ -607,4 +639,3 @@ public class RmsreptDAO {
 	      return list;
 	}
 }
-

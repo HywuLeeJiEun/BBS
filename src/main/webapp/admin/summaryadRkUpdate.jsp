@@ -682,7 +682,7 @@
 					<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center; margin-left:10px" onClick="location.href='/BBS/admin/summaryadRk.jsp'">목록</button> 
 		<% 		} %>
 		<% } %>
-		<% if(etlist.get(0).getSum_sign().equals("승인") || etlist.get(0).getSum_sign().equals("마감")) {  //승인이나 마감 상태시에만 pptx로 출력 가능!%>
+		<% if(getSign.equals("승인") || getSign.equals("마감")) {  //승인이나 마감 상태시에만 pptx로 출력 가능!%>
 				<button type="button" class="btn btn-primary pull-right" style="width:50px; text-align:center; align:center; margin-left:20px" onClick="location.href='/BBS/admin/summaryadRk.jsp'">목록</button> 
 			<% if(etlist.size() != 0 && wtlist.size() != 0) { %>
 				<button type="button" class="btn btn-success pull-right" style="width:50px; text-align:center; align:center" onclick="print()">출력</button> 

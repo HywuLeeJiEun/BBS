@@ -50,10 +50,11 @@
 			script.println("</script>");
 		} else {
 			
-		String pluser = "";
-		if(userDAO.getFD(id) != null) { // 비어있지 않다면,
-			pluser = userDAO.getFD(id);
-		} //비어있는 경우는 관리자 및 담당 업무가 없는 사용자
+		//erp 계정관리 권한이 있는 사용자인지 조회하기 (RMSTASK)
+		String task_num = userDAO.getTask("계정관리");
+		//user가 해당 권한을 부여받고 있는지 확인하기 (RMSMGRS)
+		String rmsmgrs = userDAO.getMgrs(task_num); //user_id와 같은지 확인
+			
 		String name = userDAO.getName(id);
 		
 		String rms_sign="미승인";
@@ -72,10 +73,12 @@
 		int nn = 0;
 		int an = 0;
 		
-		//데이터 삭제
-		rms.Rmsdelete(id, rms_dl,"T");
-		rms.Rmsdelete(id, rms_dl,"N");
-		rms.edelete(id, rms_dl);	
+		//데이터 sign을 보류로 변경 (기존데이터(before_dl)를 살려둠)
+		rms.updateSign(id, "보류", before_dl);
+		if(rmsmgrs.equals(id)) {
+		//test -> userid 부분을 변경해 일종의 rms_sign처럼 활용
+		rms.updateERPtest("test", before_dl);
+		}
 		
 		//업데이트하는 rms_dl의 날짜 확인
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -249,7 +252,8 @@
 					// write_rms_last
 					int numlist = rms.writeRms(rms_sign, id, rms_dl, rms_title, bbscontent, bbsstart, bbstarget, null, "N", date);
 					if(numlist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
-						rms.Rmsdelete(id, rms_dl,"T");
+						rms.RmsdeleteSign(id, rms_dl, rms_sign); //보류가 아닌, 새로 생성된 데이터를 삭제
+						rms.updateSign(id, rms_sign, before_dl); //보류 처리된 데이터를 다시 변경 (rms_sign으로)
 						PrintWriter script = response.getWriter();
 						script.println("<script>");
 						script.println("alert('(차주)데이터 수정에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
@@ -269,7 +273,7 @@
 			//ERP 데이터가 있다면,
 			//데이터를 삭제하고 다시 생성하는 방식으로 진행 -.
 		
-			if(trACnt != 0) {
+			if(rmsmgrs.equals(id)) {
 				for(int i=0; i< trACnt+acon; i++){
 					//edate 처리
 					if(request.getParameter(a+i) != null) {	//데이터가 존재한다면, 모두 포함되어 있음!
@@ -281,8 +285,12 @@
 						//erp 테이블에 저장
 						int numelist = rms.write_erp(id, rms_dl, edate, euser, etext, eau, ediv);
 						if(numelist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
-							rms.Rmsdelete(id, rms_dl,"T");
-							rms.Rmsdelete(id, rms_dl,"N");
+							rms.RmsdeleteSign(id, rms_dl, rms_sign); //보류가 아닌, 새로 생성된 데이터를 삭제
+							/* rms.Rmsdelete(id, rms_dl,"T");
+							rms.Rmsdelete(id, rms_dl,"N"); */
+							rms.updateSign(id, rms_sign, before_dl);
+							//user_id를 다시 복구 시킴.
+							rms.updateERPtest(id, before_dl);
 							PrintWriter script = response.getWriter();
 							script.println("<script>");
 							script.println("alert('(erp)데이터 수정에 오류가 발생하였습니다. \\n관리자에게 문의 바랍니다.')");
@@ -299,9 +307,12 @@
 			ArrayList<rmsrept> list = rms.getrmsSign(id, 1);
 			
 			if(n == -1 || nn == -1 || an == -1) { //llist.size() != 0
-				rms.Rmsdelete(id, rms_dl,"T");
-				rms.Rmsdelete(id, rms_dl,"N");
-				rms.edelete(id, rms_dl);		
+				//위에서 생성된 데이터를 지움.
+				rms.RmsdeleteSign(id, rms_dl, rms_sign); //보류가 아닌, 새로 생성된 데이터를 삭제
+				rms.updateSign(id, rms_sign, before_dl); //이전 데이터를 다시 복구시킴. (보류 -> rms_sign)
+				if(rmsmgrs.equals(id)) {
+					rms.updateERPtest(id, before_dl);	//user_id를 다시 복구 시킴.
+				}
 				PrintWriter script = response.getWriter();
 				script.println("<script>");
 				script.println("alert('수정에 문제가 발생하였습니다.')");
@@ -309,10 +320,11 @@
 				script.println("</script>");
 			} else {
 				if(list.size() != 0) {
-					if(!before_dl.equals(rms_dl)) { //같은 날짜로 수정하는 것이 아니라면, 
-						rms.Rmsdelete(id,before_dl,"T");
-						rms.Rmsdelete(id, before_dl,"N");
-						rms.edelete(id, before_dl);
+					//보류로 저장된 이전 데이터를 제거해야함! (이때, 헷갈리지 않도록 user_id도 검색 조건에 넣음.)
+					rms.RmsdeleteSign(id, before_dl, "보류"); //보류로 생성된 이전의 데이터를 삭제
+					//erp user_id가 test인 데이터를 제거함.
+					if(rmsmgrs.equals(id)) {
+						rms.edelete("test", before_dl);
 					}
 					PrintWriter script = response.getWriter();
 					script.println("<script>");
@@ -320,10 +332,11 @@
 					script.println("location.href='../bbsUpdateDelete.jsp'");
 					script.println("</script>");
 				}else {
-					if(!before_dl.equals(rms_dl)) { //같은 날짜로 수정하는 것이 아니라면, 
-						rms.Rmsdelete(id,before_dl,"T");
-						rms.Rmsdelete(id, before_dl,"N");
-						rms.edelete(id, before_dl);
+					//보류로 저장된 이전 데이터를 제거해야함! (이때, 헷갈리지 않도록 user_id도 검색 조건에 넣음.)
+					rms.RmsdeleteSign(id, before_dl, "보류"); //보류로 생성된 이전의 데이터를 삭제
+					//erp user_id가 test인 데이터를 제거함.
+					if(rmsmgrs.equals(id)) {
+						rms.edelete("test", before_dl);
 					}
 					PrintWriter script = response.getWriter();
 					script.println("<script>");
