@@ -447,8 +447,7 @@
 						<!-- 승인/미승인/마감 표시 -->
 						<td><%= rmslist.get(i).getRms_sign() %></td>
 						<td data-toggle="tooltip" data-html="true" data-placement="right" title="제출시, <br>수정 및 삭제가 불가합니다.">
-							<%-- <button class="btn btn-success" style="font-size:12px" onclick="location.href='/BBS/user/action/signOnAction.jsp?bbsDeadline=<%= tlist.get(i).getBbsDeadline() %>&workset=<%= workSet %>'"> 제출 </button> --%>
-							<a class="btn btn-success" style="font-size:12px" href="/BBS/user/action/signOnAction.jsp?rms_dl=<%= rmslist.get(i).getRms_dl() %>&workset=<%= workSet %>"> 제출 </a>
+							<a class="btn btn-success" style="font-size:12px" href="/BBS/user/action/signOnAction.jsp?rms_dl=<%= rmslist.get(i).getRms_dl() %>&workset=<%= workSet %>" onclick="return confirm('제출하시겠습니까?\n제출시, 수정/삭제가 불가합니다.');"> 제출 </a>
 						</td>
 					</tr>
 					<%

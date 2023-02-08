@@ -383,7 +383,7 @@
 				<tr>
 				</tr>
 				<tr>
-					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인(제출) 및 마감 처리시, 수정/삭제가 불가합니다." > [ERP/WEB] 요약본 수정 </th>
+					<th colspan="5" style=" text-align: center; color:black " class="form-control" data-toggle="tooltip" data-placement="bottom" title="승인(제출) 및 마감 처리시, 수정이 불가합니다." > [ERP/WEB] 요약본 수정 </th>
 				</tr>
 			</thead>
 		</table>
@@ -430,12 +430,15 @@
 							String etitle = "";
 							String wtitle = "";
 							String di =  "";
-							if(etlist.size() != 0) {
-								etitle = "ERP";
-							}
+							
 							if(wtlist.size() != 0) {
 								wtitle = "WEB";
 								di = "/";
+							}
+							if(etlist.size() != 0) {
+								etitle = "ERP";
+							}else {
+								di="";
 							}
 							%>
 							<td style="background-color:#f9f9f9;" colspan="1" style="align:left;" >요약본</td>
@@ -910,7 +913,7 @@
 		} else if (document.getElementById("wprogress").value == '' || document.getElementById("wprogress").value == null) { 
 			alert("WEB - 금주 업무 실적의 '진행율'이 작성되지 않았습니다.");
 		}else {
-			if(confirm("해당 요약본을 승인하시겠습니까? \n승인 처리시, 수정/삭제가 불가합니다.")) {
+			if(confirm("해당 요약본을 승인하시겠습니까? \n승인 처리시, 수정이 불가합니다.")) {
 			$('#bbsRk').attr("action","/BBS/admin/action/summaryadsignOnAction.jsp?rms_dl="+a).submit();
 			} else {
 				
