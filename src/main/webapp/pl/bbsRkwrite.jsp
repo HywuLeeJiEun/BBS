@@ -582,10 +582,10 @@
 						%>
 						<tr>
 							<td style="text-align: left; font-size:13px">
-								<textarea name="content<%=i%>" id="content<%=i%>" rows="2" style="resize: none; height:30px; width:300px;"><%= bbsContent %></textarea>
+								<textarea name="content<%=i%>" id="content<%=i%>" readonly rows="2" style="resize: none; height:30px; width:300px;"><%= bbsContent %></textarea>
 							</td>
 							<td style="text-align: left; font-size:13px">
-								<textarea name="end<%=i%>" id="end<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= tlist.get(i).getRms_end() %></textarea>
+								<textarea name="end<%=i%>" id="end<%=i%>" rows="1" readonly style="resize: none; height:30px; width:60px; text-align: center;"><%= tlist.get(i).getRms_end() %></textarea>
 								<textarea name="rms_dl" id="rms_dl" rows="1" style="resize: none; height:30px; width:60px; text-align: center; display:none"><%= rms_dl %></textarea>
 							</td>
 							<td>
@@ -639,10 +639,10 @@
 						%>
 						<tr>
 							<td style="text-align: left; font-size:13px">
-								<textarea name="ncontent<%=i%>" id="ncontent<%=i%>" rows="2" style="resize: none; height:30px; width:300px;"><%= bbsNContent %></textarea>
+								<textarea name="ncontent<%=i%>" id="ncontent<%=i%>" readonly rows="2" style="resize: none; height:30px; width:300px;"><%= bbsNContent %></textarea>
 							</td>
 							<td style="text-align: left; font-size:13px">
-								<textarea name="ntarget<%=i%>" id="ntarget<%=i%>" rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= bbsNTarget %></textarea>
+								<textarea name="ntarget<%=i%>" id="ntarget<%=i%>" readonly rows="1" style="resize: none; height:30px; width:60px; text-align: center;"><%= bbsNTarget %></textarea>
 							</td>
 							<td>
 								<input type="checkbox" name="nchk" id="nchk<%=i%>" style="zoom:2.0;" value="<%= i %>" onclick='ncheckSelectAll(this)'>

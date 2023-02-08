@@ -471,13 +471,13 @@
 							<!-- 업무 내용 -->
 							<td style=" border: 1px solid">
 							<% for(int i=0; i < etlist.size(); i++) { %>
-								<textarea required name="econtent<%= i %>" id="econtent<%= i %>" wrap="hard" style="resize: none; width:100%;"><%= etlist.get(i).getSum_con() %></textarea>
+								<textarea required name="econtent<%= i %>" maxlength="500" id="econtent<%= i %>" wrap="hard" style="resize: none; width:100%;"><%= etlist.get(i).getSum_con() %></textarea>
 							<% } %>	
 							</td>
 							<!-- 완료일 -->
 							<td style="text-align: center; border: 1px solid">
 							<% for(int i=0; i < etlist.size(); i++) { %>
-								<textarea required name="eend<%= i %>" id="eend<%= i %>" style="resize: none; width:100%;"><%=etlist.get(i).getSum_enta() %></textarea>
+								<textarea required name="eend<%= i %>" maxlength="10" id="eend<%= i %>" style="resize: none; width:100%;"><%=etlist.get(i).getSum_enta() %></textarea>
 							<% } %>
 							</td>
 							<!-- 진행율 -->
@@ -490,7 +490,7 @@
 							<!-- 상태 -->
 							<td style="text-align: center; border: 1px solid;" id="estate"></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea  name="enote" id="enote" wrap="hard" style="resize: none; width:100%; height:100px"><%= etlist.get(0).getSum_note() %></textarea><textarea id="rms_dl" name="rms_dl" style="display:none"><%= rms_dl %></textarea></td>
+							<td style=" border: 1px solid"><textarea  name="enote" maxlength="500" id="enote" wrap="hard" style="resize: none; width:100%; height:100px"><%= etlist.get(0).getSum_note() %></textarea><textarea id="rms_dl" name="rms_dl" style="display:none"><%= rms_dl %></textarea></td>
 						</tr>
 						<%
 						} else {
@@ -511,13 +511,13 @@
 							<!-- 업무 내용 -->
 							<td style=" border: 1px solid">
 							<% for(int i=0; i < wtlist.size(); i++) { %>
-								<textarea required name="wcontent<%= i %>" id="wcontent<%= i %>" wrap="hard" style="resize: none; width:100%;"><%= wtlist.get(i).getSum_con() %></textarea>
+								<textarea required name="wcontent<%= i %>" id="wcontent<%= i %>" maxlength="500" wrap="hard" style="resize: none; width:100%;"><%= wtlist.get(i).getSum_con() %></textarea>
 							<% } %>	
 							</td>
 							<!-- 완료일 -->
 							<td style="text-align: center; border: 1px solid">
 							<% for(int i=0; i < wtlist.size(); i++) { %>
-								<textarea required name="wend<%= i %>" id="wend<%= i %>" style="resize: none; width:100%;"><%= wtlist.get(i).getSum_enta() %></textarea>
+								<textarea required name="wend<%= i %>" id="wend<%= i %>" maxlength="10" style="resize: none; width:100%;"><%= wtlist.get(i).getSum_enta() %></textarea>
 							<% } %>	
 							</td>
 							<!-- 진행율 -->
@@ -530,7 +530,7 @@
 							<!-- 상태 -->
 							<td style="text-align: center; border: 1px solid;" id="wstate"></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea  name="wnote" id="wnote" wrap="hard" style="resize: none; width:100%; height:100px"><%=  wtlist.get(0).getSum_note() %></textarea></td>
+							<td style=" border: 1px solid"><textarea  name="wnote" maxlength="500" id="wnote" wrap="hard" style="resize: none; width:100%; height:100px"><%=  wtlist.get(0).getSum_note() %></textarea></td>
 						</tr>
 						<%
 						} else {
@@ -575,17 +575,17 @@
 							<!-- 업무 내용 -->
 							<td style=" border: 1px solid">
 							<% for(int i=0; i < enlist.size(); i++) { %>	
-								<textarea required name="encontent<%= i %>" wrap="hard" id="encontent<%= i %>" style="resize: none; width:100%;"><%= enlist.get(i).getSum_con() %></textarea>
+								<textarea required name="encontent<%= i %>" wrap="hard" maxlength="500" id="encontent<%= i %>" style="resize: none; width:100%;"><%= enlist.get(i).getSum_con() %></textarea>
 							<% } %>
 							</td>
 							<!-- 완료예정 -->
 							<td style="text-align: center; border: 1px solid">
 							<% for(int i=0; i < enlist.size(); i++) { %>	
-								<textarea required name="entarget<%= i %>" id="entarget<%= i %>" style="resize: none; width:100%;"><%= enlist.get(i).getSum_enta() %></textarea>
+								<textarea required name="entarget<%= i %>" id="entarget<%= i %>" maxlength="10" style="resize: none; width:100%;"><%= enlist.get(i).getSum_enta() %></textarea>
 							<% } %>	
 							</td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea name="ennote" id="ennote" wrap="hard" style="resize: none; width:100%; height:100px"><%= enlist.get(0).getSum_note() %></textarea></td>
+							<td style=" border: 1px solid"><textarea name="ennote" id="ennote" maxlength="500" wrap="hard" style="resize: none; width:100%; height:100px"><%= enlist.get(0).getSum_note() %></textarea></td>
 						</tr>
 						<%
 						} else { 
@@ -605,17 +605,17 @@
 							<!-- 업무 내용 -->
 							<td style=" border: 1px solid">
 							<% for(int i=0; i < wnlist.size(); i++) { %>
-								<textarea required name="wncontent<%= i %>" id="wncontent<%= i %>" wrap="hard" style="resize: none; width:100%;"><%= wnlist.get(i).getSum_con() %></textarea>
+								<textarea required name="wncontent<%= i %>" id="wncontent<%= i %>" maxlength="500" wrap="hard" style="resize: none; width:100%;"><%= wnlist.get(i).getSum_con() %></textarea>
 							<% } %>	
 							</td>
 							<!-- 완료예정 -->
 							<td style="text-align: center; border: 1px solid">
 							<% for(int i=0; i < wnlist.size(); i++) { %>
-								<textarea required name="wntarget<%= i %>" id="wntarget<%= i %>" style="resize: none; width:100%;"><%= wnlist.get(i).getSum_enta() %></textarea>
+								<textarea required name="wntarget<%= i %>" id="wntarget<%= i %>" maxlength="10" style="resize: none; width:100%;"><%= wnlist.get(i).getSum_enta() %></textarea>
 							<% } %>
 							</td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea name="wnnote" id="wnnote" wrap="hard" style="resize: none; width:100%; height:100px"><%= wnlist.get(0).getSum_note() %></textarea></td>
+							<td style=" border: 1px solid"><textarea name="wnnote" id="wnnote" maxlength="500" wrap="hard" style="resize: none; width:100%; height:100px"><%= wnlist.get(0).getSum_note() %></textarea></td>
 						</tr>
 						<%
 						} else {

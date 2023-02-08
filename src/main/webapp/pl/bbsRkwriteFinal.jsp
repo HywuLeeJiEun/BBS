@@ -398,13 +398,13 @@
 							<!-- 업무 내용 -->
 							<td style=" border: 1px solid">
 							<% for(int i=0; i < chk.length; i++) { %>
-								<textarea required name="content<%= i %>" id="content<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("content"+i) %></textarea>
+								<textarea required name="content<%= i %>" maxlength="500" id="content<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("content"+i) %></textarea>
 							<% } %>
 							</td>
 							<!-- 완료일 -->
 							<td style="text-align: center; border: 1px solid">
 							<% for(int i=0; i < chk.length; i++) { %>
-							<textarea required name="end<%= i %>" id="end<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("end"+i) %></textarea>
+							<textarea required name="end<%= i %>" maxlength="10" id="end<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("end"+i) %></textarea>
 							<% } %>
 							</td>
 							<!-- 진행율 -->
@@ -420,7 +420,7 @@
 							<!-- 상태 -->
 							<td style="text-align: center; border: 1px solid;" id="state"></td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea  name="note" id="note" style="resize: none; width:100%; height:100px"></textarea></td>
+							<td style=" border: 1px solid"><textarea  maxlength="500" name="note" id="note" style="resize: none; width:100%; height:100px"></textarea></td>
 						</tr>
 					</tbody>
 				</table>
@@ -448,17 +448,17 @@
 							<!-- 업무 내용 -->
 							<td style=" border: 1px solid">
 							<% for(int i=0; i < nchk.length; i++) { %>
-								<textarea required name="ncontent<%= i %>" id="ncontent<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("ncontent"+i) %></textarea>
+								<textarea required name="ncontent<%= i %>"  maxlength="500" id="ncontent<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("ncontent"+i) %></textarea>
 							<% } %>
 							</td>
 							<!-- 완료예정 -->
 							<td style="text-align: center; border: 1px solid">
 							<% for(int i=0; i < nchk.length; i++) { %>
-								<textarea required name="ntarget<%= i %>" id="ntarget<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("ntarget"+i) %></textarea>
+								<textarea required name="ntarget<%= i %>" maxlength="10" id="ntarget<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("ntarget"+i) %></textarea>
 							<% } %>
 							</td>
 							<!-- 비고 -->
-							<td style=" border: 1px solid"><textarea name="nnote" id="nnote" style="resize: none; width:100%; height:100px"></textarea></td>
+							<td style=" border: 1px solid"><textarea maxlength="500" name="nnote" id="nnote" style="resize: none; width:100%; height:100px"></textarea></td>
 						</tr>
 					</tbody>
 				</table>
