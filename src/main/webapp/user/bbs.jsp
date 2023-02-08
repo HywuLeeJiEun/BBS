@@ -416,7 +416,7 @@
 						<td>
 						<%
 						String sign = null;
-						if(dldate.after(today) || dldate.equals(today) && list.get(i).getRms_sign().equals("승인")) { //현재 날짜가 마감일을 아직 넘지 않으면,
+						if((dldate.after(today) || dldate.equals(today)) && list.get(i).getRms_sign().equals("승인")) { //현재 날짜가 마감일을 아직 넘지 않으면,
 							//sign = list.get(i).getSign();
 							sign="제출";
 							//rms에 통합 저장 진행
@@ -532,7 +532,7 @@
 									script.println("</script>");
 								}
 							}
-						} else if(dldate.after(today) || dldate.equals(today) && list.get(i).getRms_sign().equals("미승인")) {
+						} else if((dldate.after(today) || dldate.equals(today)) && list.get(i).getRms_sign().equals("미승인")) {
 							//sign = list.get(i).getSign();
 							sign="미제출";
 						}else { // 미승인, 마감 상태일 경우엔 하단 진행.

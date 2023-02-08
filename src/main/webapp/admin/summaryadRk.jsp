@@ -457,7 +457,7 @@
 						<!-- 승인/미승인/마감 표시 -->
 						<td><%= getSign %></td>
 						<td data-toggle="tooltip" data-html="true" data-placement="right" title="승인시, <br>수정이 불가합니다.">
-						<% if(dldate.after(today) || dldate.equals(today)  && getSign.equals("미승인")) { %>
+						<% if((dldate.after(today) || dldate.equals(today))  && getSign.equals("미승인")) { %>
 							<a class="btn btn-success" style="font-size:12px" href="/BBS/admin/action/summaryadsignOnAction.jsp?rms_dl=<%= dl %>"> 승인 </a>
 						<% }else if(dldate.after(today) || dldate.equals(today)  && getSign.equals("승인")){ //승인 상태라면 %>
 							완료

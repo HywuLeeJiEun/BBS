@@ -458,7 +458,7 @@
 						<td><%= writer %></td>
 						<!-- 승인/미승인/마감 표시 -->
 						<td>	
-						<% if(dldate.after(today) || dldate.equals(today)  && getSign.equals("승인")){ //승인 상태라면 %>
+						<% if((dldate.after(today) || dldate.equals(today))  && getSign.equals("승인")){ //승인 상태라면 %>
 							완료
 						<% }else{ //summary - 마감 상태는 아직 존재하지 않음!
 							sumDAO.sumSign(dl); %>
