@@ -800,7 +800,8 @@
 	<script>
 	function paste(id) {
 		//alert(id); //pasteX
-		var num = id.slice(-1);
+		const regex = /[^0-9]/g;
+		var num = id.replace(regex,"");
 		//선택된 업무 내용 읽기
 		var a = document.getElementById("jobs"+num);
 		var jobs = a.options[a.selectedIndex].value;
@@ -810,21 +811,26 @@
 		var target = document.getElementById("bbsTarget"+num).value;
 		
 		//데이터를 계승함! 
-		if(document.getElementById("jobs")+Number(num)+1 != null){ //다음 데이터가 있다면, (다음 주간보고 작성이 있다는 것!)
+		var tr = $("#bbsContent"+num).parent().parent().parent();
+		var nexttr = tr.next();
+		var b = nexttr.get(0).querySelector(".con").id;
+		var unum = b.replace(regex,"");
+		//if(document.getElementById("jobs")+Number(num)+1 != null){ //다음 데이터가 있다면, (다음 주간보고 작성이 있다는 것!)
 			//1. 데이터 삽입
 				//업무 내용 넣기
-			$("#jobs"+(Number(num)+1)).val(jobs).prop("selected", true);
+			$("#jobs"+(Number(unum))).val(jobs).prop("selected", true);
 				//작성된 접수일 넣기
-			$("#bbsStart"+(Number(num)+1)).val(start);
+			$("#bbsStart"+(Number(unum))).val(start);
 				//작성된 완료목표일 넣기
-			$("#bbsTarget"+(Number(num)+1)).val(target);
+			$("#bbsTarget"+(Number(unum))).val(target);
 				
-		} 
+		//} 
 	}
 	
 	function npaste(id) {
 		//alert(id); //pasteX
-		var num = id.slice(-1);
+		const regex = /[^0-9]/g;
+		var num = id.replace(regex,"");
 		//선택된 업무 내용 읽기
 		var a = document.getElementById("njobs"+num);
 		var jobs = a.options[a.selectedIndex].value;
@@ -834,16 +840,20 @@
 		var target = document.getElementById("bbsNTarget"+num).value;
 		
 		//데이터를 계승함! 
-		if(document.getElementById("jobs")+Number(num)+1 != null){ //다음 데이터가 있다면, (다음 주간보고 작성이 있다는 것!)
+		var tr = $("#bbsNContent"+num).parent().parent().parent();
+		var nexttr = tr.next();
+		var b = nexttr.get(0).querySelector(".ncon").id;
+		var unum = b.replace(regex,"");
+		//if(document.getElementById("jobs")+Number(num)+1 != null){ //다음 데이터가 있다면, (다음 주간보고 작성이 있다는 것!)
 			//1. 데이터 삽입
 				//업무 내용 넣기
-			$("#njobs"+(Number(num)+1)).val(jobs).prop("selected", true);
+			$("#njobs"+(Number(unum))).val(jobs).prop("selected", true);
 				//작성된 접수일 넣기
-			$("#bbsNStart"+(Number(num)+1)).val(start);
+			$("#bbsNStart"+(Number(unum))).val(start);
 				//작성된 완료목표일 넣기
-			$("#bbsNTarget"+(Number(num)+1)).val(target);
+			$("#bbsNTarget"+(Number(unum))).val(target);
 				
-		} 
+		//} 
 	}
 	</script>
 </body>
