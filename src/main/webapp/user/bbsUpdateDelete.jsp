@@ -217,133 +217,16 @@
 	</nav>
 	<!-- 네비게이션 영역 끝 -->
 	
-	
-	<!-- 모달 영역! -->
-	   <div class="modal fade" id="UserUpdateModal" role="dialog">
-		   <div class="modal-dialog">
-		    <div class="modal-content">
-		     <div class="modal-header">
-		      <button type="button" class="close" data-dismiss="modal">×</button>
-		      <h3 class="modal-title" align="center">개인정보 수정</h3>
-		     </div>
-		     <!-- 모달에 포함될 내용 -->
-		     <form method="post" action="../ModalUpdateAction.jsp" id="modalform">
-		     <div class="modal-body">
-		     		<div class="row">
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label">ID </label>
-		     				<input type="text" maxlength="20" class="form-control" readonly style="width:100%" id="updateid" name="updateid"  value="<%= id %>">
-		     			</div>
-		     			<div class="col-md-3">
-		     				<label class="col-form-label"> &nbsp; </label>
-		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
-						</div>
-						<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			
-		     			
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label"> Password </label>
-		     				<input type="password" maxlength="20" required class="form-control" style="width:100%" id="password" name="password" value="<%= password %>">
-		     			</div>
-		     			<div class="col-md-3">
-		     				<label class="col-form-label"> &nbsp; </label>
-		     				<i class="glyphicon glyphicon-eye-open" id="icon" style="right:20%; top:35px;" ></i>
-						</div>
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			
-		     			
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label">name </label>
-		     				<input type="text" maxlength="20" required class="form-control" style="width:100%" id="name" name="name"  value="<%= name %>">
-		     			</div>
-		     			<div class="col-md-3">
-		     				<label class="col-form-label"> &nbsp; </label>
-		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
-						</div>
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			
-		     			
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label">rank </label>
-		     				<input type="text" required class="form-control" data-toggle="tooltip" data-placement="bottom" title="직급 변경은 관리자 권한이 필요합니다." readonly style="width:100%" id="rank" name="rank"  value="<%= rank %>">
-		     			</div>
-		     			<div class="col-md-3">
-		     				<label class="col-form-label"> &nbsp; </label>
-		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
-						</div>
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			
-		     			
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-4 form-outline">
-		     				<label class="col-form-label">email </label>
-		     				<input type="text" maxlength="30" required class="form-control" style="width:100%" id="email" name="email"  value="<%= email[0] %>"> 
-		     			</div>
-		     			<div class="col-md-3" align="left" style="top:5px; right:20px">
-		     				<label class="col-form-label" > &nbsp; </label>
-		     				<div><i>@ s-oil.com</i></div>
-						</div>
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     			
-		     			
-		     			<div class="col-md-3" style="visibility:hidden">
-		     			</div>
-		     			<div class="col-md-6 form-outline">
-		     				<label class="col-form-label">duty </label>
-		     				<input type="text" required class="form-control" readonly data-toggle="tooltip" data-placement="bottom" title="업무 변경은 관리자 권한이 필요합니다." style="width:100%" id="duty" name="duty" value="<%= workSet %>">
-		     			</div>
-		     			<div class="col-md-3">
-		     				<label class="col-form-label"> &nbsp; </label>
-		     				<!-- <button type="submit" class="btn btn-primary pull-left form-control" >확인</button> -->
-						</div>
-		     			<div class="col-md-12" style="visibility:hidden">
-		     				<a type="button" class="close" >취소</a>
-		     				<a type="button" class="close" >취소</a>
-		     			</div>
-		     		</div>	
-		     </div>
-		     <div class="modal-footer">
-			     <div class="col-md-3" style="visibility:hidden">
-     			</div>
-     			<div class="col-md-6">
-			     	<button type="submit" class="btn btn-primary pull-left form-control" id="modalbtn" >수정</button>
-		     	</div>
-		     	 <div class="col-md-3" style="visibility:hidden">
-	   			</div>	
-		    </div>
-		    </form>
-		   </div>
-	  </div>
-	</div>
-	
+	<!-- 모달 불러오기 -->
+	<div id="modalCall">
+		<textarea style="display:none" id="ui"><%= id %></textarea>
+		<textarea style="display:none" id="pw"><%= password %></textarea>
+		<textarea style="display:none" id="nm"><%= name %></textarea>
+		<textarea style="display:none" id="rn"><%= rank %></textarea>
+		<textarea style="display:none" id="em"><%= email[0] %></textarea>
+		<textarea style="display:none" id="ws"><%= workSet %></textarea>
+		<jsp:include page="../modal.html" flush="false" />
+	</div>	
 	
 	<%
 	if(rmslist.isEmpty()) {
@@ -482,6 +365,7 @@
 	<!-- 부트스트랩 참조 영역 -->
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 	<script src="../css/js/bootstrap.js"></script>
+	<script src="../modalFunction.js"></script>
 	<script>
 		function ChangeValue() {
 			var value_str = document.getElementById('searchField');
@@ -495,49 +379,6 @@
 	
 	if(trCnt < 11) {
 		$('#next').hide();
-	}
-	</script>
-	
-	
-	<!-- modal 내, password 보이기(안보이기) 기능 -->
-		<script>
-		$(document).ready(function(){
-		    $('#icon').on('click',function(){
-		    	console.log("hello");
-		        $('#password').toggleClass('active');
-		        if($('#password').hasClass('active')){
-		            $(this).attr('class',"glyphicon glyphicon-eye-close")
-		            $('#password').attr('type',"text");
-		        }else{
-		            $(this).attr('class',"glyphicon glyphicon-eye-open")
-		            $('#password').attr('type','password');
-		        }
-		    });
-		});
-	</script>
-	
-	
-	<!-- 모달 툴팁 -->
-	<script>
-		$(document).ready(function(){
-			$('[data-toggle="tooltip"]').tooltip();
-		});
-	</script>
-	
-	
-	<!-- 모달 submit -->
-	<script>
-	$('#modalbtn').click(function(){
-		$('#modalform').text();
-	})
-	</script>
-	
-	<!-- 모달 update를 위한 history 감지 -->
-	<script>
-	window.onpageshow = function(event){
-		if(event.persisted || (window.performance && window.performance.navigation.type == 2)){ //history.back 감지
-			location.reload();
-		}
 	}
 	</script>
 	

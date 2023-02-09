@@ -129,6 +129,8 @@ public class RmsreptDAO {
 		      try {
 		    	  	if(searchText !=null && !searchText.equals("")) {
 		    	  		SQL += " LIKE '%"+searchText.trim()+"%' order by rms_dl desc limit ?,10";
+		    	  	} else {
+		    	  		return list;
 		    	  	}
 		    	  
 		            PreparedStatement pstmt=conn.prepareStatement(SQL);
