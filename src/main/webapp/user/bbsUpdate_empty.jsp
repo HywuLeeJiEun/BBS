@@ -299,7 +299,7 @@
 									</tbody>
 								</table>
 									<div id="wrapper" style="width:100%; text-align: center;">
-										<button type="button" style="margin-bottom:15px; margin-right:30px" onclick="addRow()" class="btn btn-primary"> + </button>
+										<button type="button" id="add" style="margin-bottom:15px; margin-right:30px" onclick="addRow()" class="btn btn-primary"> + </button>
 									</div>	 			
 
 
@@ -343,7 +343,7 @@
 							</tbody>
 						</table>
 						<div id="wrapper" style="width:100%; text-align: center;">
-								<button type="button" style="margin-bottom:5px; margin-top:5px; margin-right:35px; margin-bottom:50px;" onclick="addNRow()" class="btn btn-primary"> + </button>
+								<button type="button" id="nadd" style="margin-bottom:5px; margin-top:5px; margin-right:35px; margin-bottom:50px;" onclick="addNRow()" class="btn btn-primary"> + </button>
 						</div>
 						
 						<!-- '계정 관리가 있을 경우, 생성' -->
@@ -687,18 +687,20 @@
 		//데이터를 계승함! 
 		var tr = $("#bbsContent"+num).parent().parent().parent();
 		var nexttr = tr.next();
-		var b = nexttr.get(0).querySelector(".con").id;
-		var unum = b.replace(regex,"");
-		//if(document.getElementById("jobs")+Number(num)+1 != null){ //다음 데이터가 있다면, (다음 주간보고 작성이 있다는 것!)
-			//1. 데이터 삽입
-				//업무 내용 넣기
-			$("#jobs"+(Number(unum))).val(jobs).prop("selected", true);
-				//작성된 접수일 넣기
-			$("#bbsStart"+(Number(unum))).val(start);
-				//작성된 완료목표일 넣기
-			$("#bbsTarget"+(Number(unum))).val(target);
+		if(nexttr.length != 0){ //다음 데이터가 있다면, (다음 주간보고 작성이 있다는 것!)
+			var b = nexttr.get(0).querySelector(".con").id;
+			var unum = b.replace(regex,"");
+				//1. 데이터 삽입
+					//업무 내용 넣기
+				$("#jobs"+(Number(unum))).val(jobs).prop("selected", true);
+					//작성된 접수일 넣기
+				$("#bbsStart"+(Number(unum))).val(start);
+					//작성된 완료목표일 넣기
+				$("#bbsTarget"+(Number(unum))).val(target);
 				
-		//} 
+		} else {
+			 document.getElementById("add").click();
+		}
 	}
 	
 	function npaste(id) {
@@ -716,18 +718,20 @@
 		//데이터를 계승함! 
 		var tr = $("#bbsNContent"+num).parent().parent().parent();
 		var nexttr = tr.next();
-		var b = nexttr.get(0).querySelector(".ncon").id;
-		var unum = b.replace(regex,"");
-		//if(document.getElementById("jobs")+Number(num)+1 != null){ //다음 데이터가 있다면, (다음 주간보고 작성이 있다는 것!)
-			//1. 데이터 삽입
-				//업무 내용 넣기
-			$("#njobs"+(Number(unum))).val(jobs).prop("selected", true);
-				//작성된 접수일 넣기
-			$("#bbsNStart"+(Number(unum))).val(start);
-				//작성된 완료목표일 넣기
-			$("#bbsNTarget"+(Number(unum))).val(target);
+		if(nexttr.length != 0){ //다음 데이터가 있다면, (다음 주간보고 작성이 있다는 것!)
+			var b = nexttr.get(0).querySelector(".ncon").id;
+			var unum = b.replace(regex,"");
+				//1. 데이터 삽입
+					//업무 내용 넣기
+				$("#njobs"+(Number(unum))).val(jobs).prop("selected", true);
+					//작성된 접수일 넣기
+				$("#bbsNStart"+(Number(unum))).val(start);
+					//작성된 완료목표일 넣기
+				$("#bbsNTarget"+(Number(unum))).val(target);
 				
-		//} 
+		} else {
+			 document.getElementById("nadd").click();
+		}
 	}
 	</script>
 	
