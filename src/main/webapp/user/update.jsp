@@ -423,9 +423,9 @@
 							  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
 								  <textarea class="textarea" id="erp_user<%= i %>" maxlength="10" style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user<%=i%>"><%= erp.get(i).getErp_user() %></textarea></td>
 							  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-								  <textarea class="textarea"  id="erp_stext<%= i %>" maxlength="100" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%=i%>"><%= erp.get(i).getErp_text() %></textarea></td>
+								  <textarea class="textarea"  id="erp_stext<%= i %>" maxlength="150" style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext<%=i%>"><%= erp.get(i).getErp_text() %></textarea></td>
 							  	<td style="text-align:center; border: 1px solid; font-size:10px; background-color:white">  
-								  <textarea class="textarea" id="erp_authority<%= i %>" maxlength="10" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%=i%>"><%= erp.get(i).getErp_anum() %></textarea></td>
+								  <textarea class="textarea" id="erp_authority<%= i %>" maxlength="20" style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority<%=i%>"><%= erp.get(i).getErp_anum() %></textarea></td>
 							  	<td style="text-align:center; border: 1px solid; background-color:white">  
 								 <select name="erp_division<%= i %>" id="erp_division<%= i %>">
 								 <option <%= erp.get(i).getErp_div().equals("일반")?"selected":"" %>>일반</option>
@@ -501,7 +501,7 @@
 	</script>	
 	
 	<script>
-	var con = 0;
+	var con = document.getElementsByClassName('con').length;
 	var trCnt = <%= tlist.size() %>;
 		function addRow() {
 			var work = "";
@@ -594,7 +594,7 @@
 	
 	
 	<script>
-	var ncon = 0;
+	var ncon = document.getElementsByClassName('ncon').length;
 	var trNCnt = <%= nlist.size() %>;
 		function addNRow() {
 			var work = "";
@@ -705,7 +705,7 @@
 	
 	<script>
 	//줄개수(count)
-	var acon = 0;
+	var acon = document.getElementsByClassName('acon').length;
 	var trACnt = Number(document.getElementById("eSize").value);
 	//'계정관리' 업무를 추가함.
 	function addRowAccount() {
@@ -732,9 +732,9 @@
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px"> ';
 		innerHtml += '<textarea class="textarea" required maxlength="10" id="erp_user'+a+'"  style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user'+a+'"></textarea></td>';
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px">  ';
-		innerHtml += '<textarea class="textarea" required maxlength="100" id="erp_stext'+a+'"  style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext'+a+'"></textarea></td>';
+		innerHtml += '<textarea class="textarea" required maxlength="150" id="erp_stext'+a+'"  style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext'+a+'"></textarea></td>';
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px">  ';
-		innerHtml += '<textarea class="textarea" required maxlength="10" id="erp_authority'+a+'"  style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority'+a+'"></textarea></td>';
+		innerHtml += '<textarea class="textarea" required maxlength="20" id="erp_authority'+a+'"  style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority'+a+'"></textarea></td>';
 		innerHtml += '<td style="text-align:center; border: 1px solid;">  ';
 		//innerHtml += '<textarea class="textarea" required maxlength="2" id="erp_division'+a+'"  style=" width:130px; border:none; resize:none" placeholder="구분(일반/긴급)" name="erp_division'+a+'"></textarea></td>';
 		innerHtml += '<select name="erp_division'+a+'"><option>일반</option><option>긴급</option></select></td>';

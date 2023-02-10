@@ -608,9 +608,9 @@
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px"> ';
 		innerHtml += '<textarea class="textarea" required maxlength="10" id="erp_user'+a+'"  style=" width:130px; border:none; resize:none" placeholder="사용자명" name="erp_user'+a+'"></textarea></td>';
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px">  ';
-		innerHtml += '<textarea class="textarea" required maxlength="100" id="erp_stext'+a+'"  style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext'+a+'"></textarea></td>';
+		innerHtml += '<textarea class="textarea" required maxlength="150" id="erp_stext'+a+'"  style=" width:300px; border:none; resize:none" placeholder="변경값" name="erp_stext'+a+'"></textarea></td>';
 		innerHtml += '<td style="text-align:center; border: 1px solid; font-size:10px">  ';
-		innerHtml += '<textarea class="textarea" required maxlength="10" id="erp_authority'+a+'"  style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority'+a+'"></textarea></td>';
+		innerHtml += '<textarea class="textarea" required maxlength="20" id="erp_authority'+a+'"  style=" width:130px; border:none; resize:none" placeholder="ERP권한신청서번호" name="erp_authority'+a+'"></textarea></td>';
 		innerHtml += '<td style="text-align:center; border: 1px solid;">  ';
 		//innerHtml += '<textarea class="textarea" required maxlength="2" id="erp_division'+a+'"  style=" width:130px; border:none; resize:none" placeholder="구분(일반/긴급)" name="erp_division'+a+'"></textarea></td>';
 		innerHtml += '<select name="erp_division'+a+'"><option>일반</option><option>긴급</option></select></td>';
