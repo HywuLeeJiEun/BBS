@@ -121,9 +121,9 @@
 		ArrayList<String> fuser = userDAO.getidfull();
 		//중복값 제거
 		for(int i=0; i < fuser.size(); i++) {
-			if(fuser.get(i).equals("user_id")) {
+			if(fuser.get(i) != null && fuser.get(i).equals("user_id")) {
 				fuser.remove(i);
-			} else if(fuser.get(i).equals("admin")) {
+			} else if(fuser.get(i) == null || fuser.get(i).equals("미정")) {
 				fuser.remove(i);
 			}
 		}

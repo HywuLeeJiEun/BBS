@@ -284,13 +284,13 @@
 							<!-- 업무 내용 -->
 							<td style=" border: 1px solid">
 							<% for(int i=0; i < chk.length; i++) { %>
-								<textarea required name="content<%= i %>" maxlength="500" id="content<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("content"+i) %></textarea>
+								<textarea required name="content<%= i %>" maxlength="500" id="content<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("content"+chk[i]) %></textarea>
 							<% } %>
 							</td>
 							<!-- 완료일 -->
 							<td style="text-align: center; border: 1px solid">
 							<% for(int i=0; i < chk.length; i++) { %>
-							<textarea required name="end<%= i %>" maxlength="10" id="end<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("end"+i) %></textarea>
+							<textarea required name="end<%= i %>" maxlength="10" id="end<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("end"+chk[i]) %></textarea>
 							<% } %>
 							</td>
 							<!-- 진행율 -->
@@ -334,13 +334,13 @@
 							<!-- 업무 내용 -->
 							<td style=" border: 1px solid">
 							<% for(int i=0; i < nchk.length; i++) { %>
-								<textarea required name="ncontent<%= i %>"  maxlength="500" id="ncontent<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("ncontent"+i) %></textarea>
+								<textarea required name="ncontent<%= i %>"  maxlength="500" id="ncontent<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("ncontent"+nchk[i]) %></textarea>
 							<% } %>
 							</td>
 							<!-- 완료예정 -->
 							<td style="text-align: center; border: 1px solid">
 							<% for(int i=0; i < nchk.length; i++) { %>
-								<textarea required name="ntarget<%= i %>" maxlength="10" id="ntarget<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("ntarget"+i) %></textarea>
+								<textarea required name="ntarget<%= i %>" maxlength="10" id="ntarget<%= i %>" style="resize: none; width:100%;"><%= request.getParameter("ntarget"+nchk[i]) %></textarea>
 							<% } %>
 							</td>
 							<!-- 비고 -->

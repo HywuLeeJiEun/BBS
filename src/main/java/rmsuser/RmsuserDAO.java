@@ -375,7 +375,7 @@ public class RmsuserDAO {
 	
 	//RMSUSER - user_id 모두 가져오기 - workChange.jsp
 	public ArrayList<String> getidfull() {
-		String sql = "select user_id from rmsuser order by user_name asc";
+		String sql = "select if(user_fd ='미정', user_fd, user_id) from rmsuser order by user_name asc";
 			ArrayList<String> list = new ArrayList<String>();
 			try {
 				PreparedStatement pstmt = conn.prepareStatement(sql);
