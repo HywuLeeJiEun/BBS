@@ -130,11 +130,16 @@
 		//해당 user_id를 통해 제출된 rms를 조회하기
 		ArrayList<rmsrept> flist = rms.getRmsRkfull(rms_dl, pllist);
 
+		// 미제출자 인원 계산 ()
+		int psize = plist.size(); //pl 담당 유저의 아이디
+		int lsize = flist.size(); //해당 pl을 담당하는 user들의 제출 rms
+		int noSub =  psize - lsize;
+		
 		//기존 데이터 불러오기 (pageNumber를 통해 데이터를 10개까지 조회)
-		ArrayList<rmsrept> rmslist = rms.getRmsRk(rms_dl, pllist, pageNumber);
+		ArrayList<rmsrept> rmslist = rms.getRmsRk(rms_dl, pllist, pageNumber, psize);
 		
 		//다음 데이터가 있는지 조회
-		ArrayList<rmsrept> afrmslist = rms.getRmsRk(rms_dl, pllist, pageNumber+1);
+		ArrayList<rmsrept> afrmslist = rms.getRmsRk(rms_dl, pllist, pageNumber+1, psize);
 		
 		if(!au.equals("PL")) { //PL 권한이 없다면,
 			PrintWriter script = response.getWriter();
@@ -151,11 +156,6 @@
 			//script.println("history.back();");
 			//script.println("</script>");
 		}
-		
-		// 미제출자 인원 계산 ()
-		int psize = plist.size(); //pl 담당 유저의 아이디
-		int lsize = flist.size(); //해당 pl을 담당하는 user들의 제출 rms
-		int noSub =  psize - lsize;
 		
 		//해당 인원 전원 불러오기 (이름으로 변경)
 		ArrayList<String> username = new ArrayList<String>();
@@ -479,21 +479,6 @@
 					%>
 				</tbody>
 			</table>
-			
-			<!-- 페이징 처리 영역 -->
-			<%
-				if(pageNumber != 1){
-			%>
-				<a href="/BBS/pl/bbsRk.jsp?pageNumber=<%=pageNumber - 1 %>&rms_dl=<%= rms_dl %>"
-					class="btn btn-success btn-arraw-left">이전</a>
-			<%
-				}if(afrmslist.size() != 0){
-			%>
-				<a href="/BBS/pl/bbsRk.jsp?pageNumber=<%=pageNumber + 1 %>&rms_dl=<%= rms_dl %>"
-					class="btn btn-success btn-arraw-left" id="next">다음</a>
-			<%
-				}
-			%>
 			<% if(pl.equals("ERP")) {%>
 			<a href="/BBS/pl/pptx/ppt.jsp?rms_dl=<%=rmslist.get(0).getRms_dl()%>&pluser=<%= pl %>" style="width:50px" class="btn btn-success pull-right form-control" data-toggle="tooltip" data-placement="bottom" title="pptx 출력(ERP)" id="pptx" type="button"> 출력</a>
 			<% }  %>
@@ -533,15 +518,6 @@
 		}
 		
 	
-	</script>
-	
-    <!-- 보고 개수에 따라 버튼 노출 (list.size()) -->
-	<script>
-	var trCnt = $('#bbsTable tr').length; 
-	
-	if(trCnt < 11) {
-		$('#next').hide();
-	}
 	</script>
 	
 	<script>

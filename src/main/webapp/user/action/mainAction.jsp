@@ -279,7 +279,7 @@
 			if(n != -1 && nn != -1 && an != -1) {
 				PrintWriter script = response.getWriter();
 				script.println("<script>");
-				script.println("alert('제출이 완료되었습니다.')");
+				script.println("alert('작성이 완료되었습니다.')");
 				script.println("location.href='../bbs.jsp'");
 				script.println("</script>");
 			} 

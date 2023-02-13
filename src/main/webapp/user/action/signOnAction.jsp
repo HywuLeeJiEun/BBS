@@ -1,3 +1,4 @@
+<%@page import="java.util.List"%>
 <%@page import="rmsrept.rmsrept"%>
 <%@page import="rmsrept.RmsreptDAO"%>
 <%@page import="rmsuser.RmsuserDAO"%>
@@ -31,8 +32,27 @@
 			script.println("</script>");
 		} else {
 			String rms_dl = request.getParameter("rms_dl");
-			String workSet = request.getParameter("workset");
 			String name = userDAO.getName(id);
+			
+			// ********** 담당자를 가져오기 위한 메소드 *********** 
+			String workSet;
+			ArrayList<String> code = userDAO.getCode(id); //코드 리스트 출력(rmsmgrs에 접근하여, task_num을 가져옴.)
+			List<String> works = new ArrayList<String>();
+			
+			if(code.size() == 0) {
+				//1. 담당 업무가 없는 경우,
+				workSet = "";
+			} else {
+				//2. 담당 업무가 있는 경우
+				for(int i=0; i < code.size(); i++) {
+					//task_num을 받아옴.
+					String task_num = code.get(i);
+					// task_num을 통해 업무명을 가져옴.
+					String manager = userDAO.getManager(task_num);
+					works.add(manager+"\n"); //즉, work 리스트에 모두 담겨 저장됨
+				}
+				workSet = String.join("/",works);
+			}
 			
 			//데이터를 승인으로 변경함! 
 			int num = rms.updateSign(id, "승인", rms_dl);
