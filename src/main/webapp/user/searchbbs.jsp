@@ -203,7 +203,7 @@
 							}
 						%>
 						<%
-							if(au.equals("관리자")) {
+							if(au.equals("관리자") || au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"

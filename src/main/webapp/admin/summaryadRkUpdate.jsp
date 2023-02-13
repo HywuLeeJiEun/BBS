@@ -90,7 +90,7 @@
 		//사용자의 AU(Authority) 권한 가져오기 (일반/PL/관리자)
 		String au = ulist.get(0).getUser_au();
 		
-		if(!au.equals("관리자")) {
+		if(!au.equals("관리자") && !au.equals("PL")) {
 			PrintWriter script = response.getWriter();
 			script.println("<script>");
 			script.println("location.href='/BBS/user/bbs.jsp'");
@@ -193,7 +193,7 @@
 						%>
 							</li>
 						<%
-							if(au.equals("관리자")) {
+							if(au.equals("관리자") || au.equals("PL")) {
 						%>
 							<li class="dropdown">
 							<a href="#" class="dropdown-toggle"
