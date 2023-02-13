@@ -82,28 +82,10 @@
 				
 				//bbscontent
 				String bbscontent = "";
+				String rms_job = "";
 				if(request.getParameter(a+i) != null) {
-					if(request.getParameter(a+i) != null && request.getParameter(jobs+i) != null) { // 값이 비어있지 않다면,
-						if(!request.getParameter(jobs+i).contains("시스템") && !request.getParameter(jobs+i).contains("기타")) { //시스템이나 기타가 아니라면,
-							bbscontent = "- ["+ request.getParameter(jobs+i) +"] " + request.getParameter(a+i);
-
-						}else {
-							if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
-								// -가 있는 경우,
-								bbscontent = request.getParameter(a+i);
-							} else {
-								bbscontent = "- " + request.getParameter(a+i);
-							}
-							//줄바꿈 세기
-						}
-					} else { //job 선택이 없는 경우!
-						if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
-							// -가 있는 경우,
-							bbscontent = request.getParameter(a+i);
-						} else {
-							bbscontent ="- " + request.getParameter(a+i);
-						}
-					}
+					bbscontent = request.getParameter(a+i);
+					rms_job = request.getParameter(jobs+i);
 				}
 				
 				//bbsstart - 접수일 (not null)
@@ -153,7 +135,7 @@
 				
 				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
 					// write_rms_this
-					int numlist = rms.writeRms("미승인", id, rms_dl, rms_title, recon, bbsstart, bbstarget, bbsend, "T", date);
+					int numlist = rms.writeRms("미승인", id, rms_dl, rms_title, rms_job, recon, bbsstart, bbstarget, bbsend, "T", date);
 					if(numlist == -1) { //데이터 저장 오류
 						//데이터 삭제
 						int tdel = rms.Rmsdelete(id, rms_dl,"T");
@@ -175,24 +157,10 @@
 				
 				//bbscontent
 				String bbscontent = "";
+				String rms_job = "";
 				if(request.getParameter(a+i) != null) {
-					if(request.getParameter(a+i) != null && request.getParameter(jobs+i) != null) { // 값이 비어있지 않다면,
-						if(!request.getParameter(jobs+i).contains("시스템") && !request.getParameter(jobs+i).contains("기타")) { //시스템이나 기타가 아니라면,
-							bbscontent = "- ["+ request.getParameter(jobs+i) +"] " + request.getParameter(a+i);
-						}else {
-							if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
-								bbscontent = request.getParameter(a+i);
-							} else {
-								bbscontent = "- " + request.getParameter(a+i);
-							}
-						}
-					} else { //job 선택이 없는 경우!
-						if(request.getParameter(a+i).indexOf('-') > -1 && request.getParameter(a+i).indexOf('-') < 2) {
-							bbscontent = request.getParameter(a+i);
-						} else {
-							bbscontent = "- " + request.getParameter(a+i);
-						}
-					}
+						bbscontent = request.getParameter(a+i);
+						rms_job = request.getParameter(jobs+i);
 				}
 				
 				//bbsstart - 접수일 
@@ -227,7 +195,7 @@
 				// 저장에 오류가 없는지 확인!
 				if(request.getParameter(a+i) != null) { //해당 데이터가 비어있지 않고 모두 들어있다면!
 					// write_rms_last
-					int numlist = rms.writeRms("미승인", id, rms_dl, rms_title, recon, bbsstart, bbstarget, null, "N", date);
+					int numlist = rms.writeRms("미승인", id, rms_dl, rms_title, rms_job, recon, bbsstart, bbstarget, null, "N", date);
 					if(numlist == -1) { //데이터 저장 오류가 발생하면, 데이터 삭제
 						//데이터 삭제
 						int ndel = rms.Rmsdelete(id, rms_dl,"N");

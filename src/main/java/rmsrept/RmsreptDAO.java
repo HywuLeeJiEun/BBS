@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 public class RmsreptDAO {
 	private Connection conn; //자바와 데이터베이스를 연결
-	private PreparedStatement pstmt; //쿼리문 설정 및 실행
 	private ResultSet rs; //결과값 저장
 	
 	
@@ -211,13 +210,14 @@ public class RmsreptDAO {
 	        	 rms.setUser_id(rs.getString(1));
 	        	 rms.setRms_dl(rs.getString(2));
 	        	 rms.setRms_title(rs.getString(3));
-	        	 rms.setRms_con(rs.getString(4));
-	        	 rms.setRms_str(rs.getString(5));
-	        	 rms.setRms_tar(rs.getString(6));
-	        	 rms.setRms_end(rs.getString(7));
-	        	 rms.setRms_div(rs.getString(8));
-	        	 rms.setRms_sign(rs.getString(9));
-	        	 rms.setRms_time(rs.getString(10));
+	        	 rms.setRms_job(rs.getString(4));
+	        	 rms.setRms_con(rs.getString(5));
+	        	 rms.setRms_str(rs.getString(6));
+	        	 rms.setRms_tar(rs.getString(7));
+	        	 rms.setRms_end(rs.getString(8));
+	        	 rms.setRms_div(rs.getString(9));
+	        	 rms.setRms_sign(rs.getString(10));
+	        	 rms.setRms_time(rs.getString(11));
 	            list.add(rms);
 	         }         
 	      } catch(Exception e) {
@@ -246,20 +246,21 @@ public class RmsreptDAO {
 	
 	
 	//RMSREPT 작성하기 (insert)
-	public int writeRms(String rms_sign, String user_id, String rms_dl, String rms_title, String rms_con, String rms_str, String rms_tar, String rms_end, String rms_div, java.sql.Timestamp date) {
-		String sql = "insert into rmsrept values(?,?,?,?,?,?,?,?,?,?)";
+	public int writeRms(String rms_sign, String user_id, String rms_dl, String rms_title, String rms_job, String rms_con, String rms_str, String rms_tar, String rms_end, String rms_div, java.sql.Timestamp date) {
+		String sql = "insert into rmsrept values(?,?,?,?,?,?,?,?,?,?,?)";
 		try {
 			PreparedStatement pstmt = conn.prepareStatement(sql);
 			pstmt.setString(1, user_id);
 			pstmt.setString(2, rms_dl);
 			pstmt.setString(3, rms_title);
-			pstmt.setString(4, rms_con);
-			pstmt.setString(5, rms_str);
-			pstmt.setString(6, rms_tar);
-			pstmt.setString(7, rms_end);
-			pstmt.setString(8, rms_div);
-			pstmt.setString(9, rms_sign);
-			pstmt.setTimestamp(10, date);
+			pstmt.setString(4, rms_job);
+			pstmt.setString(5, rms_con);
+			pstmt.setString(6, rms_str);
+			pstmt.setString(7, rms_tar);
+			pstmt.setString(8, rms_end);
+			pstmt.setString(9, rms_div);
+			pstmt.setString(10, rms_sign);
+			pstmt.setTimestamp(11, date);
 			return pstmt.executeUpdate();
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -443,13 +444,14 @@ public class RmsreptDAO {
 	        	 rms.setUser_id(rs.getString(1));
 	        	 rms.setRms_dl(rs.getString(2));
 	        	 rms.setRms_title(rs.getString(3));
-	        	 rms.setRms_con(rs.getString(4));
-	        	 rms.setRms_str(rs.getString(5));
-	        	 rms.setRms_tar(rs.getString(6));
-	        	 rms.setRms_end(rs.getString(7));
-	        	 rms.setRms_div(rs.getString(8));
-	        	 rms.setRms_sign(rs.getString(9));
-	        	 rms.setRms_time(rs.getString(10));
+	        	 rms.setRms_job(rs.getString(4));
+	        	 rms.setRms_con(rs.getString(5));
+	        	 rms.setRms_str(rs.getString(6));
+	        	 rms.setRms_tar(rs.getString(7));
+	        	 rms.setRms_end(rs.getString(8));
+	        	 rms.setRms_div(rs.getString(9));
+	        	 rms.setRms_sign(rs.getString(10));
+	        	 rms.setRms_time(rs.getString(11));
 	            list.add(rms);
 	         }         
 	      } catch(Exception e) {

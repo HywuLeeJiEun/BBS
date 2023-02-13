@@ -4,6 +4,7 @@ public class rmsrept {
 	private String user_id;
 	private String rms_dl;
 	private String rms_title;
+	private String rms_job;
 	private String rms_con;
 	private String rms_str;
 	private String rms_tar;
@@ -11,7 +12,6 @@ public class rmsrept {
 	private String rms_div;
 	private String rms_sign;
 	private String rms_time;
-	
 	public String getUser_id() {
 		return user_id;
 	}
@@ -29,6 +29,12 @@ public class rmsrept {
 	}
 	public void setRms_title(String rms_title) {
 		this.rms_title = rms_title;
+	}
+	public String getRms_job() {
+		return rms_job;
+	}
+	public void setRms_job(String rms_job) {
+		this.rms_job = rms_job;
 	}
 	public String getRms_con() {
 		return rms_con;
@@ -72,6 +78,4 @@ public class rmsrept {
 	public void setRms_time(String rms_time) {
 		this.rms_time = rms_time;
 	}
-	
-	
 }

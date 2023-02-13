@@ -326,7 +326,10 @@
 										//content, ncotent의 줄바꿈 개수만큼 추가함
 										int num = rms_this.get(j).getRms_con().split(System.lineSeparator()).length-1;
 										if(j < rms_this.size()-1) {
-											 bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
+											/* if(!rms_this.get(j).getRms_job().contains("시스템") && !rms_this.get(j).getRms_job().contains("기타")) {
+												bbsContent +="- ["
+											} */
+											bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
 											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/") + System.lineSeparator();
 											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
 											 	bbsTarget += "[보류]" + System.lineSeparator();

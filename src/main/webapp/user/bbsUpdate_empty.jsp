@@ -287,7 +287,7 @@
 												 </select>
 											 </div>
 											 <div style="float:left">
-											 <textarea class="textarea con" wrap="hard" id="bbsContent0" maxlength="500" required style="height:45px;width:185%; border:none; resize:none " placeholder="업무내용" name="bbsContent0"></textarea>
+											 <textarea class="textarea con" wrap="hard" id="bbsContent0" maxlength="500" required style="height:45px;width:160%; border:none; resize:none " placeholder="업무내용" name="bbsContent0"></textarea>
 											 </div>
 										 </td>
 										 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsStart0" class="form-control" placeholder="접수일" name="bbsStart0" value="<%= now %>" ></td>
@@ -333,7 +333,7 @@
 								</select>
 								</div>
 								<div style="float:left">
-								<textarea wrap="hard" class="textarea ncon" maxlength="500" id="bbsNContent0" required style="height:45px;width:185%; resize:none; border:none; " placeholder="업무내용" name="bbsNContent0"></textarea>
+								<textarea wrap="hard" class="textarea ncon" maxlength="500" id="bbsNContent0" required style="height:45px;width:160%; resize:none; border:none; " placeholder="업무내용" name="bbsNContent0"></textarea>
 							</div> </td>
 								 <td><input type="date" max="9999-12-31" required style="height:45px; width:auto;" id="bbsNStart0" class="form-control" placeholder="접수일" name="bbsNStart0" value="<%= now %>" ></td>
 								 <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget0" class="form-control" placeholder="완료목표일" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." name="bbsNTarget0" value=""></td>	
@@ -440,10 +440,6 @@
 				}else {
 					c = trCnt;
 				}
-
-				//버튼 보이기 (paste) (이전)
-				document.getElementById("paste"+Number(c-1)).style.display = 'block';
-				
 	            var innerHtml = "";
 	            innerHtml += '<tr>';
 	            innerHtml += '    <td>';
@@ -455,7 +451,7 @@
 	            innerHtml += ' </select>';
 	            innerHtml += ' </div>';
 	            innerHtml += ' <div style="float:left">';
-	            innerHtml += ' <textarea wrap="hard" class="textarea con" maxlength="500" id="bbsContent'+c+'" required style="height:45px;width:185%; border:none; resize:none" placeholder="업무내용" name="bbsContent'+c+'"></textarea>';
+	            innerHtml += ' <textarea wrap="hard" class="textarea con" maxlength="500" id="bbsContent'+c+'" required style="height:45px;width:160%; border:none; resize:none" placeholder="업무내용" name="bbsContent'+c+'"></textarea>';
 	            innerHtml += '  </div> </td>';
 	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsStart'+c+'" class="form-control" placeholder="접수일" name="bbsStart'+c+'"  value="'+now+'"></td>';
 	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsTarget'+c+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsTarget'+c+'" ></td>';
@@ -469,8 +465,6 @@
 	            innerHtml += '</tr>'; 
 	            trCnt += 1;
 	            $('#bbsTable > tbody:last').append(innerHtml);
-				//버튼 숨기기 (paste)
-				document.getElementById("paste"+c).style.display = 'none';
 				} else {
 					alert("업무 예정은 최대 30개를 넘을 수 없습니다.");
 				}
@@ -522,10 +516,6 @@
 				}else {
 					n = trNCnt;
 				}
-				
-				//버튼 보이기 (paste) (이전)
-				document.getElementById("npaste"+Number(n-1)).style.display = 'block';
-				
 	            var innerHtml = "";
 	            innerHtml += '<tr>';
 	            innerHtml += '    <td>';
@@ -537,7 +527,7 @@
 	            innerHtml += ' </select>';
 	            innerHtml += ' </div>';
 	            innerHtml += ' <div style="float:left">';
-	            innerHtml += ' <textarea wrap="hard" class="textarea ncon" maxlength="500" id="bbsNContent'+n+'" required style="height:45px;width:185%; resize:none; border:none; " placeholder="업무내용" name="bbsNContent'+n+'"></textarea>';
+	            innerHtml += ' <textarea wrap="hard" class="textarea ncon" maxlength="500" id="bbsNContent'+n+'" required style="height:45px;width:160%; resize:none; border:none; " placeholder="업무내용" name="bbsNContent'+n+'"></textarea>';
 	            innerHtml += '  </div> </td>';
 	            innerHtml += '  <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNStart'+n+'" class="form-control" placeholder="접수일" name="bbsNStart'+n+'" value="'+now+'"></td>';
 	            innerHtml += ' <td><input type="date" max="9999-12-31" style="height:45px; width:auto;" id="bbsNTarget'+n+'" data-toggle="tooltip" data-placement="bottom" title="미입력시 [보류]로 표시됩니다." class="form-control" placeholder="완료목표일" name="bbsNTarget'+n+'" ></td>';
@@ -547,8 +537,6 @@
 	            innerHtml += '</tr>'; 
 	            trNCnt += 1;
 	            $('#bbsNTable > tbody:last').append(innerHtml);
-	          //버튼 숨기기 (paste)
-				document.getElementById("npaste"+n).style.display = 'none';
 				} else {
 					alert("업무 예정은 최대 30개를 넘을 수 없습니다.");
 				}
@@ -700,6 +688,7 @@
 				
 		} else {
 			 document.getElementById("add").click();
+			 paste(id);
 		}
 	}
 	
@@ -731,6 +720,7 @@
 				
 		} else {
 			 document.getElementById("nadd").click();
+			 npaste(id);
 		}
 	}
 	</script>
