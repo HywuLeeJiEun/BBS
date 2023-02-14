@@ -162,13 +162,13 @@
 								int nnum = rms_next.get(j).getRms_con().split(System.lineSeparator()).length-1;
 								if(j < rms_next.size()-1) {
 									if(rms_next.get(j).getRms_con().indexOf('-') > -1 &&  rms_next.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
-										if(rms_next.get(j).getRms_job().contains("시스템") && rms_next.get(j).getRms_job().contains("기타")) {
+										if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
 											bbsNContent += rms_next.get(j).getRms_con() + System.lineSeparator();
 										} else {
 											bbsNContent += "["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con() + System.lineSeparator();
 										}
 									} else {
-										if(rms_next.get(j).getRms_job().contains("시스템") && rms_next.get(j).getRms_job().contains("기타")) {
+										if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
 											bbsNContent += "- "+rms_next.get(j).getRms_con() + System.lineSeparator();
 										} else {
 											bbsNContent += "- ["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con() + System.lineSeparator();
@@ -190,14 +190,14 @@
 										 bbsNTarget += System.lineSeparator();
 									 }
 								} else {
-									if(rms_next.get(j).getRms_con().indexOf('-') > -1 &&  rms_next.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
+									if(rms_next.get(j).getRms_con().indexOf('-') > -1 ||  rms_next.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
 										if(rms_next.get(j).getRms_job().contains("시스템") && rms_next.get(j).getRms_job().contains("기타")) {
 											bbsNContent += rms_next.get(j).getRms_con();
 										} else {
 											bbsNContent += "["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con();
 										}
 									} else {
-										if(rms_next.get(j).getRms_job().contains("시스템") && rms_next.get(j).getRms_job().contains("기타")) {
+										if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
 											bbsNContent += "- "+rms_next.get(j).getRms_con();
 										} else {
 											bbsNContent += "- ["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con();

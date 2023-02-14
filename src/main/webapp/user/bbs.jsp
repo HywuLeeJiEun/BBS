@@ -330,13 +330,13 @@
 												if(rms_this.get(j).getRms_job().contains("시스템") || rms_this.get(j).getRms_job().contains("기타")) {
 													bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
 												} else {
-													bbsContent += "["+rms_this.get(j).getRms_job()+"]"+ rms_this.get(j).getRms_con() + System.lineSeparator();
+													bbsContent += "["+rms_this.get(j).getRms_job()+"] "+ rms_this.get(j).getRms_con() + System.lineSeparator();
 												}
 											} else {
 												if(rms_this.get(j).getRms_job().contains("시스템") || rms_this.get(j).getRms_job().contains("기타")) {
 													bbsContent += "- "+rms_this.get(j).getRms_con() + System.lineSeparator();
 												} else {
-													bbsContent += "- ["+rms_this.get(j).getRms_job()+"]"+ rms_this.get(j).getRms_con() + System.lineSeparator();
+													bbsContent += "- ["+rms_this.get(j).getRms_job()+"] "+ rms_this.get(j).getRms_con() + System.lineSeparator();
 												}
 											}
 											//bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
