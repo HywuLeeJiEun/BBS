@@ -326,10 +326,20 @@
 										//content, ncotent의 줄바꿈 개수만큼 추가함
 										int num = rms_this.get(j).getRms_con().split(System.lineSeparator()).length-1;
 										if(j < rms_this.size()-1) {
-											/* if(!rms_this.get(j).getRms_job().contains("시스템") && !rms_this.get(j).getRms_job().contains("기타")) {
-												bbsContent +="- ["
-											} */
-											bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
+											if(rms_this.get(j).getRms_con().indexOf('-') > -1 &&  rms_this.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
+												if(rms_this.get(j).getRms_job().contains("시스템") || rms_this.get(j).getRms_job().contains("기타")) {
+													bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
+												} else {
+													bbsContent += "["+rms_this.get(j).getRms_job()+"]"+ rms_this.get(j).getRms_con() + System.lineSeparator();
+												}
+											} else {
+												if(rms_this.get(j).getRms_job().contains("시스템") || rms_this.get(j).getRms_job().contains("기타")) {
+													bbsContent += "- "+rms_this.get(j).getRms_con() + System.lineSeparator();
+												} else {
+													bbsContent += "- ["+rms_this.get(j).getRms_job()+"]"+ rms_this.get(j).getRms_con() + System.lineSeparator();
+												}
+											}
+											//bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
 											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/") + System.lineSeparator();
 											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
 											 	bbsTarget += "[보류]" + System.lineSeparator();
@@ -348,7 +358,20 @@
 												 bbsEnd +=System.lineSeparator();
 											 }
 										} else {
-											bbsContent += rms_this.get(j).getRms_con();
+											if(rms_this.get(j).getRms_con().indexOf('-') > -1 &&  rms_this.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
+												if(rms_this.get(j).getRms_job().contains("시스템") || rms_this.get(j).getRms_job().contains("기타")) {
+													bbsContent += rms_this.get(j).getRms_con();
+												} else {
+													bbsContent += "["+rms_this.get(j).getRms_job()+"] "+ rms_this.get(j).getRms_con();
+												}
+											} else {
+												if(rms_this.get(j).getRms_job().contains("시스템") || rms_this.get(j).getRms_job().contains("기타")) {
+													bbsContent += "- "+rms_this.get(j).getRms_con();
+												} else {
+													bbsContent += "- ["+rms_this.get(j).getRms_job()+"] "+ rms_this.get(j).getRms_con();
+												}
+											}
+											//bbsContent += rms_this.get(j).getRms_con();
 											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/");
 											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
 												 bbsTarget += "[보류]";
@@ -372,7 +395,20 @@
 										//content, ncotent의 줄바꿈 개수만큼 추가함
 										int nnum = rms_next.get(j).getRms_con().split(System.lineSeparator()).length-1;
 										if(j < rms_next.size()-1) {
-											 bbsNContent += rms_next.get(j).getRms_con() + System.lineSeparator();
+											if(rms_next.get(j).getRms_con().indexOf('-') > -1 &&  rms_next.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
+												if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
+													bbsNContent += rms_next.get(j).getRms_con() + System.lineSeparator();
+												} else {
+													bbsNContent += "["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con() + System.lineSeparator();
+												}
+											} else { // - 가 없는 경우! 
+												if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
+													bbsNContent += "- "+rms_next.get(j).getRms_con() + System.lineSeparator();
+												} else {
+													bbsNContent += "- ["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con() + System.lineSeparator();
+												}
+											} 
+											//bbsNContent += rms_next.get(j).getRms_con() + System.lineSeparator();
 											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/") + System.lineSeparator();
 											 if(rms_next.get(j).getRms_tar() == null || rms_next.get(j).getRms_tar().isEmpty()) {
 												 bbsNTarget += "[보류]" + System.lineSeparator();
@@ -388,7 +424,20 @@
 												 bbsNTarget += System.lineSeparator();
 											 }
 										} else {
-											 bbsNContent += rms_next.get(j).getRms_con();
+											if(rms_next.get(j).getRms_con().indexOf('-') > -1 &&  rms_next.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
+												if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
+													bbsNContent += rms_next.get(j).getRms_con();
+												} else {
+													bbsNContent += "["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con();
+												}
+											} else {
+												if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
+													bbsNContent += "- "+rms_next.get(j).getRms_con();
+												} else {
+													bbsNContent += "- ["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con();
+												}
+											} 
+											//bbsNContent += rms_next.get(j).getRms_con();
 											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/");
 											 if(rms_next.get(j).getRms_tar() == null || rms_next.get(j).getRms_tar().isEmpty()) {
 												 bbsNTarget += "[보류]";
@@ -453,7 +502,20 @@
 										//content, ncotent의 줄바꿈 개수만큼 추가함
 										int num = rms_this.get(j).getRms_con().split(System.lineSeparator()).length-1;
 										if(j < rms_this.size()-1) {
-											 bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
+											if(rms_this.get(j).getRms_con().indexOf('-') > -1 &&  rms_this.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
+												if(rms_this.get(j).getRms_job().contains("시스템") || rms_this.get(j).getRms_job().contains("기타")) {
+													bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
+												} else {
+													bbsContent += "["+rms_this.get(j).getRms_job()+"]"+ rms_this.get(j).getRms_con() + System.lineSeparator();
+												}
+											} else {
+												if(rms_this.get(j).getRms_job().contains("시스템") || rms_this.get(j).getRms_job().contains("기타")) {
+													bbsContent += "- "+rms_this.get(j).getRms_con() + System.lineSeparator();
+												} else {
+													bbsContent += "- ["+rms_this.get(j).getRms_job()+"]"+ rms_this.get(j).getRms_con() + System.lineSeparator();
+												}
+											} 
+											//bbsContent += rms_this.get(j).getRms_con() + System.lineSeparator();
 											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/") + System.lineSeparator();
 											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
 											 	bbsTarget += "[보류]" + System.lineSeparator();
@@ -472,7 +534,20 @@
 												 bbsEnd +=System.lineSeparator();
 											 }
 										} else {
-											bbsContent += rms_this.get(j).getRms_con();
+											if(rms_this.get(j).getRms_con().indexOf('-') > -1 &&  rms_this.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
+												if(rms_this.get(j).getRms_job().contains("시스템") || rms_this.get(j).getRms_job().contains("기타")) {
+													bbsContent += rms_this.get(j).getRms_con();
+												} else {
+													bbsContent += "["+rms_this.get(j).getRms_job()+"]"+ rms_this.get(j).getRms_con();
+												}
+											} else {
+												if(rms_this.get(j).getRms_job().contains("시스템") || rms_this.get(j).getRms_job().contains("기타")) {
+													bbsContent += "- "+rms_this.get(j).getRms_con();
+												} else {
+													bbsContent += "- ["+rms_this.get(j).getRms_job()+"]"+ rms_this.get(j).getRms_con();
+												}
+											}
+											//bbsContent += rms_this.get(j).getRms_con();
 											 bbsStart += rms_this.get(j).getRms_str().substring(5).replace("-","/");
 											 if(rms_this.get(j).getRms_tar() == null || rms_this.get(j).getRms_tar().isEmpty()) {
 												 bbsTarget += "[보류]";
@@ -496,7 +571,20 @@
 										//content, ncotent의 줄바꿈 개수만큼 추가함
 										int nnum = rms_next.get(j).getRms_con().split(System.lineSeparator()).length-1;
 										if(j < rms_next.size()-1) {
-											 bbsNContent += rms_next.get(j).getRms_con() + System.lineSeparator();
+											if(rms_next.get(j).getRms_con().indexOf('-') > -1 &&  rms_next.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
+												if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
+													bbsNContent += rms_next.get(j).getRms_con() + System.lineSeparator();
+												} else {
+													bbsNContent += "["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con() + System.lineSeparator();
+												}
+											} else { // - 가 없는 경우! 
+												if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
+													bbsNContent += "- "+rms_next.get(j).getRms_con() + System.lineSeparator();
+												} else {
+													bbsNContent += "- ["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con() + System.lineSeparator();
+												}
+											} 
+											//bbsNContent += rms_next.get(j).getRms_con() + System.lineSeparator();
 											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/") + System.lineSeparator();
 											 if(rms_next.get(j).getRms_tar() == null || rms_next.get(j).getRms_tar().isEmpty()) {
 												 bbsNTarget += "[보류]" + System.lineSeparator();
@@ -512,7 +600,20 @@
 												 bbsNTarget += System.lineSeparator();
 											 }
 										} else {
-											 bbsNContent += rms_next.get(j).getRms_con();
+											if(rms_next.get(j).getRms_con().indexOf('-') > -1 &&  rms_next.get(j).getRms_con().indexOf('-') < 2) { // - 가 있는 경우,
+												if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
+													bbsNContent += rms_next.get(j).getRms_con();
+												} else {
+													bbsNContent += "["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con();
+												}
+											} else { // - 가 없는 경우! 
+												if(rms_next.get(j).getRms_job().contains("시스템") || rms_next.get(j).getRms_job().contains("기타")) {
+													bbsNContent += "- "+rms_next.get(j).getRms_con();
+												} else {
+													bbsNContent += "- ["+rms_next.get(j).getRms_job()+"] "+ rms_next.get(j).getRms_con();
+												}
+											}  
+											//bbsNContent += rms_next.get(j).getRms_con();
 											 bbsNStart += rms_next.get(j).getRms_str().substring(5).replace("-","/");
 											 if(rms_next.get(j).getRms_tar() == null || rms_next.get(j).getRms_tar().isEmpty()) {
 												 bbsNTarget += "[보류]";
